@@ -1,0 +1,30 @@
+/* 젤리젤리 디자인 토큰 — UI 시안(docs/ui.html)에서 확정한 값 */
+:root {
+  /* 바탕은 조용하게. 색은 젤리가 낸다 */
+  --bg: #fbf4f5;
+  --surface: #ffffff;
+  --ink: #3b2430;
+  --ink-soft: #8a7280;
+  --ink-faint: #c3b2bb;
+  --line: #f0e4e8;
+  --accent: #e0568c;
+  --accent-bg: #fde9f0;
+
+  /* 젤리 8색 */
+  --g-grape: #8e5bc9;
+  --g-berry: #ef5d7a;
+  --g-green: #7cc36a;
+  --g-orange: #f59940;
+  --g-cola: #a9673f;
+  --g-lemon: #efc93c;
+  --g-soda: #5bb8e0;
+  --g-peach: #f79ea8;
+
+  /* 별점 */
+  --star: #f5b731;
+
+  --font-display: "Jua", "Noto Sans KR", system-ui, sans-serif;
+  --font-body: "Noto Sans KR", system-ui, -apple-system, sans-serif;
+
+  color-scheme: light;
+}

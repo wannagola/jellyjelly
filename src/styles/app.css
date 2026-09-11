@@ -1,0 +1,245 @@
+@import "tailwindcss";
+@import "./tokens.css";
+
+@theme {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-faint: var(--ink-faint);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-bg: var(--accent-bg);
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+}
+
+/* base 레이어에 넣어야 유틸리티 클래스가 이 리셋을 이긴다.
+   (레이어 밖에 두면 button{background:none}이 bg-* 를 지워버린다) */
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    line-height: 1.6;
+    word-break: keep-all;
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior-y: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+}
+
+/* ===== 유리병 =====
+   시안의 층 구조를 그대로 옮김: 젤리 더미 위에 반사층이 덮여야
+   젤리가 '유리 앞'이 아니라 '유리 안'에 있는 것처럼 보인다. */
+.jar {
+  position: relative;
+}
+
+.jar-cast {
+  position: absolute;
+  left: 50%;
+  bottom: -5px;
+  transform: translateX(-50%);
+  width: 85%;
+  height: 17px;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(108, 86, 100, 0.26),
+    rgba(108, 86, 100, 0) 72%
+  );
+}
+
+.jar-lid {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 63%;
+  height: 19px;
+  border-radius: 9px 9px 4px 4px;
+  background: linear-gradient(180deg, #fae8ed 0%, #f2d2dc 42%, #e2aec0 100%);
+  box-shadow:
+    inset 0 -2px 3px rgba(150, 100, 120, 0.22),
+    0 2px 4px rgba(120, 90, 105, 0.16);
+  overflow: hidden;
+}
+.jar-lid::before {
+  content: "";
+  position: absolute;
+  inset: 4px 7px 5px;
+  border-radius: 4px;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.55) 0 1.5px,
+    rgba(255, 255, 255, 0) 1.5px 6px
+  );
+  opacity: 0.7;
+}
+.jar-lid::after {
+  content: "";
+  position: absolute;
+  left: 12px;
+  top: 3px;
+  width: 32%;
+  height: 4px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.jar-neck {
+  position: absolute;
+  top: 17px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 53%;
+  height: 14px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.9) 0 4%,
+    rgba(205, 224, 232, 0.5) 12%,
+    rgba(255, 255, 255, 0.18) 50%,
+    rgba(205, 224, 232, 0.42) 86%,
+    rgba(255, 255, 255, 0.78) 100%
+  );
+  box-shadow: inset 0 -3px 5px -2px rgba(140, 170, 184, 0.45);
+}
+
+.jar-glass {
+  position: absolute;
+  top: 29px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 26px 26px 38px 38px;
+  overflow: hidden;
+  background: linear-gradient(
+    96deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(196, 220, 230, 0.55) 3.5%,
+    rgba(232, 244, 248, 0.42) 10%,
+    rgba(214, 234, 241, 0.3) 34%,
+    rgba(222, 238, 243, 0.24) 56%,
+    rgba(200, 224, 233, 0.36) 82%,
+    rgba(255, 255, 255, 0.8) 94%,
+    rgba(176, 201, 212, 0.7) 100%
+  );
+  box-shadow:
+    inset 0 3px 7px -2px rgba(255, 255, 255, 0.95),
+    inset 0 -18px 24px -14px rgba(138, 170, 184, 0.55),
+    0 8px 20px -12px rgba(72, 94, 106, 0.4);
+}
+
+.jar-pile {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.jar-pile > * {
+  position: absolute;
+  transform-origin: center;
+}
+
+.jar-glare {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  border-radius: 26px 26px 38px 38px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.42) 0%,
+      rgba(255, 255, 255, 0.06) 22%,
+      rgba(255, 255, 255, 0) 40%
+    ),
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.5) 0 4%,
+      rgba(255, 255, 255, 0) 15% 84%,
+      rgba(255, 255, 255, 0.34) 95%,
+      rgba(168, 196, 208, 0.4) 100%
+    );
+}
+
+.jar-shine,
+.jar-shine2,
+.jar-shine-r,
+.jar-floor {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+}
+.jar-shine {
+  top: 16px;
+  left: 9%;
+  width: 11px;
+  height: 39%;
+  border-radius: 7px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.96),
+    rgba(255, 255, 255, 0.42) 70%,
+    rgba(255, 255, 255, 0.1)
+  );
+}
+.jar-shine2 {
+  top: 28px;
+  left: 18%;
+  width: 5px;
+  height: 17%;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.62);
+}
+.jar-shine-r {
+  top: 34px;
+  right: 8%;
+  width: 6px;
+  height: 50%;
+  border-radius: 5px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.55),
+    rgba(255, 255, 255, 0.1)
+  );
+}
+.jar-floor {
+  left: 5%;
+  right: 5%;
+  bottom: 6px;
+  height: 15px;
+  border-radius: 50%;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.08),
+    rgba(255, 255, 255, 0.62)
+  );
+  box-shadow: 0 -4px 11px rgba(255, 255, 255, 0.45);
+}
+
+.safe-b {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}

@@ -1,0 +1,531 @@
+<title>젤리젤리</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@500;700&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+  :root{
+    --ground:#FAF7FA;
+    --surface:#FFFFFF;
+    --sunk:#F3ECF4;
+    --ink:#2B1E33;
+    --ink-soft:#6C5C75;
+    --ink-faint:#907F98;
+    --rule:#E4D9E7;
+    --accent:#BE3C7C;
+    --accent-soft:#FBE7F1;
+    --green:#3A8872;
+    --green-soft:#E1F0EB;
+    --amber:#A96C16;
+    --amber-soft:#F8EAD6;
+    --red:#B8423C;
+    --red-soft:#FAE6E4;
+    --shadow:0 1px 2px rgba(43,30,51,.05), 0 8px 24px -16px rgba(43,30,51,.28);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#191220;
+      --surface:#241B2D;
+      --sunk:#1F1726;
+      --ink:#F2E9F4;
+      --ink-soft:#B6A4BE;
+      --ink-faint:#8C7C95;
+      --rule:#3A2E45;
+      --accent:#F58CBE;
+      --accent-soft:#3C2034;
+      --green:#6FC7AB;
+      --green-soft:#1D3A33;
+      --amber:#E2A95F;
+      --amber-soft:#38290F;
+      --red:#F18E88;
+      --red-soft:#3B1E1C;
+      --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px -16px rgba(0,0,0,.8);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#191220;
+    --surface:#241B2D;
+    --sunk:#1F1726;
+    --ink:#F2E9F4;
+    --ink-soft:#B6A4BE;
+    --ink-faint:#8C7C95;
+    --rule:#3A2E45;
+    --accent:#F58CBE;
+    --accent-soft:#3C2034;
+    --green:#6FC7AB;
+    --green-soft:#1D3A33;
+    --amber:#E2A95F;
+    --amber-soft:#38290F;
+    --red:#F18E88;
+    --red-soft:#3B1E1C;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px -16px rgba(0,0,0,.8);
+  }
+
+  body{
+    background:var(--ground);
+    color:var(--ink);
+    font-family:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+    font-size:15.5px;
+    line-height:1.78;
+    -webkit-font-smoothing:antialiased;
+    word-break:keep-all;
+  }
+  .page{max-width:860px;margin:0 auto;padding:0 22px 100px;}
+  h1,h2,h3{font-family:Hahmlet,"IBM Plex Sans KR",serif;text-wrap:balance;line-height:1.35;}
+  p{margin:0;}
+  a{color:var(--accent);text-underline-offset:3px;}
+  a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px;}
+  strong{font-weight:600;color:var(--ink);}
+  em{font-style:normal;color:var(--accent);font-weight:500;}
+  code,.mono{font-family:"IBM Plex Mono",ui-monospace,monospace;}
+
+  /* ---------- 헤더 ---------- */
+  header{padding:64px 0 40px;}
+  .jar{display:flex;gap:9px;align-items:flex-end;height:46px;margin-bottom:26px;}
+  .j{width:34px;border:1.5px solid var(--ink);position:relative;}
+  .j::after{content:"";position:absolute;left:22%;top:18%;width:26%;height:22%;border-radius:50%;background:var(--surface);opacity:.75;}
+  .j1{height:34px;border-radius:14px 14px 6px 6px;background:var(--accent-soft);}
+  .j2{height:26px;border-radius:50%;background:var(--green-soft);width:26px;}
+  .j3{height:30px;border-radius:6px 16px 6px 16px;background:var(--amber-soft);}
+  .j4{height:40px;border-radius:17px;background:var(--sunk);width:24px;}
+  .j5{height:22px;border-radius:4px;background:var(--red-soft);width:30px;}
+  .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);}
+  h1{font-size:clamp(38px,7vw,58px);font-weight:700;margin:10px 0 0;letter-spacing:-.01em;}
+  .sub{font-size:17px;color:var(--ink-soft);margin-top:16px;max-width:34em;}
+  .meta{margin-top:26px;padding-top:18px;border-top:1px solid var(--rule);display:flex;flex-wrap:wrap;gap:10px 26px;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-faint);}
+
+  /* ---------- 섹션 ---------- */
+  section{margin-top:58px;}
+  .shead{display:flex;align-items:baseline;gap:12px;margin-bottom:8px;}
+  .shead .num{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--accent);letter-spacing:.08em;padding-top:4px;}
+  h2{font-size:26px;font-weight:700;margin:0;}
+  .lede{color:var(--ink-soft);margin:6px 0 22px;}
+  h3{font-size:17.5px;font-weight:700;margin:34px 0 10px;}
+  .stack{display:flex;flex-direction:column;gap:14px;}
+
+  /* ---------- 요약 박스 ---------- */
+  .verdict{background:var(--surface);border:1px solid var(--rule);border-left:4px solid var(--accent);border-radius:4px 12px 12px 4px;padding:24px 26px;box-shadow:var(--shadow);}
+  .verdict dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:12px 20px;}
+  .verdict dt{font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.1em;color:var(--ink-faint);padding-top:5px;white-space:nowrap;}
+  .verdict dd{margin:0;}
+
+  /* ---------- 칩 ---------- */
+  .chip{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.06em;padding:2px 9px;border-radius:999px;white-space:nowrap;font-weight:500;}
+  .ok{background:var(--green-soft);color:var(--green);}
+  .cond{background:var(--amber-soft);color:var(--amber);}
+  .no{background:var(--red-soft);color:var(--red);}
+  .nt{background:var(--accent-soft);color:var(--accent);}
+
+  /* ---------- 데이터소스 카드 ---------- */
+  .sources{display:grid;gap:12px;}
+  .src{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:18px 20px;display:grid;grid-template-columns:1fr auto;gap:6px 14px;align-items:start;}
+  .src h4{font-family:"IBM Plex Sans KR",sans-serif;font-size:15.5px;font-weight:600;margin:0;}
+  .src .why{grid-column:1/-1;color:var(--ink-soft);font-size:14.5px;}
+  .src .fact{grid-column:1/-1;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-faint);background:var(--sunk);border-radius:6px;padding:7px 11px;overflow-x:auto;white-space:nowrap;}
+
+  /* ---------- 표 ---------- */
+  .tw{overflow-x:auto;border:1px solid var(--rule);border-radius:12px;background:var(--surface);}
+  table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:520px;}
+  th,td{text-align:left;padding:11px 16px;border-bottom:1px solid var(--rule);vertical-align:top;}
+  thead th{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);font-weight:500;background:var(--sunk);}
+  tbody tr:last-child td{border-bottom:none;}
+  td.num{font-variant-numeric:tabular-nums;font-family:"IBM Plex Mono",monospace;}
+
+  /* ---------- 레이어 다이어그램 ---------- */
+  .layers{display:flex;flex-direction:column;gap:10px;}
+  .layer{display:grid;grid-template-columns:52px 1fr;gap:16px;align-items:center;background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:16px 18px;}
+  .layer .lv{font-family:"IBM Plex Mono",monospace;font-size:11px;text-align:center;color:var(--ink-faint);border-right:1px solid var(--rule);padding-right:10px;line-height:1.4;}
+  .layer b{display:block;font-weight:600;}
+  .layer span{color:var(--ink-soft);font-size:14.5px;}
+  .l1{border-left:3px solid var(--accent);}
+  .l2{border-left:3px solid var(--green);}
+  .l3{border-left:3px solid var(--amber);}
+
+  /* ---------- 화면 탭 ---------- */
+  .screens{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:12px;}
+  .screen{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:16px 16px 18px;}
+  .screen .ic{font-size:20px;line-height:1;}
+  .screen b{display:block;margin:9px 0 4px;font-weight:600;font-size:15px;}
+  .screen span{color:var(--ink-soft);font-size:13.5px;line-height:1.6;}
+
+  /* ---------- 로드맵 ---------- */
+  .road{display:flex;flex-direction:column;gap:0;border-left:2px solid var(--rule);margin-left:9px;}
+  .step{position:relative;padding:0 0 28px 26px;}
+  .step:last-child{padding-bottom:0;}
+  .step::before{content:"";position:absolute;left:-7px;top:7px;width:12px;height:12px;border-radius:50%;background:var(--accent);border:2px solid var(--ground);}
+  .step .t{font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.08em;color:var(--accent);}
+  .step b{display:block;font-weight:600;margin:2px 0 4px;}
+  .step span{color:var(--ink-soft);font-size:14.5px;}
+
+  /* ---------- 목록 ---------- */
+  ul.clean{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:9px;}
+  ul.clean li{padding-left:18px;position:relative;color:var(--ink-soft);}
+  ul.clean li::before{content:"";position:absolute;left:2px;top:11px;width:6px;height:6px;border-radius:50% 50% 50% 2px;background:var(--accent);}
+  ul.clean li strong{color:var(--ink);}
+
+  /* ---------- 질문 ---------- */
+  .qs{display:flex;flex-direction:column;gap:2px;}
+  .q{display:grid;grid-template-columns:auto 1fr;gap:14px;padding:14px 0;border-bottom:1px dashed var(--rule);align-items:start;}
+  .q:last-child{border-bottom:none;}
+  .q .qn{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--accent);padding-top:4px;}
+  .q b{font-weight:600;}
+  .q em{display:block;font-style:normal;color:var(--ink-soft);font-size:14px;margin-top:2px;}
+
+  footer{margin-top:72px;padding-top:22px;border-top:1px solid var(--rule);color:var(--ink-faint);font-size:13px;}
+  footer a{color:var(--ink-soft);}
+
+  @media (max-width:560px){
+    .src{grid-template-columns:1fr;}
+    .verdict dl{grid-template-columns:1fr;gap:4px 0;}
+    .verdict dd{margin-bottom:10px;}
+  }
+</style>
+
+
+<style>
+  .cut{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:16px 18px;display:grid;grid-template-columns:auto 1fr;gap:4px 14px;align-items:baseline;}
+  .cut .was{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.06em;color:var(--ink-faint);white-space:nowrap;padding-top:3px;}
+  .cut b{font-weight:600;}
+  .cut .now{grid-column:2;color:var(--ink-soft);font-size:14.5px;}
+  .cuts{display:flex;flex-direction:column;gap:10px;}
+  details{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:0 18px;}
+  details[open]{padding-bottom:14px;}
+  summary{cursor:pointer;padding:15px 0;font-weight:600;font-size:15px;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px;}
+  summary::-webkit-details-marker{display:none;}
+  summary::after{content:"펼치기";font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-faint);letter-spacing:.06em;}
+  details[open] summary::after{content:"접기";}
+  summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px;}
+  .note{border-left:3px solid var(--amber);background:var(--amber-soft);color:var(--ink);border-radius:0 10px 10px 0;padding:14px 18px;font-size:14.5px;}
+</style>
+
+<div class="page">
+
+<header>
+  <div class="jar" aria-hidden="true">
+    <div class="j j1"></div><div class="j j2"></div><div class="j j3"></div><div class="j j4"></div><div class="j j5"></div>
+  </div>
+  <div class="eyebrow">개정 2판 · 개인 로컬용</div>
+  <h1>젤리젤리</h1>
+  <p class="sub">먹은 젤리를 하나씩 병에 담아 모으는 기록 앱. <em>북적북적</em>이 책을 쌓아 올리듯, 젤리를 쌓아 올린다.</p>
+  <div class="meta">
+    <span>2026.09.11</span>
+    <span>전제 · 혼자 쓰는 앱 · 내 전용 서버 · 비상업</span>
+    <span>상태 · 착수 가능</span>
+  </div>
+</header>
+
+<section>
+  <div class="shead"><span class="num">요약</span><h2>전제가 바뀌면서 달라진 것</h2></div>
+  <p class="lede">"배포용"을 전제로 썼던 1판의 제약 대부분이 사라졌습니다. 범위가 절반 이하로 줄었습니다.</p>
+  <div class="cuts">
+    <div class="cut">
+      <span class="was">사진</span>
+      <b>저작권 문제 소멸 — 아무 이미지나 가져다 쓰세요</b>
+      <span class="now">배포하지 않고 내 기기에만 두는 개인적 이용이라, 1판에서 제일 크게 걱정했던 부분이 통째로 없어졌습니다. 쿠팡·네이버에서 상품 이미지를 길게 눌러 저장하거나 URL을 붙여넣으면 끝. <strong>자동 누끼는 필수 기능에서 "있으면 좋은 것"으로 내려갑니다.</strong></span>
+    </div>
+    <div class="cut">
+      <span class="was">데이터</span>
+      <b>씨드 200종 → 0종에서 시작</b>
+      <span class="now">내가 먹는 젤리만 들어가면 되므로, 미리 도감을 채울 이유가 없습니다. 먹을 때마다 하나씩 추가되고, 그게 곧 내 도감이 됩니다. 1판에서 "제일 지루하지만 제일 중요하다"고 했던 작업이 사라졌습니다.</span>
+    </div>
+    <div class="cut">
+      <span class="was">공공 API</span>
+      <b>식약처 API 신청도 당장은 불필요</b>
+      <span class="now">칼로리·원재료는 봉지 뒷면을 보고 적거나, 아예 안 적어도 됩니다. 나중에 "성분 자동으로 채워지면 좋겠다" 싶을 때 붙이면 되는 선택 사항으로 내려갑니다.</span>
+    </div>
+    <div class="cut">
+      <span class="was">일정</span>
+      <b>2주+ → 4~5일</b>
+      <span class="now">소셜·추천 알고리즘·크롤러·씨드 구축이 전부 빠졌습니다. 내 계정 하나짜리 서버를 붙이는 데 반나절쯤 더 듭니다.</span>
+    </div>
+    <div class="cut">
+      <span class="was">저장</span>
+      <b>내 전용 서버를 두기로 — 저장 문제 해결</b>
+      <span class="now">Supabase에 <strong>내 계정 하나만</strong> 만들고 잠급니다. 폰을 바꿔도, 앱을 안 열어도, 사진이 몇 장이든 기록이 안전합니다. 다만 <strong>저작권은 서버와 무관합니다</strong> — 로컬이든 내 서버든 원래 문제가 없었고, 대신 "진짜 로그인을 걸어야 한다"는 조건이 하나 붙습니다. 3절을 보세요.</span>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="shead"><span class="num">01</span><h2>사진은 이렇게 넣습니다</h2></div>
+  <p class="lede">세 경로를 다 열어두고, 어느 쪽으로 들어와도 같은 모양의 젤리 스티커가 되게 만듭니다.</p>
+  <ul class="clean">
+    <li><strong>이미지 URL 붙여넣기</strong> — 쇼핑몰 상품 사진 주소를 복사해 붙이면 앱이 받아서 기기에 저장합니다. 원본 링크가 죽어도 내 사진은 남습니다. <strong>가장 빠르고, 원하시던 "상품 디스플레이 느낌"이 그대로 나옵니다.</strong></li>
+    <li><strong>사진 앨범에서 고르기</strong> — 이미 폰에 저장해 둔 이미지를 그대로.</li>
+    <li><strong>직접 촬영</strong> — 봉지를 찍는 것 자체가 기록의 순간이 되는 경로. 여행지·직구 젤리는 이 방법뿐입니다.</li>
+    <li><strong>사진이 없어도 예쁘게</strong> — 등록 직후엔 고른 색 + 모양(곰·벌레·링·큐브·하트)으로 만든 <strong>젤리 SVG가 자동 배정</strong>됩니다. 사진은 나중에 채워도 되고, 안 채워도 빈 카드가 안 생깁니다.</li>
+    <li><strong>누끼는 선택 기능</strong> — 원할 때만 버튼 한 번으로. 브라우저 안에서 처리(<code>@imgly/background-removal</code>)되니 사진이 밖으로 나가지 않습니다. 없어도 앱은 완성됩니다.</li>
+  </ul>
+</section>
+
+<section>
+  <div class="shead"><span class="num">02</span><h2>젤리 정보는 어떻게 채우나</h2></div>
+  <p class="lede">"검색하면 젤리 정보가 뜬다"를 포기하고, "한 번 적으면 다시는 안 적어도 된다"로 바꿉니다. 혼자 쓰는 앱에서는 이쪽이 훨씬 낫습니다.</p>
+  <div class="layers">
+    <div class="layer l1">
+      <div class="lv">기본</div>
+      <div>
+        <b>처음 먹는 젤리는 이름만 적으면 끝</b>
+        <span>이름(필수) 외엔 전부 나중에 채워도 되는 선택 항목. 브랜드·색·모양은 고르기 쉬운 칩으로, 성분은 비워둬도 됩니다. <strong>등록이 10초를 넘으면 앱을 안 쓰게 됩니다.</strong></span>
+      </div>
+    </div>
+    <div class="layer l2">
+      <div class="lv">두번째<br>부터</div>
+      <div>
+        <b>이미 먹어본 젤리는 검색해서 한 번 탭</b>
+        <span>내 도감이 쌓일수록 등록이 빨라집니다. 초성 검색(<code>ㅁㄱㅁ → 마이구미</code>)을 넣으면 체감이 확 달라집니다.</span>
+      </div>
+    </div>
+    <div class="layer l3">
+      <div class="lv">선택</div>
+      <div>
+        <b>나중에 생각나면 붙이는 것들</b>
+        <span>식약처 품목제조보고 API로 제조사·원재료 자동 채우기, 영양성분DB로 칼로리 붙이기, 바코드 스캔. 셋 다 무료지만 <strong>지금 할 필요는 없습니다.</strong> 조사 결과는 부록에 남겨뒀습니다.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="shead"><span class="num">03</span><h2>어디에 두고 어떻게 여나</h2></div>
+  <p class="lede">"내 전용 서버"로 방향을 잡았습니다. 저장 문제는 이걸로 끝납니다.</p>
+  <div class="note" style="margin-bottom:18px">
+    <strong>먼저 짚을 것 — 저작권은 서버와 무관합니다.</strong> 로컬에 두든 내 전용 서버에 두든 똑같이 문제가 없습니다. 선을 만드는 건 저장 위치가 아니라 <strong>남이 볼 수 있느냐</strong>입니다. 그래서 서버를 두면 조건이 하나 새로 붙습니다 — <strong>진짜 로그인을 걸어야 합니다.</strong> "URL을 아무한테도 안 알려주면 되지"는 안 됩니다. 주소가 새거나 검색엔진에 잡히는 순간 성립하지 않으니까요.
+  </div>
+
+  <h3>Supabase를 권합니다</h3>
+  <p style="color:var(--ink-soft)">로그인 · DB · 파일 저장 · 접근 제어(RLS)가 한 세트로 무료입니다. 다른 걸 조립할 이유가 없습니다.</p>
+  <div class="tw" style="margin-top:14px">
+    <table>
+      <thead><tr><th>항목</th><th>무료 한도</th><th>내 앱 기준</th></tr></thead>
+      <tbody>
+        <tr><td>파일 저장</td><td class="num">1 GB</td><td>640px WebP 기준 장당 약 50KB → <strong>사진 약 2만 장</strong>. 평생 안 찹니다</td></tr>
+        <tr><td>DB</td><td class="num">500 MB</td><td>젤리 기록은 한 건에 1KB 미만. 사실상 무제한</td></tr>
+        <tr><td>전송량</td><td class="num">5 GB / 월</td><td>혼자 쓰면 근처도 안 갑니다</td></tr>
+        <tr><td>로그인</td><td>내장</td><td>내 계정 하나만 만들고, RLS로 그 계정만 읽고 쓰게 잠급니다</td></tr>
+        <tr><td><strong>7일 미사용 시 일시정지</strong></td><td>무료 플랜 정책</td><td>매일 쓰면 무관. 긴 여행 뒤엔 대시보드에서 재개 한 번. 귀찮으면 하루 한 번 찔러주는 cron으로 막습니다</td></tr>
+        <tr><td><strong>자동 백업 없음</strong></td><td>무료 플랜 정책</td><td>그래서 <strong>내보내기 기능은 그대로 유지</strong>합니다. 4절 참고</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="margin-top:14px;color:var(--ink-soft)"><strong>Firebase는 뺐습니다</strong> — 2026년 2월 3일부터 Storage를 쓰려면 카드 등록(Blaze)이 필수가 됐습니다. 실제 요금은 0원에 머물 가능성이 높지만, 혼자 쓰는 젤리 앱에 카드를 걸어두고 싶진 않을 겁니다. Cloudflare D1+R2도 좋은데 로그인을 직접 붙여야 해서 손이 더 갑니다.</p>
+
+  <h3>단, 서버 온리로는 만들지 마세요</h3>
+  <p style="color:var(--ink-soft)"><strong>기록은 일단 기기에 쓰고(IndexedDB), 그 다음 서버로 밀어 올립니다.</strong> 이유는 넷입니다 — 지하철에서 인터넷이 끊겨도 기록이 되고, 버튼을 누른 즉시 젤리가 병에 떨어지고(서버 응답을 기다리지 않음), 서버가 잠들어 있어도 앱이 멀쩡히 돌고, Supabase가 언젠가 사라져도 내 기록은 폰에 남습니다. 기기가 하나라 동기화 충돌은 거의 생기지 않아서, <code>updatedAt</code> 비교로 늦은 쪽이 이기게만 해두면 충분합니다.</p>
+</section>
+
+<section>
+  <div class="shead"><span class="num">04</span><h2>그래도 백업은 남겨둡니다</h2></div>
+  <p class="lede">서버가 생기면서 기기 관련 리스크는 전부 사라졌습니다. 남은 건 하나뿐입니다.</p>
+  <div class="tw">
+    <table>
+      <thead><tr><th>기존 리스크</th><th>지금</th></tr></thead>
+      <tbody>
+        <tr><td>Safari 7일 미사용 시 저장소 삭제</td><td><span class="chip ok">해소</span> 서버가 진본. 지워져도 다시 받아옵니다 (그래도 홈 화면 추가는 하세요 — 앱처럼 열려야 매일 씁니다)</td></tr>
+        <tr><td>기기 저장소 용량 한계</td><td><span class="chip ok">해소</span> 사진은 서버에, 기기엔 캐시만. 압축(640px WebP)은 계속 하는 게 좋습니다 — 로딩이 빨라집니다</td></tr>
+        <tr><td>폰 교체 · 초기화</td><td><span class="chip ok">해소</span> 로그인하면 그대로 복구됩니다. 아이패드·맥에서도 열립니다</td></tr>
+        <tr><td><strong>서비스가 사라지거나 계정이 잠기는 것</strong></td><td><span class="chip cond">남음</span> 무료 플랜은 자동 백업이 없습니다. <strong>기록+사진을 zip 하나로 내보내는 기능은 그대로 MVP에 둡니다.</strong> 한 달에 한 번이면 충분합니다</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="margin-top:16px;color:var(--ink-soft)">그리고 처음부터 <strong>남의 이메일로 가입 링크가 열리지 않게</strong> 막아두세요. Supabase에서 회원가입을 꺼두고 내 계정만 수동으로 만들면 끝입니다. 이게 "나만 쓰는 서버"를 실제로 성립시키는 한 줄입니다.</p>
+</section>
+<section>
+  <div class="shead"><span class="num">05</span><h2>기능 명세</h2></div>
+  <p class="lede">배포용 전제에서 붙었던 것들을 덜어낸 축소판입니다.</p>
+  <div class="tw">
+    <table>
+      <thead><tr><th>기능</th><th>판정</th><th>비고</th></tr></thead>
+      <tbody>
+        <tr><td>홈 = 젤리 보관함</td><td><span class="chip ok">MVP</span></td><td><strong>앱의 얼굴.</strong> 유리병에 젤리가 쌓이고, 스크롤하면 달마다 병이 하나씩. 탭하면 그 기록으로</td></tr>
+        <tr><td>기록하기 (먹은 것 체크)</td><td><span class="chip ok">MVP</span></td><td>검색 → 선택 → <em>먹는 중</em> → <strong>완료</strong> → 젤리가 병으로 톡 떨어지는 애니메이션</td></tr>
+        <tr><td>젤리 등록 · 사진 넣기</td><td><span class="chip ok">MVP</span></td><td>이름만 필수. URL 붙여넣기 / 앨범 / 촬영 3경로. 사진 없으면 SVG 자동 배정</td></tr>
+        <tr><td>리뷰</td><td><span class="chip ok">MVP</span></td><td>별점 + 한 줄 + <strong>식감 슬라이더 3종(쫀득함·신맛·단맛)</strong>. 글쓰기 부담 없이</td></tr>
+        <tr><td>젤리 상세</td><td><span class="chip ok">MVP</span></td><td>사진·브랜드·내 기록 타임라인·평균 별점·"몇 번째로 먹었는지"</td></tr>
+        <tr><td>월간 캘린더</td><td><span class="chip ok">MVP</span></td><td>날짜 칸에 그날 먹은 젤리 미니 아이콘. 빈 날도 귀엽게</td></tr>
+        <tr><td>검색 (초성 지원)</td><td><span class="chip ok">MVP</span></td><td>내 도감 안에서. 없으면 "직접 추가하기"로 바로 연결</td></tr>
+        <tr><td>백업 내보내기</td><td><span class="chip ok">MVP</span></td><td>서버가 있어도 무료 플랜엔 자동 백업이 없습니다. 한 달에 한 번 zip으로 (4절)</td></tr>
+        <tr><td>도감 · 수집 현황</td><td><span class="chip nt">v1.1</span></td><td>"올해 모은 젤리 42종" · 브랜드별 · 못 먹어본 색/모양. 혼자 쓰는 앱에서도 이게 제일 재밌는 화면이 됩니다</td></tr>
+        <tr><td>월간 리포트 카드</td><td><span class="chip nt">v1.1</span></td><td>이번 달 먹은 수 · 최애 브랜드 · 취향 그래프를 이미지 한 장으로. 저장해서 자랑용</td></tr>
+        <tr><td>위시리스트</td><td><span class="chip nt">v1.1</span></td><td>먹어보고 싶은 젤리를 담아두고, 먹으면 보관함으로 이동</td></tr>
+        <tr><td>추천 탭</td><td><span class="chip cond">v1.2</span></td><td>혼자 쓰는 앱이라 "남들이 좋아한 젤리"는 불가. 대신 <strong>내 취향 태그 기준 + 오래 안 먹은 최애 다시 꺼내기 + 위시리스트 리마인드</strong>로 재정의</td></tr>
+        <tr><td>자동 누끼</td><td><span class="chip cond">v1.2</span></td><td>선택 기능. 브라우저 안에서 WASM으로</td></tr>
+        <tr><td>바코드 스캔</td><td><span class="chip cond">나중</span></td><td>공공 바코드 DB가 2018년 이후 갱신 중단이라 적중률이 낮습니다. 재미로만</td></tr>
+        <tr><td>식약처 API 연동</td><td><span class="chip cond">나중</span></td><td>성분 자동 채우기. 손으로 적는 게 귀찮아질 때</td></tr>
+        <tr><td>로그인 · 서버 동기화</td><td><span class="chip ok">MVP</span></td><td>내 계정 하나. 회원가입은 잠급니다 (3절)</td></tr>
+        <tr><td>소셜 · 공유 · 남의 기록</td><td><span class="chip no">제외</span></td><td>전제상 불필요</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="shead"><span class="num">06</span><h2>화면 구조</h2></div>
+  <p class="lede">하단 탭 3개 + 중앙 기록 버튼. 혼자 쓰는 앱에 탭 5개는 과합니다.</p>
+  <div class="screens">
+    <div class="screen"><div class="ic">🫙</div><b>보관함</b><span>홈. 젤리가 쌓인 병. 달마다 병이 하나씩</span></div>
+    <div class="screen"><div class="ic">🍬</div><b>기록하기</b><span>중앙 버튼. 검색 → 선택 → 별점 → 완료</span></div>
+    <div class="screen"><div class="ic">📅</div><b>달력</b><span>이번 달 먹은 기록. 날짜별 미니 젤리</span></div>
+    <div class="screen"><div class="ic">📖</div><b>도감</b><span>내가 모은 젤리 전체 + 검색. 상세로 가는 입구</span></div>
+  </div>
+  <h3>"완료" 한 순간에 예산을 몰아주세요</h3>
+  <p style="color:var(--ink-soft)">다 먹고 <strong>완료</strong>를 누르면 젤리가 위에서 떨어져 병 안에 <em>툭</em> 하고 자리를 잡습니다. 스프링 애니메이션 + 살짝 튕김 + 진동 한 번. 이 앱을 매일 열게 만드는 건 기능이 아니라 이 2초입니다. 나머지 화면은 담백해도 괜찮습니다.</p>
+</section>
+
+<section>
+  <div class="shead"><span class="num">07</span><h2>데이터 모델</h2></div>
+  <p class="lede">젤리(카탈로그)와 기록(먹은 사건)을 분리합니다. 같은 젤리를 열 번 먹어도 젤리는 하나입니다.</p>
+  <div class="tw">
+    <table>
+      <thead><tr><th>엔티티</th><th>필드</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Jelly</strong><br><span style="color:var(--ink-faint);font-size:13px">내 도감</span></td><td class="mono" style="font-size:13px">id · name(필수) · brand · photoBlob · color · shape · tags[] · kcal? · note?</td></tr>
+        <tr><td><strong>Entry</strong><br><span style="color:var(--ink-faint);font-size:13px">먹은 기록</span></td><td class="mono" style="font-size:13px">id · jellyId · status(eating|done) · startedAt · finishedAt · rating · review · texture{chewy,sour,sweet} · place?</td></tr>
+        <tr><td><strong>Jar</strong><br><span style="color:var(--ink-faint);font-size:13px">병 / 보관함</span></td><td class="mono" style="font-size:13px">id · title · month · entryIds[]</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="shead"><span class="num">08</span><h2>기술 스택</h2></div>
+  <p class="lede">2026년 9월 11일 기준 최신 버전을 확인해 적었습니다. 의존성은 적게 — 혼자 만들고 혼자 고칠 앱이라 손에 익은 것만 씁니다.</p>
+
+  <h3>화면</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th>패키지</th><th>버전</th><th>역할과 이유</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">react</td><td class="num">19.3</td><td>UI</td></tr>
+        <tr><td class="mono">typescript</td><td class="num">7.0</td><td>젤리·기록 모양을 타입으로 못 박아두면 나중에 필드를 늘릴 때 안 헷갈립니다</td></tr>
+        <tr><td class="mono">vite</td><td class="num">8.3</td><td>개발 서버와 빌드. 저장하면 즉시 반영</td></tr>
+        <tr><td class="mono">tailwindcss</td><td class="num">4.3</td><td>여백·색을 코드 옆에서 바로 조절. 디자인을 자주 갈아엎을 앱이라 이게 빠릅니다</td></tr>
+        <tr><td class="mono">motion</td><td class="num">13.2</td><td>구 Framer Motion. <strong>젤리가 병에 툭 떨어지는 스프링 연출의 전부</strong></td></tr>
+        <tr><td class="mono">react-router</td><td class="num">8.3</td><td>탭 4개 전환과 뒤로가기. 폰에서 스와이프 뒤로가기가 자연스러우려면 필요합니다</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>저장 · 서버</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th>패키지</th><th>버전</th><th>역할과 이유</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">dexie</td><td class="num">4.4</td><td>IndexedDB를 사람이 쓸 만하게. <strong>기록은 여기 먼저 씁니다</strong></td></tr>
+        <tr><td class="mono">dexie-react-hooks</td><td class="num">4.4</td><td><code>useLiveQuery</code> — DB가 바뀌면 화면이 알아서 갱신됩니다. <strong>덕분에 상태관리 라이브러리가 통째로 필요 없습니다</strong></td></tr>
+        <tr><td class="mono">@supabase/supabase-js</td><td class="num">2.116</td><td>로그인 · Postgres · 사진 저장. 내 계정 하나만 열어두고 RLS로 잠급니다</td></tr>
+        <tr><td class="mono">vite-plugin-pwa</td><td class="num">1.3</td><td>홈 화면 추가, 오프라인 동작, 아이콘</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>거들어주는 것들</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th>패키지</th><th>버전</th><th>역할과 이유</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">es-hangul</td><td class="num">2.4</td><td>초성 검색. <code>ㅁㄱㅁ → 마이구미</code>. 직접 짜도 되지만 20줄 아끼고 정확합니다</td></tr>
+        <tr><td class="mono">date-fns</td><td class="num">4.4</td><td>달력 계산. 필요한 함수만 딸려옵니다</td></tr>
+        <tr><td class="mono">@biomejs/biome</td><td class="num">2.5</td><td>린트+포맷 한 방. ESLint+Prettier 두 개 설정할 시간 아낍니다</td></tr>
+        <tr><td class="mono">@imgly/background-removal</td><td class="num">1.7</td><td><span class="chip cond">v1.2</span> 선택 기능인 자동 누끼. 무겁습니다(모델 파일 수 MB) — 쓸 때만 불러오게 지연 로딩</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="margin-top:14px;color:var(--ink-soft)"><strong>사진 압축은 라이브러리 없이</strong> canvas로 직접 합니다 — 긴 변 640px, WebP 품질 0.8. 30줄이면 되고, 의존성 하나 아낍니다.</p>
+
+  <h3>배포</h3>
+  <ul class="clean">
+    <li><strong>Cloudflare Pages</strong> — <code>git push</code>하면 끝. 무료. 커스텀 도메인도 무료</li>
+    <li><strong>Supabase</strong> — 서울 리전 선택. 무료</li>
+    <li>합계 <strong>월 0원</strong></li>
+  </ul>
+
+  <h3>의도적으로 안 쓰는 것</h3>
+  <ul class="clean">
+    <li><strong>Next.js</strong> — 서버 렌더링이 필요 없는 개인 앱입니다. 정적 SPA면 충분하고, 빌드·배포만 복잡해집니다</li>
+    <li><strong>상태관리 라이브러리</strong>(Zustand·Redux) — <code>useLiveQuery</code>가 그 자리를 대신합니다. DB가 곧 상태입니다</li>
+    <li><strong>UI 컴포넌트 라이브러리</strong>(MUI·shadcn) — 이 앱의 전부가 <em>커스텀 귀여움</em>인데, 기성 컴포넌트를 쓰면 그 순간 "흔한 앱"이 됩니다. 버튼 몇 개는 직접 만듭니다</li>
+    <li><strong>ORM</strong>(Prisma·Drizzle) — 테이블 3개에 쿼리 열 개 남짓. Supabase 클라이언트로 충분합니다</li>
+    <li><strong>테스트 프레임워크</strong> — 혼자 쓰고 매일 여는 앱이라 버그가 즉시 드러납니다. 나중에 동기화 로직이 복잡해지면 그때 Vitest</li>
+  </ul>
+</section>
+<section>
+  <div class="shead"><span class="num">09</span><h2>진행 순서</h2></div>
+  <p class="lede">각 단계 끝에 손에 잡히는 게 나오게 끊었습니다. 1일차 끝에 이미 폰에서 열립니다.</p>
+  <div class="road">
+    <div class="step">
+      <div class="t">DAY 1</div>
+      <b>뼈대 + 젤리 그래픽</b>
+      <span>프로젝트 세팅, 색 팔레트와 폰트, 젤리 모양 SVG 세트(곰·벌레·링·큐브·하트), 유리병 그래픽. 빈 앱이지만 폰 홈 화면에 올려서 확인합니다.</span>
+    </div>
+    <div class="step">
+      <div class="t">DAY 2</div>
+      <b>등록 → 기록 → 보관함</b>
+      <span>젤리 추가(사진 3경로 포함), 먹는 중 → 완료, 병에 쌓이기. <strong>여기까지면 이미 매일 쓸 수 있습니다.</strong></span>
+    </div>
+    <div class="step">
+      <div class="t">DAY 2.5 · 반나절</div>
+      <b>Supabase 붙이기</b>
+      <span>내 계정 하나 만들고 회원가입 잠그기, 테이블 3개와 RLS, 사진 업로드 경로, 기기→서버 동기화 레이어. <strong>여기까지 오면 폰을 잃어버려도 괜찮습니다.</strong></span>
+    </div>
+    <div class="step">
+      <div class="t">DAY 3</div>
+      <b>완료 애니메이션 · 리뷰 · 상세</b>
+      <span>앱의 인상을 결정하는 2초를 여기서 만듭니다. 별점과 식감 슬라이더, 젤리별 기록 타임라인.</span>
+    </div>
+    <div class="step">
+      <div class="t">DAY 4</div>
+      <b>달력 · 검색 · 백업 내보내기</b>
+      <span>기록이 쌓인 뒤에야 의미가 생기는 화면들. 서버가 있어도 내보내기는 넣습니다 — 무료 플랜엔 백업이 없습니다.</span>
+    </div>
+    <div class="step">
+      <div class="t">그 다음</div>
+      <b>도감 · 월간 리포트 · 위시리스트 · 추천</b>
+      <span>실제로 쓰면서 아쉬운 순서대로. 미리 정하지 말고 써 보고 정하세요.</span>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="shead"><span class="num">10</span><h2>남은 질문</h2></div>
+  <div class="qs">
+    <div class="q"><span class="qn">Q1</span><div><b>기록의 단위는 '젤리 한 봉지'인가요, '먹은 순간'인가요?</b><em>봉지 단위면 "개봉 → 며칠에 걸쳐 먹음 → 완료"가 자연스럽고, 순간 단위면 달력이 훨씬 촘촘해집니다. 말씀하신 흐름상 <strong>봉지 단위</strong>로 가정했습니다.</em></div></div>
+    <div class="q"><span class="qn">Q2</span><div><b>병은 무엇을 기준으로 나눌까요?</b><em>달마다(1월 병, 2월 병)를 기본으로 잡았습니다. 브랜드별·맛별·"그냥 하나의 큰 병에 계속 쌓기"도 가능합니다. 하나의 큰 병은 <strong>"이만큼 모았다"는 감동이 제일 크지만</strong> 개수가 많아지면 느려집니다.</em></div></div>
+    <div class="q"><span class="qn">Q3</span><div><b>앱 이름</b><em>작업명은 <strong>젤리젤리</strong>입니다. 다른 후보: 젤리서랍 · 쫀득쫀득 · 젤리도감 · 구미상자.</em></div></div>
+  </div>
+</section>
+
+<section>
+  <div class="shead"><span class="num">부록</span><h2>젤리 데이터 소스 조사 결과</h2></div>
+  <p class="lede">지금은 안 쓰지만, 나중에 성분 자동 채우기를 붙일 때를 위해 남겨둡니다. 2026년 9월 11일 기준으로 직접 호출해 확인했습니다.</p>
+  <details>
+    <summary>후보 8곳 — 무엇이 되고 무엇이 죽었나</summary>
+    <div class="tw" style="margin:6px 0 4px">
+      <table>
+        <thead><tr><th>소스</th><th>판정</th><th>확인한 사실</th></tr></thead>
+        <tbody>
+          <tr><td>식약처 품목제조보고</td><td><span class="chip ok">쓸 만함</span></td><td>국내 가공식품 공식 원장. 제품명·업소명·식품유형·원재료. 무료, 즉시 발급. <strong>이미지 없음</strong></td></tr>
+          <tr><td>식약처 식품영양성분DB</td><td><span class="chip ok">쓸 만함</span></td><td>칼로리·당류·나트륨. 무료. 제품명 매칭되는 것만</td></tr>
+          <tr><td>Open Food Facts</td><td><span class="chip no">한국 데이터 없음</span></td><td class="num">한국 전체 3,234개 · 한국×사탕류 <strong>4개</strong> · "젤리" 검색 <strong>1개</strong> · "롯데" 8개</td></tr>
+          <tr><td>네이버 쇼핑 검색 API</td><td><span class="chip no">폐지</span></td><td><strong>2026.7.31 종료</strong>, 공식 대체 없음. 일반 검색만 네이버 API 허브로 이관됨 (아직 이걸 추천하는 블로그 글이 많으니 주의)</td></tr>
+          <tr><td>코리안넷 (GS1 Korea)</td><td><span class="chip no">기업 전용</span></td><td>바코드·제조사·<strong>상품 이미지</strong>까지 최고 품질이지만 DB 활용 계약 필요</td></tr>
+          <tr><td>식약처 유통바코드</td><td><span class="chip cond">낡음</span></td><td>무료지만 <strong>2018년 이후 갱신 중단</strong>. 신상 젤리는 안 잡힘</td></tr>
+          <tr><td>쿠팡 파트너스 API</td><td><span class="chip cond">조건부</span></td><td>제휴 수익 실적을 먼저 내야 키 발급. 광고 링크 노출 전제</td></tr>
+          <tr><td>USDA FoodData Central</td><td><span class="chip no">부적합</span></td><td>미국 제품 위주, 이미지 없음. 하리보류 영양정보 백업 정도</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+</section>
+
+<footer>
+  확인한 출처 — <a href="https://world.openfoodfacts.org/data">Open Food Facts</a> (API 직접 호출) ·
+  <a href="https://www.data.go.kr/data/15064909/openapi.do">식약처 품목제조보고</a> ·
+  <a href="https://www.data.go.kr/data/15127578/openapi.do">식품영양성분DB</a> ·
+  <a href="https://www.data.go.kr/data/15064775/openapi.do">유통바코드</a> ·
+  <a href="https://www.koreannet.or.kr/front/koreannet/dbApply.do">코리안넷</a> ·
+  <a href="https://developer.apple.com/forums/thread/710157">iOS 웹앱 저장소 정책</a> ·
+  <a href="https://github.com/imgly/background-removal-js">@imgly/background-removal</a>
+</footer>
+
+</div>
