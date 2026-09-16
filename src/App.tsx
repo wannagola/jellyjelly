@@ -7,6 +7,7 @@ import { CountScreen } from "./screens/CountScreen";
 import { DexScreen } from "./screens/DexScreen";
 import { DrawScreen } from "./screens/DrawScreen";
 import { FinishScreen } from "./screens/FinishScreen";
+import { FoldScreen } from "./screens/FoldScreen";
 import { JarShelfScreen } from "./screens/JarShelfScreen";
 import { JellyDetailScreen } from "./screens/JellyDetailScreen";
 import { JellyFormScreen } from "./screens/JellyFormScreen";
@@ -38,6 +39,7 @@ const FULLSCREEN = [
   /^\/count/,
   /^\/path/,
   /^\/spin/,
+  /^\/fold/,
 ];
 
 export default function App() {
@@ -95,6 +97,7 @@ export default function App() {
         <Route path="/count" element={<CountScreen />} />
         <Route path="/path" element={<PathScreen />} />
         <Route path="/spin" element={<SpinScreen />} />
+        <Route path="/fold" element={<FoldScreen />} />
         <Route path="/settings" element={<SettingsScreen />} />
       </Routes>
       {bare ? null : <TabBar />}
