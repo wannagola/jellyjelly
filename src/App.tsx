@@ -3,6 +3,7 @@ import { Route, Routes, useLocation } from "react-router";
 import { TabBar } from "./components/TabBar";
 import { AcornScreen } from "./screens/AcornScreen";
 import { CalendarScreen } from "./screens/CalendarScreen";
+import { CountScreen } from "./screens/CountScreen";
 import { DexScreen } from "./screens/DexScreen";
 import { DrawScreen } from "./screens/DrawScreen";
 import { FinishScreen } from "./screens/FinishScreen";
@@ -32,6 +33,7 @@ const FULLSCREEN = [
   /^\/tummy/,
   /^\/acorn/,
   /^\/order/,
+  /^\/count/,
 ];
 
 export default function App() {
@@ -86,6 +88,7 @@ export default function App() {
         <Route path="/tummy" element={<TummyScreen />} />
         <Route path="/acorn" element={<AcornScreen />} />
         <Route path="/order" element={<OrderScreen />} />
+        <Route path="/count" element={<CountScreen />} />
         <Route path="/settings" element={<SettingsScreen />} />
       </Routes>
       {bare ? null : <TabBar />}

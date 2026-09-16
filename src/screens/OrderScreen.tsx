@@ -27,6 +27,30 @@ const GAP = 170;
 
 type Phase = "ready" | "showing" | "input" | "over";
 
+/**
+ * 판마다 순서를 새로 뽑는다.
+ *
+ * 앞 판에 한 알을 얹어 나가면 외울 게 마지막 하나뿐이라 기억력이 아니라
+ * 끈기 싸움이 된다. 매번 새로 뽑아야 처음부터 다시 외운다.
+ *
+ * 같은 알이 연달아 나오면 두 번 반짝인 건지 한 번 길게 반짝인 건지 알 수가 없다.
+ * 알이 남아 있는 동안에는 아예 안 겹치게 뽑고, 판이 알 수보다 길어지면
+ * 그때부터는 겹치되 바로 옆끼리만 피한다.
+ */
+function makeOrder(length: number): number[] {
+  const pool = PADS.map((_, i) => i);
+  const seq: number[] = [];
+  let left = [...pool];
+
+  for (let i = 0; i < length; i += 1) {
+    if (left.length === 0) left = pool.filter((p) => p !== seq[seq.length - 1]);
+    const pick = left[Math.floor(Math.random() * left.length)];
+    seq.push(pick);
+    left = left.filter((p) => p !== pick);
+  }
+  return seq;
+}
+
 export function OrderScreen() {
   const settings = useSettings();
   const best = useLiveQuery(async () => ((await db.meta.get(BEST_KEY))?.value as number) ?? 0, []);
@@ -82,18 +106,17 @@ export function OrderScreen() {
   );
 
   const nextRound = useCallback(
-    (seq: number[]) => {
-      const grown = [...seq, Math.floor(Math.random() * PADS.length)];
-      setOrder(grown);
-      replay(grown);
+    (length: number) => {
+      const seq = makeOrder(length);
+      setOrder(seq);
+      replay(seq);
     },
     [replay],
   );
 
   const start = () => {
     setWrong(undefined);
-    setOrder([]);
-    nextRound([]);
+    nextRound(1);
   };
 
   function tap(pad: number) {
@@ -125,7 +148,8 @@ export function OrderScreen() {
     if (next >= order.length) {
       setPhase("showing");
       if (!muted) timers.current.push(window.setTimeout(playClear, 220));
-      timers.current.push(window.setTimeout(() => nextRound(order), 900));
+      const grown = order.length + 1;
+      timers.current.push(window.setTimeout(() => nextRound(grown), 900));
     }
   }
 
