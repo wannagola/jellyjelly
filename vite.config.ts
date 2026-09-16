@@ -9,8 +9,14 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: "autoUpdate",
-      // 설명서는 앱이 아니다. 오프라인 캐시에 2MB 짜리 캡처를 밀어 넣을 이유가 없다.
-      workbox: { globIgnores: ["**/manual/**"] },
+      workbox: {
+        // 설명서는 앱이 아니다. 오프라인 캐시에 2MB 짜리 캡처를 밀어 넣을 이유가 없다.
+        globIgnores: ["**/manual/**"],
+        // 서비스 워커는 이 주소의 모든 화면 이동을 앱 껍데기로 바꿔치기한다.
+        // 그래서 폰에서 /manual/ 을 열면 설명서 대신 앱이 떴다. 서버는 멀쩡해서
+        // 브라우저 밖에서는 멀쩡히 보이는 게 함정이다. 설명서만 빼준다.
+        navigateFallbackDenylist: [/^\/manual(\/|$)/],
+      },
       includeAssets: ["icon-180.png"],
       manifest: {
         name: "젤리젤리",
