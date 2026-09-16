@@ -10,6 +10,7 @@ import { type Puzzle, adjacent, makePuzzle, stageOf } from "../lib/maze";
 import { useSettings } from "../lib/settings";
 
 const BEST_KEY = "pathBest";
+const RULES_KEY = "pathRulesSeen";
 
 /** 쌍마다 다른 색. 옆 칸끼리 헷갈리지 않게 먼 색끼리 늘어놓는다. */
 const COLORS: JellyColor[] = ["grape", "orange", "soda", "berry", "green", "lemon", "cola"];
@@ -18,6 +19,10 @@ const KINDS = ["bear", "cube", "ring"] as const;
 export function PathScreen() {
   const settings = useSettings();
   const best = useLiveQuery(async () => ((await db.meta.get(BEST_KEY))?.value as number) ?? 0, []);
+  const rulesSeen = useLiveQuery(
+    async () => ((await db.meta.get(RULES_KEY))?.value as boolean) ?? false,
+    [],
+  );
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [level, setLevel] = useState(1);
@@ -74,7 +79,8 @@ export function PathScreen() {
   const total = puzzle.size * puzzle.size;
   // 다 풀었는지는 따로 들고 있을 게 아니라 판을 보면 안다. 상태로 두면
   // 길을 지웠을 때 같이 안 풀리는 것을 잊기 쉽다.
-  const won = linked === puzzle.pairs.length && filled === total;
+  const allLinked = linked === puzzle.pairs.length;
+  const won = allLinked && filled === total;
 
   /* ---------- 손가락 ---------- */
 
@@ -212,13 +218,22 @@ export function PathScreen() {
 
     ctx.clearRect(0, 0, side, side);
 
-    // 빈 칸
+    // 빈 칸. 가운데에 점을 찍어 둔다 - 아직 채울 자리가 남았다는 게
+    // 눈에 보여야 한다. 흰 칸만으로는 그냥 배경으로 읽힌다.
     const owner = ownerOf(paths);
     for (let cell = 0; cell < total; cell += 1) {
+      if (owner[cell] >= 0) continue;
       const { x, y } = mid(cell);
-      ctx.fillStyle = owner[cell] >= 0 ? "transparent" : "rgba(255,255,255,.85)";
+      ctx.fillStyle = "rgba(255,255,255,.9)";
       ctx.beginPath();
       ctx.roundRect(x - step / 2 + 2, y - step / 2 + 2, step - 4, step - 4, step * 0.2);
+      ctx.fill();
+
+      const isEnd = puzzle.pairs.some((p) => p.a === cell || p.b === cell);
+      if (isEnd) continue;
+      ctx.fillStyle = "rgba(59,36,48,.16)";
+      ctx.beginPath();
+      ctx.arc(x, y, step * 0.075, 0, Math.PI * 2);
       ctx.fill();
     }
 
@@ -260,6 +275,45 @@ export function PathScreen() {
     if (!muted) playWrong();
   };
 
+  // 규칙이 둘인데 둘째가 안 보인다. 처음 온 사람에게는 판을 보여주기 전에
+  // 한 번 짚어준다. 읽고 나서 막히는 것과 모르고 막히는 것은 다르다.
+  if (rulesSeen === false) {
+    return (
+      <>
+        <header className="grid flex-none grid-cols-[1fr_auto_1fr] items-center gap-2 px-5 pt-3 pb-2.5">
+          <Link to="/" className="justify-self-start text-base text-ink-soft">
+            ‹ 선반
+          </Link>
+          <h1 className="font-display text-lg">길 만들기</h1>
+          <span className="w-10" />
+        </header>
+
+        <main className="flex min-h-0 flex-1 flex-col items-center justify-center px-7 pb-6">
+          <div className="w-full max-w-[340px] rounded-3xl bg-surface p-6">
+            <h2 className="mb-4 text-center font-display text-xl">규칙은 둘뿐이에요</h2>
+            <ol className="flex flex-col gap-4">
+              <Rule n={1} title="같은 젤리끼리 잇기">
+                젤리에서 손가락을 끌면 길이 그려져요. 길끼리 겹치면 나중에 그린 길이 이겨요.
+              </Rule>
+              <Rule n={2} title="빈 칸을 남기지 않기">
+                이게 진짜 규칙이에요. 젤리를 다 이어도{" "}
+                <b className="font-medium text-ink">빈 칸이 하나라도 남으면 안 끝납니다.</b> 그래서
+                최단 거리로 잇는 게 정답이 아닐 때가 많아요.
+              </Rule>
+            </ol>
+            <button
+              type="button"
+              onClick={() => void writeSetting(RULES_KEY, true)}
+              className="mt-6 w-full rounded-2xl bg-accent py-3 font-display text-base text-white transition active:scale-[.98]"
+            >
+              시작하기
+            </button>
+          </div>
+        </main>
+      </>
+    );
+  }
+
   return (
     <>
       <header className="grid flex-none grid-cols-[1fr_auto_1fr] items-center gap-2 px-5 pt-3 pb-2.5">
@@ -267,15 +321,22 @@ export function PathScreen() {
           ‹ 선반
         </Link>
         <h1 className="font-display text-lg">길 만들기</h1>
-        <span className="justify-self-end text-xs text-ink-faint tabular-nums">
-          {best ? `최고 ${best}판` : ""}
-        </span>
+        <button
+          type="button"
+          onClick={() => void writeSetting(RULES_KEY, false)}
+          className="justify-self-end text-xs text-ink-faint tabular-nums"
+        >
+          {best ? `최고 ${best}판` : "규칙"}
+        </button>
       </header>
 
       <div className="flex flex-none items-baseline justify-between px-5 pb-2">
         <span className="font-display text-2xl tabular-nums">{level}판</span>
-        <span className="text-xs text-ink-faint tabular-nums">
-          이은 젤리 {linked}/{puzzle.pairs.length} · 채운 칸 {filled}/{total}
+        <span className="text-xs tabular-nums text-ink-faint">
+          이은 젤리 {linked}/{puzzle.pairs.length} ·{" "}
+          <b className={`font-medium ${allLinked && !won ? "text-accent" : "text-ink-faint"}`}>
+            채운 칸 {filled}/{total}
+          </b>
         </span>
       </div>
 
@@ -284,8 +345,21 @@ export function PathScreen() {
           <canvas ref={canvasRef} className="block aspect-square w-full touch-none select-none" />
         </div>
 
-        <p className="mt-3 h-5 text-center text-sm text-ink-soft">
-          {won ? "다 이었어요!" : "같은 젤리끼리 이어요 · 빈 칸이 없어야 해요"}
+        {/*
+          젤리를 다 이었는데 안 끝나는 순간이 제일 헷갈린다. 그때는 무엇이
+          모자란지 콕 집어 말해줘야 한다 - "빈 칸이 없어야 해요" 같은 일반론은
+          이미 다 읽고도 막힌 사람에게는 아무 도움이 안 된다.
+        */}
+        <p
+          className={`mt-3 min-h-10 max-w-[30ch] text-center text-sm leading-snug ${
+            allLinked && !won ? "font-medium text-accent" : "text-ink-soft"
+          }`}
+        >
+          {won
+            ? "다 이었어요!"
+            : allLinked
+              ? `젤리는 다 이었어요. 이제 빈 칸 ${total - filled}개만 마저 채우면 끝이에요`
+              : "같은 젤리끼리 이어요 · 빈 칸 없이 판을 꽉 채워야 해요"}
         </p>
 
         <div className="mt-3 flex gap-2">
@@ -306,5 +380,19 @@ export function PathScreen() {
         </div>
       </main>
     </>
+  );
+}
+
+function Rule({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {
+  return (
+    <li className="flex gap-3">
+      <span className="mt-0.5 grid size-6 flex-none place-items-center rounded-full bg-accent font-display text-sm text-white">
+        {n}
+      </span>
+      <span className="min-w-0">
+        <b className="block font-display text-base font-normal">{title}</b>
+        <span className="mt-0.5 block text-sm leading-relaxed text-ink-soft">{children}</span>
+      </span>
+    </li>
   );
 }
