@@ -79,6 +79,13 @@ export async function updateJelly(id: string, patch: Partial<Jelly>): Promise<vo
   await db.jellies.update(id, { ...patch, updatedAt: Date.now() });
 }
 
+/** 최애 표시를 켜고 끈다 */
+export async function toggleFavorite(id: string): Promise<void> {
+  const jelly = await db.jellies.get(id);
+  if (!jelly) return;
+  await db.jellies.update(id, { favorite: !jelly.favorite, updatedAt: Date.now() });
+}
+
 /** 먹기 시작. 같은 젤리를 또 먹어도 기록은 새로 하나 생긴다. */
 export async function startEating(jellyId: string): Promise<string> {
   const now = Date.now();

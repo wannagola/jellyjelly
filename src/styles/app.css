@@ -158,9 +158,11 @@
   inset: 0;
   z-index: 1;
 }
+/* 자리잡기는 CSS가, 회전과 찌그러짐은 안쪽 요소가 맡는다.
+   바깥에서 transform 을 쓰면 motion 이 회전을 쓸 때 가운데 정렬이 날아간다. */
 .jar-pile > * {
   position: absolute;
-  transform-origin: center;
+  transform: translate(-50%, -50%);
 }
 
 .jar-glare {

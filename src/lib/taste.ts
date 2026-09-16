@@ -61,7 +61,8 @@ export function buildTaste(jellies: Jelly[], entries: Entry[]): TasteProfile {
     const jelly = byId.get(entry.jellyId);
     if (!jelly) continue;
 
-    const affinity = affinityOf(entry.rating);
+    // 최애는 별점 하나 더 준 것으로 친다
+    const affinity = affinityOf(entry.rating) + (jelly.favorite ? 1 : 0);
     if (jelly.brand) brandRows.push({ key: jelly.brand, score: affinity });
     colorRows.push({ key: jelly.color, score: affinity });
     shapeRows.push({ key: jelly.shape, score: affinity });
@@ -109,23 +110,28 @@ function historyOf(entries: Entry[]) {
 /** 며칠 이상 지나야 '다시 만날 때'가 된다. 그저께 먹은 걸 다시 권하면 헛소리다. */
 const REVISIT_AFTER_DAYS = 7;
 
-/** 좋아했는데 요즘 안 먹은 것. 추천 중에 제일 잘 먹힌다. */
+/**
+ * 좋아했는데 요즘 안 먹은 것. 추천 중에 제일 잘 먹힌다.
+ * 최애로 찍어둔 젤리는 별점을 안 남겼어도 여기 들어온다 - 하트가 별점보다 분명한 신호다.
+ */
 export function revisits(jellies: Jelly[], entries: Entry[], now = Date.now()): Suggestion[] {
   const { last, best } = historyOf(entries);
 
   return jellies
-    .filter((j) => (best.get(j.id) ?? 0) >= 4 && last.has(j.id))
+    .filter((j) => last.has(j.id) && (j.favorite || (best.get(j.id) ?? 0) >= 4))
     .map((jelly) => ({
       jelly,
       days: differenceInCalendarDays(now, last.get(jelly.id) ?? now),
     }))
     .filter((row) => row.days >= REVISIT_AFTER_DAYS)
-    .sort((a, b) => b.days - a.days)
+    // 최애를 먼저, 그 다음 오래 안 먹은 순
+    .sort((a, b) => Number(!!b.jelly.favorite) - Number(!!a.jelly.favorite) || b.days - a.days)
     .slice(0, 4)
-    .map(({ jelly, days }) => ({
-      jelly,
-      reason: `${days}일째 안 먹었어요 · ★${best.get(jelly.id)}`,
-    }));
+    .map(({ jelly, days }) => {
+      const rating = best.get(jelly.id);
+      const tail = jelly.favorite ? "최애" : rating ? `★${rating}` : "";
+      return { jelly, reason: `${days}일째 안 먹었어요${tail ? ` · ${tail}` : ""}` };
+    });
 }
 
 /**

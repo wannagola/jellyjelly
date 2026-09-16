@@ -37,18 +37,31 @@ export function ShelfScreen() {
     };
   }, [month.start, month.end]);
 
+  // 병에 들어갈 젤리들. id는 기록의 id라서, 같은 젤리를 두 번 먹었으면 두 알이 된다.
   const doneJellies = (data?.done ?? [])
-    .map((e) => data?.byId.get(e.jellyId))
-    .filter((j): j is Jelly => Boolean(j));
+    .map((e) => {
+      const jelly = data?.byId.get(e.jellyId);
+      return jelly ? { id: e.id, shape: jelly.shape, color: jelly.color, jellyId: jelly.id } : undefined;
+    })
+    .filter((x): x is { id: string; shape: Jelly["shape"]; color: Jelly["color"]; jellyId: string } =>
+      Boolean(x),
+    );
 
+  // 흔들 때마다 씨앗이 바뀌어 젤리들이 새 자리로 옮겨간다
+  const [shakes, setShakes] = useState(0);
   const pile = useMemo(
-    () => buildPile(doneJellies, seedFromKey(month.key)),
+    () => buildPile(doneJellies, seedFromKey(month.key) + shakes * 977, shakes > 0),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [doneJellies.length, month.key],
+    [doneJellies.length, month.key, shakes],
   );
 
+  function shake() {
+    setShakes((n) => n + 1);
+    navigator.vibrate?.(12);
+  }
+
   const count = doneJellies.length;
-  const kinds = new Set(doneJellies.map((j) => j.id)).size;
+  const kinds = new Set(doneJellies.map((j) => j.jellyId)).size;
   const overflow = Math.max(0, count - JAR_CAPACITY);
 
   return (
@@ -79,7 +92,12 @@ export function ShelfScreen() {
 
       <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-8">
         <section className="flex flex-col items-center pt-2">
-          <Jar items={pile} dropKey={playDrop ? pile.at(-1)?.key : undefined} />
+          <Jar
+            items={pile}
+            dropKey={playDrop ? pile.at(-1)?.key : undefined}
+            shakeToken={shakes}
+            onShake={count > 0 ? shake : undefined}
+          />
 
           <div className="mt-4 flex items-center gap-1">
             <button
@@ -108,6 +126,9 @@ export function ShelfScreen() {
                 ? `${count}개 담겼어요 · 병에는 ${JAR_CAPACITY}개까지 보여요`
                 : `${count}개 담겼어요`}
           </p>
+          {count > 1 ? (
+            <p className="mt-1 text-[10px] text-ink-faint">병을 톡 치면 젤리가 섞여요</p>
+          ) : null}
         </section>
 
         {data && data.eating.length > 0 ? (

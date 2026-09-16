@@ -1,6 +1,7 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
+import { Heart } from "../components/Heart";
 import { JellyFace } from "../components/JellyFace";
 import { db, startEating } from "../data/db";
 import { searchJellies } from "../lib/search";
@@ -20,7 +21,12 @@ export function RecordScreen() {
     return map;
   }, []);
 
-  const results = useMemo(() => searchJellies(jellies ?? [], query), [jellies, query]);
+  const results = useMemo(() => {
+    const hits = searchJellies(jellies ?? [], query);
+    // 검색어를 치면 관련도가 우선이고, 그냥 열었을 땐 최애가 위로 온다
+    if (query.trim()) return hits;
+    return [...hits].sort((a, b) => Number(!!b.favorite) - Number(!!a.favorite));
+  }, [jellies, query]);
 
   async function pick(jellyId: string, name: string) {
     await startEating(jellyId);
@@ -64,7 +70,10 @@ export function RecordScreen() {
                 >
                   <JellyFace jelly={jelly} size={42} radius={13} />
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[13.5px] font-medium">{jelly.name}</span>
+                    <span className="flex items-center gap-1">
+                      {jelly.favorite ? <Heart on size={11} /> : null}
+                      <span className="truncate text-[13.5px] font-medium">{jelly.name}</span>
+                    </span>
                     <span className="block text-[10.5px] text-ink-soft">{jelly.brand ?? "—"}</span>
                   </span>
                   <span className="flex-none text-[10.5px] text-accent">

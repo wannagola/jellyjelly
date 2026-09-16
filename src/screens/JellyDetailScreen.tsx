@@ -1,9 +1,10 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { format } from "date-fns";
 import { Link, useNavigate, useParams } from "react-router";
+import { Heart } from "../components/Heart";
 import { JellyFace } from "../components/JellyFace";
 import { Stars } from "../components/Stars";
-import { db } from "../data/db";
+import { db, toggleFavorite } from "../data/db";
 import type { Entry } from "../data/types";
 import { COLOR_NAMES, JELLY_COLORS, SHAPE_NAMES } from "../lib/jelly";
 
@@ -46,9 +47,20 @@ export function JellyDetailScreen() {
           ‹ 뒤로
         </button>
         {jelly ? (
-          <Link to={`/jelly/${jelly.id}/edit`} className="text-[13px] text-accent">
-            고치기
-          </Link>
+          <span className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={() => toggleFavorite(jelly.id)}
+              aria-pressed={Boolean(jelly.favorite)}
+              aria-label={jelly.favorite ? "최애에서 빼기" : "최애로 담기"}
+              className="text-ink-faint transition active:scale-90"
+            >
+              <Heart on={Boolean(jelly.favorite)} size={21} />
+            </button>
+            <Link to={`/jelly/${jelly.id}/edit`} className="text-[13px] text-accent">
+              고치기
+            </Link>
+          </span>
         ) : null}
       </header>
 
@@ -57,7 +69,10 @@ export function JellyDetailScreen() {
           <>
             <div className="flex flex-col items-center rounded-b-[26px] bg-surface px-5 pt-1 pb-5 text-center">
               <JellyFace jelly={jelly} size={112} radius={34} />
-              <h1 className="mt-3 font-display text-[19px]">{jelly.name}</h1>
+              <h1 className="mt-3 flex items-center justify-center gap-1.5 font-display text-[19px]">
+                {jelly.favorite ? <Heart on size={15} /> : null}
+                {jelly.name}
+              </h1>
               <p className="mt-0.5 text-[11.5px] text-ink-soft">
                 {[jelly.brand, `${COLOR_NAMES[jelly.color]} ${SHAPE_NAMES[jelly.shape]}`]
                   .filter(Boolean)

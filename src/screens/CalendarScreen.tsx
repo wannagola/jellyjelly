@@ -29,13 +29,19 @@ export function CalendarScreen() {
     const byId = new Map(jellies.map((j) => [j.id, j]));
 
     const byDay = new Map<number, { entry: Entry; jelly: Jelly }[]>();
+    let kcal = 0;
+    let counted = 0;
     for (const entry of entries) {
       const jelly = byId.get(entry.jellyId);
       if (!jelly || !entry.finishedAt) continue;
       const day = getDate(entry.finishedAt);
       byDay.set(day, [...(byDay.get(day) ?? []), { entry, jelly }]);
+      if (jelly.kcal) {
+        kcal += jelly.kcal;
+        counted += 1;
+      }
     }
-    return { byDay, total: entries.length };
+    return { byDay, total: entries.length, kcal, counted };
   }, [month.start, month.end]);
 
   const first = startOfMonth(cursor);
@@ -58,6 +64,21 @@ export function CalendarScreen() {
       />
 
       <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-8">
+        {data && data.total > 0 ? (
+          <div className="mb-3 flex items-baseline gap-2.5 rounded-2xl bg-surface px-4 py-3">
+            <span className="font-display text-[25px] leading-none text-accent tabular-nums">
+              {data.counted > 0 ? data.kcal.toLocaleString() : "—"}
+            </span>
+            <span className="text-[11px] leading-snug text-ink-soft">
+              {data.counted > 0 ? "이번 달 먹은 칼로리" : "칼로리를 아는 젤리가 없어요"}
+              <br />
+              {data.counted === data.total
+                ? `${data.total}개 모두 계산했어요`
+                : `${data.total}개 중 ${data.total - data.counted}개는 칼로리를 몰라 빠졌어요`}
+            </span>
+          </div>
+        ) : null}
+
         <div className="mb-2 flex items-center justify-center gap-1">
           <button
             type="button"

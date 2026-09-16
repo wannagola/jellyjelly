@@ -37,6 +37,7 @@ type Draft = {
   shape?: JellyShape;
   color?: JellyColor;
   photo?: Blob;
+  kcal?: number;
 };
 
 /**
@@ -51,6 +52,7 @@ function JellyForm({ mode, initial }: { mode: "create" | "edit"; initial: Draft 
   const [shape, setShape] = useState<JellyShape>(initial.shape ?? "bear");
   const [color, setColor] = useState<JellyColor>(initial.color ?? "grape");
   const [photo, setPhoto] = useState<Blob | undefined>(initial.photo);
+  const [kcal, setKcal] = useState(initial.kcal ? String(initial.kcal) : "");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string>();
 
@@ -74,7 +76,15 @@ function JellyForm({ mode, initial }: { mode: "create" | "edit"; initial: Draft 
     }
     setBusy(true);
     try {
-      const fields = { name: trimmed, brand: brand.trim() || undefined, shape, color, photo };
+      const parsed = Number.parseInt(kcal, 10);
+      const fields = {
+        name: trimmed,
+        brand: brand.trim() || undefined,
+        shape,
+        color,
+        photo,
+        kcal: Number.isFinite(parsed) && parsed > 0 ? parsed : undefined,
+      };
       if (mode === "edit" && id) {
         await updateJelly(id, fields);
         navigate(-1);
@@ -156,6 +166,19 @@ function JellyForm({ mode, initial }: { mode: "create" | "edit"; initial: Draft 
             placeholder="오리온"
             className="w-full rounded-2xl bg-surface px-3.5 py-2.5 text-[14px] outline-none placeholder:text-ink-faint focus:shadow-[inset_0_0_0_1.5px_var(--accent)]"
           />
+        </Field>
+
+        <Field label="칼로리" hint="봉지 뒷면 · 몰라도 괜찮아요">
+          <div className="flex items-center gap-2">
+            <input
+              value={kcal}
+              onChange={(e) => setKcal(e.target.value.replace(/[^0-9]/g, "").slice(0, 4))}
+              inputMode="numeric"
+              placeholder="66"
+              className="w-24 rounded-2xl bg-surface px-3.5 py-2.5 text-[14px] tabular-nums outline-none placeholder:text-ink-faint focus:shadow-[inset_0_0_0_1.5px_var(--accent)]"
+            />
+            <span className="text-[12px] text-ink-soft">kcal · 1봉 기준</span>
+          </div>
         </Field>
 
         <Field label="모양" hint="사진이 없을 때의 얼굴">

@@ -3,11 +3,12 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { useMemo, useState } from "react";
 import { Link } from "react-router";
 import { AppBar } from "../components/AppBar";
+import { Heart } from "../components/Heart";
 import { JellyFace } from "../components/JellyFace";
 import { db } from "../data/db";
 import { searchJellies } from "../lib/search";
 
-type Tab = "mine" | "all";
+type Tab = "fav" | "mine" | "all";
 
 /** 도감 — 모은 젤리가 카드로 쌓인다. 이 화면이 제일 다시 보게 된다. */
 export function DexScreen() {
@@ -34,9 +35,11 @@ export function DexScreen() {
 
   const shown = useMemo(() => {
     if (!data) return [];
-    const pool = data.jellies.filter((j) =>
-      tab === "mine" ? (data.counts.get(j.id) ?? 0) > 0 : true,
-    );
+    const pool = data.jellies.filter((j) => {
+      if (tab === "fav") return Boolean(j.favorite);
+      if (tab === "mine") return (data.counts.get(j.id) ?? 0) > 0;
+      return true;
+    });
     return searchJellies(pool, query);
   }, [data, tab, query]);
 
@@ -63,6 +66,9 @@ export function DexScreen() {
         </div>
 
         <div className="mb-3 flex gap-1.5">
+          <Segment on={tab === "fav"} onClick={() => setTab("fav")}>
+            최애
+          </Segment>
           <Segment on={tab === "mine"} onClick={() => setTab("mine")}>
             모은 젤리
           </Segment>
@@ -82,9 +88,11 @@ export function DexScreen() {
           <p className="mt-10 whitespace-pre-line text-center text-[13px] leading-relaxed text-ink-soft">
             {query.trim()
               ? "찾는 젤리가 없어요"
-              : tab === "mine"
-                ? "아직 다 먹은 젤리가 없어요\n하나 기록하면 여기 쌓입니다"
-                : "도감이 비어 있어요"}
+              : tab === "fav"
+                ? "아직 최애가 없어요\n젤리를 열고 하트를 눌러보세요"
+                : tab === "mine"
+                  ? "아직 다 먹은 젤리가 없어요\n하나 기록하면 여기 쌓입니다"
+                  : "도감이 비어 있어요"}
           </p>
         ) : (
           <ul className="grid grid-cols-3 gap-2">
@@ -94,10 +102,15 @@ export function DexScreen() {
                 <li key={jelly.id}>
                   <Link
                     to={`/jelly/${jelly.id}`}
-                    className={`flex flex-col items-center rounded-2xl bg-surface px-1.5 pt-2 pb-2.5 text-center transition active:scale-[.97] ${
+                    className={`relative flex flex-col items-center rounded-2xl bg-surface px-1.5 pt-2 pb-2.5 text-center transition active:scale-[.97] ${
                       n === 0 ? "opacity-55" : ""
                     }`}
                   >
+                    {jelly.favorite ? (
+                      <span className="absolute top-1.5 right-1.5">
+                        <Heart on size={12} />
+                      </span>
+                    ) : null}
                     <JellyFace jelly={jelly} size={44} radius={14} />
                     <span className="mt-1.5 line-clamp-2 text-[9.5px] leading-tight">
                       {jelly.name}
