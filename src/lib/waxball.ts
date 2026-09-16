@@ -122,7 +122,7 @@ function angleGap(a: number, b: number): number {
 }
 
 /** 손가락이 닿는 자리의 폭 */
-const DENT_WIDTH = 0.72;
+const DENT_WIDTH = 0.86;
 
 /**
  * 어느 각도에서 표면이 얼마나 멀리 있는지.
@@ -139,23 +139,25 @@ export function blobRadius(theta: number, s: Squish): number {
   const core = Math.exp(-(u * u * u * u) * 0.8);
   // 밀려난 살이 쌓이는 둘레. 홈에서 조금 떨어진 자리에 봉우리를 따로 세운다.
   const shoulder = Math.exp(-(((Math.abs(u) - 1.45) / 0.72) ** 2));
-  const dent = s.pressDepth * (0.5 * core - 0.24 * shoulder);
+  const dent = s.pressDepth * (0.62 * core - 0.3 * shoulder);
 
   // 끄는 쪽으로만 뾰족하게 딸려 나온다.
   // 코사인으로 퍼뜨리면 반쪽이 통째로 밀려서 뭉툭하게 잘린 것처럼 보인다.
   const away = angleGap(theta, s.stretchAngle);
-  const stretch = s.stretch * 0.72 * Math.exp(-(away * away) / (2 * 0.6 * 0.6));
+  const stretch = s.stretch * 0.85 * Math.exp(-(away * away) / (2 * 0.66 * 0.66));
 
   // 한복판을 누르면 파이는 게 아니라 공 전체가 조금 납작해진다
-  return Math.max(0.22, 1 - dent - s.squash * 0.13 + stretch);
+  return Math.max(0.2, 1 - dent - s.squash * 0.18 + stretch);
 }
 
 /**
  * 손을 떼면 제자리로. 그냥 사그라들게 하면 공기가 빠지는 것 같다.
  * 용수철로 되돌리면 한 번 지나쳤다가 돌아와서 탱글하게 보인다.
  */
-const STIFFNESS = 210;
-const DAMPING = 2 * 0.52 * Math.sqrt(STIFFNESS);
+// 무를수록 용수철이 약하고 덜 잡아준다. 한 번 튕기고 마는 게 아니라
+// 두어 번 출렁이다 멎어야 젤리처럼 보인다.
+const STIFFNESS = 115;
+const DAMPING = 2 * 0.36 * Math.sqrt(STIFFNESS);
 
 export function relax(s: Squish, dt: number): Squish {
   const step = (x: number, v: number) => {

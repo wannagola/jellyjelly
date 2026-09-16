@@ -210,7 +210,13 @@ export function WaxBallScreen() {
     };
 
     const onDown = (e: PointerEvent) => {
-      canvas.setPointerCapture(e.pointerId);
+      // 손가락을 놓쳐도 계속 따라가게 잡아둔다.
+      // 실패해도 눌린 것 자체는 처리해야 한다 - 여기서 멈추면 아무 반응이 없다.
+      try {
+        canvas.setPointerCapture(e.pointerId);
+      } catch {
+        // 이미 사라진 포인터면 그냥 넘어간다
+      }
       const p = local(e);
       pointer.current.down = true;
       pointer.current.lastX = p.x;
