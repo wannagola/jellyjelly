@@ -160,31 +160,44 @@ export function JarShelfScreen() {
           </>
         )}
 
-        <Link
-          to="/tummy"
-          className="mt-2 flex items-center gap-3 rounded-2xl bg-surface px-4 py-3.5 transition active:scale-[.99]"
-        >
-          <span className="text-2xl leading-none">🐘</span>
-          <span className="min-w-0 flex-1">
-            <span className="block font-display text-base">코끼리 배</span>
-            <span className="block text-xs text-ink-soft">두드리면 북처럼 울려요</span>
+        {/* 여기부터는 기록이 아니라 장난감이다. 선을 그어 갈라놔야 선반을 훑다가 헷갈리지 않는다. */}
+        <div className="mt-7 mb-2.5 flex items-center gap-2.5">
+          <span className="h-px flex-1 bg-line" />
+          <span className="text-micro font-medium tracking-[.2em] text-ink-faint">
+            PLAY GROUND
           </span>
-          <span className="text-lg text-ink-faint">›</span>
-        </Link>
+          <span className="h-px flex-1 bg-line" />
+        </div>
 
-        <Link
-          to="/waxball"
-          className="mt-2 flex items-center gap-3 rounded-2xl bg-surface px-4 py-3.5 transition active:scale-[.99]"
-        >
-          <span className="text-2xl leading-none">🥚</span>
-          <span className="min-w-0 flex-1">
-            <span className="block font-display text-base">젤리 왁뿌볼</span>
-            <span className="block text-xs text-ink-soft">
-              왁스를 다 부수면 말랑이가 나와요
+        <div className="flex flex-col gap-2">
+          <Link
+            to="/tummy"
+            className="flex items-center gap-3 rounded-2xl bg-surface px-4 py-3.5 transition active:scale-[.99]"
+          >
+            <span className="text-2xl leading-none">🐘</span>
+            <span className="min-w-0 flex-1">
+              <span className="block font-display text-base">코끼리 배</span>
+              <span className="block text-xs text-ink-soft">
+                두드리고, 코 당기고, 쓰다듬어요
+              </span>
             </span>
-          </span>
-          <span className="text-lg text-ink-faint">›</span>
-        </Link>
+            <span className="text-lg text-ink-faint">›</span>
+          </Link>
+
+          <Link
+            to="/waxball"
+            className="flex items-center gap-3 rounded-2xl bg-surface px-4 py-3.5 transition active:scale-[.99]"
+          >
+            <span className="text-2xl leading-none">🥚</span>
+            <span className="min-w-0 flex-1">
+              <span className="block font-display text-base">젤리 왁뿌볼</span>
+              <span className="block text-xs text-ink-soft">
+                왁스를 다 부수면 말랑이가 나와요
+              </span>
+            </span>
+            <span className="text-lg text-ink-faint">›</span>
+          </Link>
+        </div>
       </main>
     </>
   );

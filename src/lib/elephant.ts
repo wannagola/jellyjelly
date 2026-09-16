@@ -2,12 +2,20 @@ const TRUNK = "#a99db3";
 
 /** 코끼리 그리기. 화면 파일에 두면 빠른 새로고침이 깨져서 따로 뒀다. */
 
+export interface TrunkPoint {
+  x: number;
+  y: number;
+  w: number;
+}
+
 /**
  * 코. 굵기가 변해야 코처럼 보여서, 선을 긋지 않고
  * 곡선을 따라 양옆으로 벌린 다각형을 채운다.
  *
- * tip 을 주면 코끝이 그리로 뻗는다. 젤리를 주울 때 쓴다.
+ * tip 을 주면 코끝이 그리로 뻗는다. 젤리를 주울 때도, 손으로 잡아당길 때도 쓴다.
  * 중간 제어점도 같이 끌려가야 뻗는 팔처럼 보인다.
+ *
+ * 그린 등뼈를 돌려준다. 코를 잡으려면 어디에 그려졌는지 알아야 한다.
  */
 export function drawTrunk(
   ctx: CanvasRenderingContext2D,
@@ -16,17 +24,21 @@ export function drawTrunk(
   headR: number,
   swing: number,
   tip?: { x: number; y: number },
+  /** 중간에 거쳐 가는 자리. 주면 코가 그쪽으로 휜다. */
+  via?: { x: number; y: number },
 ) {
   const rest = { x: x + headR * (0.68 + swing * 1.4), y: y + headR * 1.52 };
   const end = tip ?? rest;
 
   const p0 = { x, y };
   const p1 = { x: x + headR * (0.04 + swing * 0.3), y: y + headR * 0.72 };
-  const p2 = tip
-    ? { x: (x + end.x) / 2 + headR * 0.1, y: y + (end.y - y) * 0.55 + headR * 0.35 }
-    : { x: x + headR * (0.26 + swing * 0.9), y: y + headR * 1.42 };
+  const p2 =
+    via ??
+    (tip
+      ? { x: (x + end.x) / 2 + headR * 0.1, y: y + (end.y - y) * 0.55 + headR * 0.35 }
+      : { x: x + headR * (0.26 + swing * 0.9), y: y + headR * 1.42 });
 
-  const spine: { x: number; y: number; w: number }[] = [];
+  const spine: TrunkPoint[] = [];
   const STEPS = 26;
   for (let i = 0; i <= STEPS; i += 1) {
     const t = i / STEPS;
@@ -73,7 +85,28 @@ export function drawTrunk(
     ctx.stroke();
   }
 
-  return spine[spine.length - 1];
+  return spine;
+}
+
+/**
+ * 손가락이 코에 닿았나.
+ *
+ * 코뿌리는 얼굴 속에 파묻혀 있다. 그 부분까지 코로 치면 이마를 쓰다듬으려 해도
+ * 코가 잡혀버린다. 그래서 얼굴 밖으로 나온 부분만 코로 센다.
+ */
+export function trunkHit(
+  spine: TrunkPoint[],
+  x: number,
+  y: number,
+  head: { x: number; y: number; r: number },
+): boolean {
+  for (const p of spine) {
+    if (Math.hypot(p.x - head.x, p.y - head.y) < head.r * 0.94) continue;
+    // 코는 가늘어서 정확히 짚기 어렵다. 실제 굵기보다 넉넉하게 잡아준다.
+    const grip = Math.max(p.w * 2.4, spine[0].w * 0.8);
+    if (Math.hypot(p.x - x, p.y - y) < grip) return true;
+  }
+  return false;
 }
 
 /** 바닥에 굴러다니는 젤리 한 알 */

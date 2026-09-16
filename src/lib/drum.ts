@@ -149,3 +149,83 @@ export function playTrumpet(): void {
   osc.start(at);
   osc.stop(at + 0.7);
 }
+
+/**
+ * 뿌우 — 쓰다듬거나 코를 한 바퀴 돌렸을 때 나는 코끼리 울음.
+ *
+ * playTrumpet 보다 길고 굵다. 관악기처럼 들리려면 세 가지가 필요하다.
+ * 톱니파(배음이 촘촘해야 관이 울린다), 좁은 포먼트 둘(코끼리 코라는 긴 관),
+ * 그리고 떨림. 사람이 부는 게 아니라 짐승이 내는 소리라 떨림이 일정하지 않다.
+ */
+export function playPuu(power = 1): void {
+  const ac = audio();
+  if (!ac) return;
+  const at = ac.currentTime;
+  const len = 0.85 + power * 0.35;
+
+  const out = ac.createGain();
+  out.gain.value = 0.42;
+  out.connect(ac.destination);
+
+  const osc = ac.createOscillator();
+  osc.type = "sawtooth";
+  const base = 196 + power * 36;
+  const top = base * (1.9 + power * 0.35);
+  osc.frequency.setValueAtTime(base * 0.72, at);
+  osc.frequency.exponentialRampToValueAtTime(top, at + 0.11);
+  osc.frequency.exponentialRampToValueAtTime(top * 0.94, at + len * 0.6);
+  osc.frequency.exponentialRampToValueAtTime(base * 0.8, at + len);
+
+  // 떨림. 살짝 빨라지면서 흔들려야 살아 있는 소리로 들린다.
+  const vib = ac.createOscillator();
+  vib.type = "sine";
+  vib.frequency.setValueAtTime(5.4, at);
+  vib.frequency.linearRampToValueAtTime(8.6, at + len);
+  const vibDepth = ac.createGain();
+  vibDepth.gain.setValueAtTime(0, at);
+  vibDepth.gain.linearRampToValueAtTime(top * 0.05, at + 0.22);
+  vibDepth.gain.linearRampToValueAtTime(0, at + len);
+  vib.connect(vibDepth).connect(osc.frequency);
+
+  // 포먼트 둘. 긴 관을 지난 소리는 특정 대역만 살아남는다.
+  const f1 = ac.createBiquadFilter();
+  f1.type = "bandpass";
+  f1.frequency.setValueAtTime(620, at);
+  f1.frequency.linearRampToValueAtTime(880, at + 0.2);
+  f1.Q.value = 2.4;
+
+  const f2 = ac.createBiquadFilter();
+  f2.type = "peaking";
+  f2.frequency.value = 1750;
+  f2.Q.value = 1.6;
+  f2.gain.value = 9;
+
+  const env = ac.createGain();
+  env.gain.setValueAtTime(0.0001, at);
+  env.gain.exponentialRampToValueAtTime(0.2 * (0.7 + power * 0.5), at + 0.07);
+  env.gain.setValueAtTime(0.2 * (0.7 + power * 0.5), at + len * 0.62);
+  env.gain.exponentialRampToValueAtTime(0.0001, at + len);
+
+  osc.connect(f1).connect(f2).connect(env).connect(out);
+  osc.start(at);
+  vib.start(at);
+  osc.stop(at + len + 0.05);
+  vib.stop(at + len + 0.05);
+
+  // 숨. 코로 바람이 빠져나가는 기척이 있어야 관이 뚫린 것처럼 들린다
+  const air = ac.createBufferSource();
+  air.buffer = noiseBuffer(ac);
+  air.loop = true;
+  const airBand = ac.createBiquadFilter();
+  airBand.type = "bandpass";
+  airBand.frequency.setValueAtTime(1100, at);
+  airBand.frequency.linearRampToValueAtTime(2200, at + len);
+  airBand.Q.value = 0.8;
+  const airEnv = ac.createGain();
+  airEnv.gain.setValueAtTime(0.0001, at);
+  airEnv.gain.exponentialRampToValueAtTime(0.035, at + 0.06);
+  airEnv.gain.exponentialRampToValueAtTime(0.0001, at + len);
+  air.connect(airBand).connect(airEnv).connect(out);
+  air.start(at);
+  air.stop(at + len + 0.05);
+}

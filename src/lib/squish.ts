@@ -36,52 +36,89 @@ function noiseBuffer(ac: BaseAudioContext): AudioBuffer {
 }
 
 /**
- * 왁스 깨지는 소리. 한 번에 여러 조각이 떨어질수록 두툼해진다.
- * 잘게 쪼갠 딱 소리를 몇 밀리초 간격으로 겹쳐야 '뽀각' 하고 갈라지는 느낌이 난다.
+ * 왁스 깨지는 소리 - 파삭.
+ *
+ * 처음엔 짧은 딱 소리를 6~20ms 간격으로 여섯 번 겹쳤더니 드릴이 됐다.
+ * 그 간격이 문제였다. 10ms 간격으로 반복되는 소리는 귀에 100Hz 짜리 음으로
+ * 들린다. 반복이 음이 되지 않으려면 붙여서 하나로 뭉개거나(3ms 이내),
+ * 따로따로 들릴 만큼 떼어놔야(25ms 이상) 한다. 그 사이가 기계 소리다.
+ *
+ * 그래서 한 방으로 바꿨다. 마른 껍질이 갈라지는 '파'(넓은 고음 한 방)와
+ * 부스러기가 흩어지는 '삭'(그보다 높고 짧은 꼬리), 그리고 갈라지는
+ * 순간의 음정 하나. 조각이 많을 때만 늦은 잔조각을 한둘 더 던진다.
  */
 export function renderCrack(ac: BaseAudioContext, destination: AudioNode, shards: number, at = 0) {
   const out = ac.createGain();
   out.gain.value = 0.9;
   out.connect(destination);
 
-  const ticks = Math.min(6, 2 + Math.round(shards / 2));
-  for (let i = 0; i < ticks; i += 1) {
-    const t = at + i * (0.006 + Math.random() * 0.014);
-
+  /**
+   * 부스러지는 한 방.
+   *
+   * 대역을 넓게 열되 위도 막아야 한다. 고역만 잘라내고 두면 잡음의 힘이
+   * 10kHz 위에 쏠려서 마른 껍질이 아니라 치익 하는 바람 소리가 된다.
+   */
+  const burst = (t: number, peak: number, decay: number, lo: number, hi: number) => {
     const src = ac.createBufferSource();
     src.buffer = noiseBuffer(ac);
-    src.playbackRate.value = 0.9 + Math.random() * 0.6;
+    src.playbackRate.value = 0.85 + Math.random() * 0.7;
 
-    // 높고 좁은 대역이 '딱' 소리의 정체다
-    const crack = ac.createBiquadFilter();
-    crack.type = "bandpass";
-    crack.frequency.value = 1900 + Math.random() * 2600;
-    crack.Q.value = 2.4 + Math.random() * 3;
+    const hp = ac.createBiquadFilter();
+    hp.type = "highpass";
+    hp.frequency.value = lo;
+    hp.Q.value = 0.7;
+
+    const lp = ac.createBiquadFilter();
+    lp.type = "lowpass";
+    lp.frequency.value = hi;
+    lp.Q.value = 0.9;
 
     const env = ac.createGain();
-    const peak = (0.1 + Math.random() * 0.12) * (i === 0 ? 1.4 : 0.8);
-    const decay = 0.012 + Math.random() * 0.03;
-    env.gain.setValueAtTime(0.0001, t);
-    env.gain.exponentialRampToValueAtTime(peak, t + 0.0016);
+    env.gain.setValueAtTime(peak, t);
     env.gain.exponentialRampToValueAtTime(0.0001, t + decay);
 
-    src.connect(crack).connect(env).connect(out);
+    src.connect(hp).connect(lp).connect(env).connect(out);
     src.start(t);
-    src.stop(t + decay + 0.03);
+    src.stop(t + decay + 0.02);
+  };
+
+  // 파 - 갈라지는 순간
+  burst(at, 0.3, 0.017, 1400, 5200);
+  // 삭 - 부스러기가 흩어지는 꼬리. 조금 늦게, 더 높게, 더 작게.
+  burst(at + 0.007, 0.08, 0.055, 2800, 9000);
+
+  // 마른 껍질이 갈라질 때 나는 음정. 짧게 미끄러져 내려야 '파삭' 이 된다.
+  const snap = ac.createOscillator();
+  snap.type = "triangle";
+  const base = 1250 + Math.random() * 600;
+  snap.frequency.setValueAtTime(base, at);
+  snap.frequency.exponentialRampToValueAtTime(base * 0.38, at + 0.028);
+  const snapEnv = ac.createGain();
+  snapEnv.gain.setValueAtTime(0.085, at);
+  snapEnv.gain.exponentialRampToValueAtTime(0.0001, at + 0.032);
+  snap.connect(snapEnv).connect(out);
+  snap.start(at);
+  snap.stop(at + 0.06);
+
+  // 크게 떨어져 나갔으면 잔조각 한둘이 뒤늦게 튄다.
+  // 서로도 25ms 넘게 떨어뜨린다. 둘이 붙으면 그 둘만으로도 기계 소리가 난다.
+  const extra = shards > 3 ? 1 + Math.round(Math.random()) : 0;
+  for (let i = 0; i < extra; i += 1) {
+    burst(at + 0.03 + i * 0.032 + Math.random() * 0.014, 0.055, 0.02, 1800, 6500);
   }
 
-  // 껍질이 통째로 울리는 낮은 기척
+  // 껍질이 통째로 울리는 낮은 기척. 크면 소리가 탁해져서 아주 살짝만.
   const thud = ac.createOscillator();
   thud.type = "sine";
-  thud.frequency.setValueAtTime(230, at);
-  thud.frequency.exponentialRampToValueAtTime(90, at + 0.09);
+  thud.frequency.setValueAtTime(180, at);
+  thud.frequency.exponentialRampToValueAtTime(84, at + 0.06);
   const thudEnv = ac.createGain();
   thudEnv.gain.setValueAtTime(0.0001, at);
-  thudEnv.gain.exponentialRampToValueAtTime(0.07, at + 0.005);
-  thudEnv.gain.exponentialRampToValueAtTime(0.0001, at + 0.13);
+  thudEnv.gain.exponentialRampToValueAtTime(0.038, at + 0.004);
+  thudEnv.gain.exponentialRampToValueAtTime(0.0001, at + 0.085);
   thud.connect(thudEnv).connect(out);
   thud.start(at);
-  thud.stop(at + 0.18);
+  thud.stop(at + 0.12);
 }
 
 export function playCrack(shards: number): void {

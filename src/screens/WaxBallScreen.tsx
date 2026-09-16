@@ -44,6 +44,8 @@ export function WaxBallScreen() {
   const voice = useRef(new SquishVoice());
   const muted = useRef(false);
   const waxDirty = useRef(true);
+  /** 마지막으로 파삭 소리를 낸 때. 너무 촘촘하면 드릴이 된다. */
+  const lastCrackAt = useRef(0);
 
   useEffect(() => {
     muted.current = Boolean(settings?.muted);
@@ -202,7 +204,12 @@ export function WaxBallScreen() {
       chips.current.push(makeChip(x, y, CHIP_SIZE));
       waxDirty.current = true;
 
-      if (!muted.current) playCrack(3 + Math.floor(Math.random() * 3));
+      // 드래그로 죽 긁으면 조각은 연달아 떨어지지만, 소리는 떼어놔야 한 알씩 들린다
+      const now = performance.now();
+      if (!muted.current && now - lastCrackAt.current > 52) {
+        lastCrackAt.current = now;
+        playCrack(3 + Math.floor(Math.random() * 3));
+      }
       navigator.vibrate?.(14);
 
       if (peeled(chips.current) >= ABSORB_AT) absorb.current = 0.0001;
@@ -255,14 +262,18 @@ export function WaxBallScreen() {
       const angle = Math.atan2(p.y, p.x);
 
       // 왁스가 남아 있어도 공은 눌리고 딸려온다. 다만 굳은 껍질이라 덜 무르다.
+      //
+      // 홈과 늘어남은 같은 각도에 붙는다. 그래서 홈을 남겨둔 채 늘이면
+      // 둘이 서로를 지워서 아무 일도 안 일어난 것처럼 보인다. 손가락이
+      // 움직이기 시작하면 홈을 접고 그 자리를 끌기에 넘겨야 딸려 나온다.
       if (chipsRemain()) {
-        const shell = pressAt(pull, 0.62 * (1 - drag * 0.6));
+        const shell = pressAt(pull, 0.62 * (1 - drag * 0.85));
         squish.current = hold(squish.current, {
           pressAngle: angle,
           pressDepth: shell.dent,
           squash: shell.squash,
           stretchAngle: angle,
-          stretch: Math.min(1, pull * 0.5),
+          stretch: Math.min(1, pull * 0.8),
         });
         return;
       }
@@ -442,10 +453,18 @@ function squashWhole(ctx: CanvasRenderingContext2D, s: Squish, radius: number) {
   if (Math.abs(push) < 0.002 && Math.abs(pull) < 0.002 && Math.abs(flat) < 0.002) return;
 
   ctx.translate(
-    Math.cos(s.stretchAngle) * radius * 0.16 * pull + Math.cos(s.pressAngle) * radius * 0.06 * push,
-    Math.sin(s.stretchAngle) * radius * 0.16 * pull + Math.sin(s.pressAngle) * radius * 0.06 * push,
+    Math.cos(s.stretchAngle) * radius * 0.13 * pull + Math.cos(s.pressAngle) * radius * 0.06 * push,
+    Math.sin(s.stretchAngle) * radius * 0.13 * pull + Math.sin(s.pressAngle) * radius * 0.06 * push,
   );
   ctx.rotate(s.pressAngle);
   ctx.scale(1 - 0.17 * push - 0.1 * flat, 1 + 0.11 * push - 0.1 * flat);
   ctx.rotate(-s.pressAngle);
+
+  // 당기는 쪽으로 길어지고 그만큼 가늘어진다. 옮겨만 주면 공이 미끄러진 것이지
+  // 늘어난 게 아니라서, 껍질일 때도 손에 딸려 나오는 느낌이 안 난다.
+  if (Math.abs(pull) > 0.002) {
+    ctx.rotate(s.stretchAngle);
+    ctx.scale(1 + 0.3 * pull, 1 - 0.13 * pull);
+    ctx.rotate(-s.stretchAngle);
+  }
 }

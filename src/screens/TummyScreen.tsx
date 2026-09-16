@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
-import { playHit, playTrumpet } from "../lib/drum";
+import { playHit, playPuu, playTrumpet } from "../lib/drum";
 import { JELLY_COLORS } from "../lib/jelly";
 import type { JellyColor } from "../data/types";
 import { useSettings } from "../lib/settings";
-import { drawFloorJelly, drawTrunk } from "../lib/elephant";
+import { type TrunkPoint, drawFloorJelly, drawTrunk, trunkHit } from "../lib/elephant";
 import { SquishVoice } from "../lib/squish";
 import { type Squish, blobRadius, hold, pressAt, relax, restingSquish } from "../lib/waxball";
 
@@ -33,6 +33,23 @@ interface Eating {
   jelly: FloorJelly;
 }
 
+/** 손으로 잡은 코. 뿌리에서 본 각도와 길이로만 들고 있으면 놓았을 때 되돌리기 쉽다. */
+interface Pull {
+  ang: number;
+  len: number;
+  vAng: number;
+  vLen: number;
+  held: boolean;
+}
+
+/** 쓰다듬을 때 머리 위로 떠오르는 하트 */
+interface Heart {
+  x: number;
+  y: number;
+  t: number;
+  drift: number;
+}
+
 const SKIN = "#b9aec4";
 const SKIN_DARK = "#8f8299";
 const BELLY = "#cfc4d6";
@@ -42,6 +59,27 @@ const KINDS: FloorJelly["kind"][] = ["bear", "cube", "ring"];
 /** 배가 늘어나도 화면 밖으로 안 나가게 */
 const MAX_REACH = 1.5;
 const FLOOR_COUNT = 4;
+
+/** 가만히 있을 때 코끝이 있는 자리 (머리 반지름 단위) */
+const REST_ANG = Math.atan2(1.52, 0.68);
+const REST_LEN = Math.hypot(0.68, 1.52);
+/** 너무 당기면 코가 아니라 고무줄이 된다 */
+const PULL_MIN = 0.85;
+const PULL_MAX = 2.55;
+/** 한 바퀴 돌리면 한 번 운다 */
+const SPIN = Math.PI * 2;
+/** 이만큼 쓰다듬으면 기분이 좋아진다 (머리 반지름 단위 거리) */
+const PAT_FULL = 2.6;
+
+const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
+
+/** -π..π 로 접어서 한 바퀴를 두 바퀴로 세지 않게 */
+function wrapAngle(a: number): number {
+  let d = a;
+  while (d > Math.PI) d -= Math.PI * 2;
+  while (d < -Math.PI) d += Math.PI * 2;
+  return d;
+}
 
 let jellySeq = 0;
 function spawnJelly(slot: number): FloorJelly {
@@ -78,6 +116,21 @@ export function TummyScreen() {
   const muted = useRef(false);
   const down = useRef(new Set<number>());
   const moved = useRef(0);
+
+  /** 이번 프레임에 그린 코. 코를 잡으려면 어디 있는지 알아야 한다. */
+  const spine = useRef<TrunkPoint[]>([]);
+  const pull = useRef<Pull | undefined>(undefined);
+  const pullId = useRef(-1);
+  /** 잡고 돌린 각도의 합. 한 바퀴가 될 때마다 깎아낸다. */
+  const whirl = useRef(0);
+  const lastTurn = useRef({ at: 0, d: 0 });
+  const patId = useRef(-1);
+  const patAt = useRef({ x: 0, y: 0 });
+  const pat = useRef(0);
+  const patGlow = useRef(0);
+  const hearts = useRef<Heart[]>([]);
+  /** 뿌우 글씨 남은 시간 */
+  const puu = useRef(0);
 
   useEffect(() => {
     muted.current = Boolean(settings?.muted);
@@ -118,8 +171,39 @@ export function TummyScreen() {
       const box = canvas.getBoundingClientRect();
       return { x: (e.clientX - box.left - bx) / radius, y: (e.clientY - box.top - by) / radius };
     };
+    const px = (e: PointerEvent) => {
+      const box = canvas.getBoundingClientRect();
+      return { x: e.clientX - box.left, y: e.clientY - box.top };
+    };
 
     const headOf = () => ({ y: by - radius * 1.12, r: radius * 0.5 });
+    const rootOf = () => {
+      const head = headOf();
+      return { x: bx, y: head.y + head.r * 0.04, r: head.r };
+    };
+
+    /** 기분 좋을 때 머리 위로 하트 몇 개 */
+    const popHearts = (n: number) => {
+      const head = headOf();
+      for (let i = 0; i < n; i += 1) {
+        hearts.current.push({
+          x: bx + (Math.random() - 0.5) * head.r * 1.2,
+          y: head.y - head.r * 0.5 - Math.random() * head.r * 0.3,
+          t: 1,
+          drift: (Math.random() - 0.5) * 0.9,
+        });
+      }
+    };
+
+    /** 코끼리가 기분 좋아서 우는 순간 */
+    const trumpet = (power: number) => {
+      puu.current = 1;
+      flap.current = 1;
+      blink.current = 1;
+      popHearts(3);
+      if (!muted.current) playPuu(power);
+      navigator.vibrate?.([14, 50, 22]);
+    };
     const mouthOf = () => {
       const head = headOf();
       return { x: bx + head.r * 0.5, y: head.y + head.r * 1.05 };
@@ -145,6 +229,35 @@ export function TummyScreen() {
           eating.current = { phase: "reach", t: 0, jelly: picked };
           return;
         }
+      }
+
+      const c = px(e);
+      const root = rootOf();
+
+      // 코를 잡는다. 젤리를 줍는 중에는 못 잡는다 - 밥 먹을 땐 건드리지 말자.
+      const face = { x: bx, y: headOf().y, r: root.r };
+      if (!eating.current && pullId.current < 0 && trunkHit(spine.current, c.x, c.y, face)) {
+        pullId.current = e.pointerId;
+        whirl.current = 0;
+        lastTurn.current = { at: performance.now(), d: 0 };
+        pull.current = {
+          ang: Math.atan2(c.y - root.y, c.x - root.x),
+          len: clamp(Math.hypot(c.x - root.x, c.y - root.y) / root.r, PULL_MIN, PULL_MAX),
+          vAng: 0,
+          vLen: 0,
+          held: true,
+        };
+        blink.current = 1;
+        navigator.vibrate?.(8);
+        return;
+      }
+
+      // 머리는 두드리는 데가 아니라 쓰다듬는 데다
+      if (patId.current < 0 && Math.hypot(c.x - face.x, c.y - face.y) < face.r * 1.02) {
+        patId.current = e.pointerId;
+        patAt.current = c;
+        blink.current = 1;
+        return;
       }
 
       const reach = Math.hypot(p.x, p.y);
@@ -173,6 +286,50 @@ export function TummyScreen() {
 
     const onMove = (e: PointerEvent) => {
       if (!down.current.has(e.pointerId)) return;
+
+      // 코를 잡고 있다 - 코끝이 손가락을 따라온다
+      if (e.pointerId === pullId.current && pull.current) {
+        const c = px(e);
+        const root = rootOf();
+        const ang = Math.atan2(c.y - root.y, c.x - root.x);
+        const d = wrapAngle(ang - pull.current.ang);
+        const now = performance.now();
+
+        whirl.current += d;
+        lastTurn.current = { at: now, d };
+        pull.current.ang = ang;
+        pull.current.len = clamp(Math.hypot(c.x - root.x, c.y - root.y) / root.r, PULL_MIN, PULL_MAX);
+        // 코가 잡혀 있으면 눈을 질끈 감는다. 휘두른 코가 눈을 가리는 것도 이걸로 가려진다.
+        blink.current = 1;
+
+        // 한 바퀴 다 돌렸다
+        while (Math.abs(whirl.current) >= SPIN) {
+          whirl.current -= Math.sign(whirl.current) * SPIN;
+          trumpet(0.9);
+        }
+        return;
+      }
+
+      // 머리를 쓰다듬는 중
+      if (e.pointerId === patId.current) {
+        const c = px(e);
+        const head = headOf();
+        const moveBy = Math.hypot(c.x - patAt.current.x, c.y - patAt.current.y) / head.r;
+        patAt.current = c;
+        // 손을 대고만 있는 건 쓰다듬는 게 아니다
+        if (moveBy < 0.004) return;
+        pat.current += moveBy;
+        patGlow.current = 1;
+        blink.current = 1;
+        flap.current = Math.max(flap.current, 0.3);
+        if (Math.random() < moveBy * 1.6) popHearts(1);
+        if (pat.current >= PAT_FULL) {
+          pat.current = 0;
+          trumpet(0.45);
+        }
+        return;
+      }
+
       const p = local(e);
       const reach = Math.hypot(p.x, p.y);
       moved.current += 1;
@@ -195,6 +352,21 @@ export function TummyScreen() {
 
     const onUp = (e: PointerEvent) => {
       down.current.delete(e.pointerId);
+
+      if (e.pointerId === pullId.current) {
+        pullId.current = -1;
+        if (pull.current) {
+          // 놓는 순간의 손목 속도를 그대로 넘겨준다. 휙 돌리다 놓으면 더 휘청인다.
+          const gap = Math.max(0.016, (performance.now() - lastTurn.current.at) / 1000);
+          pull.current.held = false;
+          pull.current.vAng = gap < 0.12 ? clamp(lastTurn.current.d / gap, -14, 14) : 0;
+        }
+        whirl.current = 0;
+      }
+      if (e.pointerId === patId.current) {
+        patId.current = -1;
+        pat.current = 0;
+      }
       if (down.current.size === 0) stroke.stop();
     };
 
@@ -235,6 +407,32 @@ export function TummyScreen() {
 
     /* ---------- 그리기 ---------- */
 
+    /**
+     * 놓은 코가 제자리로 돌아간다. 감쇠를 임계 아래로 두어서
+     * 한 번에 멈추지 않고 두어 번 흔들리게 한다. 그게 살아 있는 코처럼 보인다.
+     */
+    const relaxPull = (dt: number) => {
+      const p = pull.current;
+      if (!p || p.held) return;
+
+      const K = 52;
+      const C = 2 * 0.34 * Math.sqrt(K);
+      // 각도는 가까운 쪽으로 돌아간다. 360도 반대로 도는 걸 막는다.
+      const dAng = wrapAngle(p.ang - REST_ANG);
+      p.vAng += (-dAng * K - p.vAng * C) * dt;
+      p.vLen += (-(p.len - REST_LEN) * K * 1.4 - p.vLen * C * 1.2) * dt;
+      p.ang += p.vAng * dt;
+      p.len += p.vLen * dt;
+
+      if (
+        Math.abs(wrapAngle(p.ang - REST_ANG)) < 0.012 &&
+        Math.abs(p.vAng) < 0.06 &&
+        Math.abs(p.len - REST_LEN) < 0.012
+      ) {
+        pull.current = undefined;
+      }
+    };
+
     const bellyPath = () => {
       ctx.beginPath();
       const STEPS = 130;
@@ -257,6 +455,17 @@ export function TummyScreen() {
       blink.current = Math.max(0, blink.current - dt * 3.2);
       flap.current = Math.max(0, flap.current - dt * 2.4);
       cheer.current = Math.max(0, cheer.current - dt * 0.85);
+      puu.current = Math.max(0, puu.current - dt * 0.8);
+      patGlow.current = Math.max(0, patGlow.current - dt * 1.6);
+      // 손을 뗀 채 두면 쓰다듬던 기억도 천천히 식는다
+      if (patId.current < 0) pat.current = Math.max(0, pat.current - dt * 0.9);
+      relaxPull(dt);
+      for (const heart of hearts.current) {
+        heart.t -= dt * 0.9;
+        heart.y -= dt * radius * 0.5;
+        heart.x += heart.drift * dt * radius * 0.2;
+      }
+      hearts.current = hearts.current.filter((heart) => heart.t > 0);
       for (const jelly of jellies.current) jelly.drop = Math.max(0, jelly.drop - dt * 2.4);
       stepEating(dt);
 
@@ -332,11 +541,12 @@ export function TummyScreen() {
       ctx.fill();
       ctx.restore();
 
-      // 머리
-      ctx.fillStyle = SKIN;
-      ctx.beginPath();
-      ctx.arc(bx, headY, headR, 0, Math.PI * 2);
-      ctx.fill();
+      const drawHead = () => {
+        ctx.fillStyle = SKIN;
+        ctx.beginPath();
+        ctx.arc(bx, headY, headR, 0, Math.PI * 2);
+        ctx.fill();
+      };
 
       // 바닥 젤리
       const size = radius * 0.3;
@@ -355,6 +565,7 @@ export function TummyScreen() {
 
       // 코는 얼굴에 붙어 있다. 젤리를 주울 땐 코끝이 그리로 뻗는다.
       const swing = squish.current.pressDepth * 0.5 + Math.sin(now / 900) * 0.06;
+      drawHead();
       let tip: { x: number; y: number } | undefined;
       const act = eating.current;
       if (act) {
@@ -370,15 +581,30 @@ export function TummyScreen() {
           tip = mouth;
         }
       }
-      const trunkTip = drawTrunk(ctx, bx, headY + headR * 0.04, headR, swing, tip);
+      // 젤리를 줍는 중이 아니면 손이 이긴다
+      const rootY = headY + headR * 0.04;
+      let via: { x: number; y: number } | undefined;
+      if (!act && pull.current) {
+        const grip = pull.current;
+        tip = {
+          x: bx + Math.cos(grip.ang) * grip.len * headR,
+          y: rootY + Math.sin(grip.ang) * grip.len * headR,
+        };
+        // 코가 곧은 막대처럼 돌면 안테나로 보인다. 늘 같은 쪽으로 한 번 휘게 해서
+        // 휜 모양을 유지한 채 돌아가게 한다. 각도에 상수만 더하니 어디서도 안 튄다.
+        const curl = grip.ang + 0.6;
+        via = { x: bx + Math.cos(curl) * headR * 1.22, y: rootY + Math.sin(curl) * headR * 1.22 };
+      }
+      spine.current = drawTrunk(ctx, bx, rootY, headR, swing, tip, via);
+      const trunkTip = spine.current[spine.current.length - 1];
 
       // 코끝에 매달린 젤리
       if (act && act.phase !== "cheer") {
         drawFloorJelly(ctx, trunkTip.x, trunkTip.y, size * 0.9, JELLY_COLORS[act.jelly.color], act.jelly.kind);
       }
 
-      // 눈
-      const lid = blink.current;
+      // 눈. 쓰다듬는 동안엔 계속 감고 웃는다.
+      const lid = Math.max(blink.current, patGlow.current);
       for (const side of [-1, 1]) {
         const ex = bx + side * headR * 0.38;
         const ey = headY - headR * 0.14;
@@ -413,6 +639,58 @@ export function TummyScreen() {
         ctx.beginPath();
         ctx.ellipse(bx + side * headR * 0.62, headY + headR * 0.22, headR * 0.16, headR * 0.1, 0, 0, Math.PI * 2);
         ctx.fill();
+      }
+
+      // 쓰다듬은 자리에 남는 온기
+      if (patGlow.current > 0) {
+        ctx.save();
+        ctx.globalAlpha = patGlow.current * 0.5;
+        // 그라디언트가 0 이 되는 자리보다 넓게 칠해야 테두리에서 뚝 끊기지 않는다
+        const warm = ctx.createRadialGradient(bx, headY - headR * 0.4, 0, bx, headY, headR * 0.98);
+        warm.addColorStop(0, "rgba(255, 190, 212, 0.85)");
+        warm.addColorStop(1, "rgba(255, 190, 212, 0)");
+        ctx.fillStyle = warm;
+        ctx.beginPath();
+        ctx.arc(bx, headY, headR * 1.1, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // 하트
+      for (const heart of hearts.current) {
+        const s = headR * 0.24 * (0.6 + heart.t * 0.6);
+        ctx.save();
+        ctx.globalAlpha = Math.min(1, heart.t * 1.6);
+        ctx.translate(heart.x, heart.y);
+        ctx.rotate(heart.drift * 0.3);
+        ctx.fillStyle = "#EF5D7A";
+        ctx.beginPath();
+        ctx.moveTo(0, s * 0.72);
+        ctx.bezierCurveTo(-s * 1.05, -s * 0.05, -s * 0.5, -s * 0.9, 0, -s * 0.28);
+        ctx.bezierCurveTo(s * 0.5, -s * 0.9, s * 1.05, -s * 0.05, 0, s * 0.72);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // 뿌우~
+      if (puu.current > 0) {
+        const pop = Math.min(1, (1 - puu.current) * 5);
+        ctx.save();
+        ctx.globalAlpha = Math.min(1, puu.current * 2.2);
+        ctx.translate(bx - headR * 1.25, headY - headR * 0.95 - (1 - puu.current) * headR * 0.35);
+        ctx.rotate(-0.1);
+        ctx.scale(pop, pop);
+        ctx.font = `700 ${headR * 0.5}px Jua, sans-serif`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.lineWidth = headR * 0.16;
+        ctx.strokeStyle = "#fff";
+        ctx.lineJoin = "round";
+        ctx.strokeText("뿌우~", 0, 0);
+        ctx.fillStyle = "#E0568C";
+        ctx.fillText("뿌우~", 0, 0);
+        ctx.restore();
       }
 
       // 야르!
@@ -466,7 +744,9 @@ export function TummyScreen() {
           ref={canvasRef}
           className="aspect-[1/1.24] w-full max-w-[420px] touch-none select-none"
         />
-        <p className="mt-1 h-5 text-sm text-ink-soft">배는 두드리고, 젤리는 눌러서 먹여요</p>
+        <p className="mt-1 text-center text-sm leading-snug text-ink-soft">
+          배는 두드리고, 코는 잡아당기고, 머리는 쓰다듬어요
+        </p>
       </main>
     </>
   );
