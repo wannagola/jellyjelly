@@ -7,33 +7,7 @@
  * 주무름은 계속 울리는 소리를 손가락 속도에 맞춰 열고 닫는다.
  */
 
-let ctx: AudioContext | undefined;
-let noise: AudioBuffer | undefined;
-
-type WindowWithWebkit = Window & { webkitAudioContext?: typeof AudioContext };
-
-function audio(): AudioContext | undefined {
-  if (typeof window === "undefined") return undefined;
-  const Ctor = window.AudioContext ?? (window as WindowWithWebkit).webkitAudioContext;
-  if (!Ctor) return undefined;
-  try {
-    ctx ??= new Ctor();
-    if (ctx.state === "suspended") void ctx.resume();
-    return ctx;
-  } catch {
-    return undefined;
-  }
-}
-
-function noiseBuffer(ac: BaseAudioContext): AudioBuffer {
-  if (noise && noise.sampleRate === ac.sampleRate) return noise;
-  const length = Math.floor(ac.sampleRate * 2);
-  const buffer = ac.createBuffer(1, length, ac.sampleRate);
-  const data = buffer.getChannelData(0);
-  for (let i = 0; i < length; i += 1) data[i] = Math.random() * 2 - 1;
-  noise = buffer;
-  return buffer;
-}
+import { audio, audioIfAwake, noiseBuffer } from "./audio";
 
 /**
  * 왁스 깨지는 소리 - 파삭.
@@ -163,7 +137,7 @@ export class SquishVoice {
 
   /** speed 0~1: 빠를수록 알갱이가 촘촘하고 크게 터진다 */
   update(speed: number): void {
-    const ac = ctx;
+    const ac = audioIfAwake();
     if (!ac || !this.running) return;
 
     this.bed?.gain.gain.setTargetAtTime(Math.min(0.05, speed * 0.07), ac.currentTime, 0.08);
@@ -214,7 +188,7 @@ export class SquishVoice {
   }
 
   stop(): void {
-    const ac = ctx;
+    const ac = audioIfAwake();
     this.running = false;
     if (!ac || !this.bed) return;
     const { source, gain } = this.bed;

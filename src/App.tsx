@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Route, Routes, useLocation } from "react-router";
 import { TabBar } from "./components/TabBar";
+import { AcornScreen } from "./screens/AcornScreen";
 import { CalendarScreen } from "./screens/CalendarScreen";
 import { DexScreen } from "./screens/DexScreen";
 import { DrawScreen } from "./screens/DrawScreen";
@@ -21,7 +22,15 @@ import { applyTheme } from "./lib/theme";
 import { useAutoSync } from "./lib/useAutoSync";
 
 /** 탭바를 숨기는 화면들 — 하나의 일을 끝내고 돌아가는 곳이라 */
-const FULLSCREEN = [/^\/record/, /^\/finish\//, /^\/jelly\/[^/]+\/edit/, /^\/draw/, /^\/waxball/, /^\/tummy/];
+const FULLSCREEN = [
+  /^\/record/,
+  /^\/finish\//,
+  /^\/jelly\/[^/]+\/edit/,
+  /^\/draw/,
+  /^\/waxball/,
+  /^\/tummy/,
+  /^\/acorn/,
+];
 
 export default function App() {
   const { pathname } = useLocation();
@@ -73,6 +82,7 @@ export default function App() {
         <Route path="/draw" element={<DrawScreen />} />
         <Route path="/waxball" element={<WaxBallScreen />} />
         <Route path="/tummy" element={<TummyScreen />} />
+        <Route path="/acorn" element={<AcornScreen />} />
         <Route path="/settings" element={<SettingsScreen />} />
       </Routes>
       {bare ? null : <TabBar />}

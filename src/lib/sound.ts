@@ -7,34 +7,7 @@
  * 잡음만 뿌리면 사각사각 부딪히는 소리가 되지 젤리가 되지 않는다.
  */
 
-let ctx: AudioContext | undefined;
-let noise: AudioBuffer | undefined;
-
-type WindowWithWebkit = Window & { webkitAudioContext?: typeof AudioContext };
-
-function audio(): AudioContext | undefined {
-  if (typeof window === "undefined") return undefined;
-  const Ctor = window.AudioContext ?? (window as WindowWithWebkit).webkitAudioContext;
-  if (!Ctor) return undefined;
-  try {
-    ctx ??= new Ctor();
-    // 사파리는 사용자가 건드리기 전까지 재워둔다
-    if (ctx.state === "suspended") void ctx.resume();
-    return ctx;
-  } catch {
-    return undefined;
-  }
-}
-
-function noiseBuffer(ac: BaseAudioContext): AudioBuffer {
-  if (noise && noise.sampleRate === ac.sampleRate) return noise;
-  const length = Math.floor(ac.sampleRate * 0.05);
-  const buffer = ac.createBuffer(1, length, ac.sampleRate);
-  const data = buffer.getChannelData(0);
-  for (let i = 0; i < length; i += 1) data[i] = Math.random() * 2 - 1;
-  noise = buffer;
-  return buffer;
-}
+import { audio, noiseBuffer } from "./audio";
 
 interface Bounce {
   at: number;

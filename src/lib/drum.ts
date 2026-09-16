@@ -6,33 +6,7 @@
  * 정수배로 쌓으면 북이 아니라 관악기가 된다.
  */
 
-let ctx: AudioContext | undefined;
-let noise: AudioBuffer | undefined;
-
-type WindowWithWebkit = Window & { webkitAudioContext?: typeof AudioContext };
-
-function audio(): AudioContext | undefined {
-  if (typeof window === "undefined") return undefined;
-  const Ctor = window.AudioContext ?? (window as WindowWithWebkit).webkitAudioContext;
-  if (!Ctor) return undefined;
-  try {
-    ctx ??= new Ctor();
-    if (ctx.state === "suspended") void ctx.resume();
-    return ctx;
-  } catch {
-    return undefined;
-  }
-}
-
-function noiseBuffer(ac: BaseAudioContext): AudioBuffer {
-  if (noise && noise.sampleRate === ac.sampleRate) return noise;
-  const length = Math.floor(ac.sampleRate * 0.4);
-  const buffer = ac.createBuffer(1, length, ac.sampleRate);
-  const data = buffer.getChannelData(0);
-  for (let i = 0; i < length; i += 1) data[i] = Math.random() * 2 - 1;
-  noise = buffer;
-  return buffer;
-}
+import { audio, noiseBuffer } from "./audio";
 
 /**
  * 5음 음계. 아무 음이나 내면 소음이 되는데, 이 다섯 음 안에서만 고르면
