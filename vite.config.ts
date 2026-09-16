@@ -9,6 +9,8 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: "autoUpdate",
+      // 설명서는 앱이 아니다. 오프라인 캐시에 2MB 짜리 캡처를 밀어 넣을 이유가 없다.
+      workbox: { globIgnores: ["**/manual/**"] },
       includeAssets: ["icon-180.png"],
       manifest: {
         name: "젤리젤리",

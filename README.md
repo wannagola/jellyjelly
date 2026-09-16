@@ -3,7 +3,7 @@
   <p><b>먹은 젤리를 병에 담아 모으는 기록장</b></p>
   <p>
     <a href="https://jellyjelly.vercel.app">jellyjelly.vercel.app</a> ·
-    <a href="https://claude.ai/artifact/EDGTYJQzG59rNehn2wHAVR">설명서</a>
+    <a href="https://jellyjelly.vercel.app/manual/">설명서</a>
   </p>
 </div>
 
@@ -227,7 +227,7 @@ src/
 docs/
   logo/                    로고 원본(SVG)과 내보낸 PNG
   screens/                 이 문서의 화면 캡처
-  manual.html              사용자용 설명서
+  manual.html              사용자용 설명서 (public/manual/ 로 같이 배포된다)
 ```
 
 ## 설계 노트
@@ -273,6 +273,6 @@ px 로 두면 선반의 작은 병에서 뚜껑만 두꺼워 보인다.
 
 ## 문서
 
-- [설명서](https://claude.ai/artifact/EDGTYJQzG59rNehn2wHAVR) — 화면별 설명 + 홈 화면 추가법 ([`docs/manual.html`](docs/manual.html) 과 같은 내용)
+- [설명서](https://jellyjelly.vercel.app/manual/) — 화면별 설명 + 홈 화면 추가법. 원본은 [`docs/manual.html`](docs/manual.html), 배포본은 `public/manual/`
 - [`docs/plan.html`](docs/plan.html) — 타당성 검토와 기획안
 - [`docs/ui.html`](docs/ui.html) — UI 시안
