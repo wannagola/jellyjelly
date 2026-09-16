@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useState } from "react";
 
 /**
  * 봉지 사진을 긴 변 640px WebP로 줄여 담는다.
@@ -37,14 +37,31 @@ export async function compressPhoto(file: File, maxSide = 640, quality = 0.82): 
   });
 }
 
-/** Blob을 <img src>로 쓸 수 있게. 바뀌거나 사라질 때 URL을 되돌려준다. */
+/**
+ * Blob을 <img src>로 쓸 수 있게. 바뀌거나 사라질 때 URL을 되돌려준다.
+ *
+ * 만드는 것과 되돌리는 것이 반드시 같은 effect 안에 있어야 한다.
+ * useMemo 로 만들고 effect 로 되돌리면, StrictMode 가 effect 를 두 번 돌릴 때
+ * 첫 정리에서 URL 을 회수해버리고 useMemo 는 값이 안 바뀌었으니 다시 만들지 않는다.
+ * 그러면 img 가 이미 죽은 주소를 붙들고 깨진 채로 남는다.
+ */
 export function usePhotoUrl(photo?: Blob | null): string | undefined {
-  const url = useMemo(() => (photo ? URL.createObjectURL(photo) : undefined), [photo]);
+  const [url, setUrl] = useState<string>();
 
+  // set-state-in-effect 규칙이 말하는 "외부 시스템과의 동기화"가 바로 이 경우다.
+  // 브라우저의 URL 레지스트리에 등록하고 그 주소를 화면에 돌려주는 것이라
+  // 렌더 중에 만들어낼 수가 없다.
+  /* oxlint-disable react/set-state-in-effect */
   useEffect(() => {
-    if (!url) return;
-    return () => URL.revokeObjectURL(url);
-  }, [url]);
+    if (!photo) {
+      setUrl(undefined);
+      return;
+    }
+    const next = URL.createObjectURL(photo);
+    setUrl(next);
+    return () => URL.revokeObjectURL(next);
+  }, [photo]);
+  /* oxlint-enable react/set-state-in-effect */
 
   return url;
 }

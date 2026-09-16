@@ -119,11 +119,13 @@ export function FinishScreen() {
               onChange={(e) => pickPhoto(e.target.files?.[0])}
             />
             {photoUrl ? (
-              <div className="relative mb-4">
+              // 박스를 고정해두면 폰으로 찍은 세로 사진이 잘린다.
+              // 사진이 제 비율대로 들어가고 너무 커지지만 않게 막는다.
+              <div className="relative mx-auto mb-4 w-fit">
                 <img
                   src={photoUrl}
                   alt="오늘 먹은 젤리"
-                  className="h-40 w-full rounded-2xl object-cover"
+                  className="max-h-[42vh] max-w-full rounded-2xl"
                 />
                 <button
                   type="button"
