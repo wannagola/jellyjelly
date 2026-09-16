@@ -9,6 +9,7 @@ import { FinishScreen } from "./screens/FinishScreen";
 import { JarShelfScreen } from "./screens/JarShelfScreen";
 import { JellyDetailScreen } from "./screens/JellyDetailScreen";
 import { JellyFormScreen } from "./screens/JellyFormScreen";
+import { OrderScreen } from "./screens/OrderScreen";
 import { RecommendScreen } from "./screens/RecommendScreen";
 import { RecordScreen } from "./screens/RecordScreen";
 import { SettingsScreen } from "./screens/SettingsScreen";
@@ -30,6 +31,7 @@ const FULLSCREEN = [
   /^\/waxball/,
   /^\/tummy/,
   /^\/acorn/,
+  /^\/order/,
 ];
 
 export default function App() {
@@ -83,6 +85,7 @@ export default function App() {
         <Route path="/waxball" element={<WaxBallScreen />} />
         <Route path="/tummy" element={<TummyScreen />} />
         <Route path="/acorn" element={<AcornScreen />} />
+        <Route path="/order" element={<OrderScreen />} />
         <Route path="/settings" element={<SettingsScreen />} />
       </Routes>
       {bare ? null : <TabBar />}

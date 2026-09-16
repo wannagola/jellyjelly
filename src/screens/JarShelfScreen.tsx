@@ -1,3 +1,4 @@
+import { differenceInCalendarDays, parseISO, startOfDay } from "date-fns";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useMemo } from "react";
 import { Link } from "react-router";
@@ -8,6 +9,7 @@ import { StatRow } from "../components/StatRow";
 import { db } from "../data/db";
 import type { JellyColor, JellyShape } from "../data/types";
 import { monthKeyOf, monthsFrom, seedFromKey } from "../lib/month";
+import { useToday } from "../lib/useCurrentMonth";
 import { useSettings } from "../lib/settings";
 import { buildPile, jellyRatioFor } from "../lib/pile";
 
@@ -28,6 +30,7 @@ interface Jarful {
  */
 export function JarShelfScreen() {
   const settings = useSettings();
+  const today = useToday();
   const data = useLiveQuery(async () => {
     const [entries, jellies] = await Promise.all([
       db.entries.where("status").equals("done").toArray(),
@@ -81,6 +84,10 @@ export function JarShelfScreen() {
   );
 
   const total = jars.reduce((sum, j) => sum + j.jellies.length, 0);
+  // 첫 기록부터 오늘까지 며칠째인가. 첫날도 하루로 센다.
+  const days = data
+    ? differenceInCalendarDays(parseISO(today), startOfDay(data.first)) + 1
+    : 0;
   const allKinds = data ? new Set([...data.kinds.values()].flatMap((s) => [...s])).size : 0;
 
   return (
@@ -102,7 +109,7 @@ export function JarShelfScreen() {
                   items={[
                     { value: total, unit: "개", label: "담은 젤리" },
                     { value: allKinds, unit: "종", label: "모은 종류" },
-                    { value: jars.length, unit: "달", label: "모은 기간" },
+                    { value: days, unit: "일", label: "모은 기간" },
                   ]}
                 />
               </div>
@@ -197,6 +204,20 @@ export function JarShelfScreen() {
               <span className="block font-display text-base">도토리 받기</span>
               <span className="block text-xs text-ink-soft">
                 가을이니까. 밤송이는 피하세요
+              </span>
+            </span>
+            <span className="text-lg text-ink-faint">›</span>
+          </Link>
+
+          <Link
+            to="/order"
+            className="flex items-center gap-3 rounded-2xl bg-surface px-4 py-3.5 transition active:scale-[.99]"
+          >
+            <span className="text-2xl leading-none">🎵</span>
+            <span className="min-w-0 flex-1">
+              <span className="block font-display text-base">순서 외우기</span>
+              <span className="block text-xs text-ink-soft">
+                반짝인 젤리를 그 순서대로 누르기
               </span>
             </span>
             <span className="text-lg text-ink-faint">›</span>

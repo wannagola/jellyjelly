@@ -25,6 +25,10 @@ export function monthKeyOf(ts: number): string {
   return format(ts, "yyyy-MM");
 }
 
+export function dayKeyOf(ts: number): string {
+  return format(ts, "yyyy-MM-dd");
+}
+
 export function parseMonthKey(key: string): Date | undefined {
   const [y, m] = key.split("-").map(Number);
   if (!y || !m) return undefined;

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { monthKeyOf } from "./month";
+import { dayKeyOf, monthKeyOf } from "./month";
 
 /**
  * 지금이 몇 월인지. 렌더 중에 Date.now() 를 부르면 값이 언제 바뀔지 알 수 없고,
@@ -11,6 +11,28 @@ export function useCurrentMonth(): string {
 
   useEffect(() => {
     const sync = () => setKey(monthKeyOf(Date.now()));
+    const timer = setInterval(sync, 60_000);
+    document.addEventListener("visibilitychange", sync);
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", sync);
+    };
+  }, []);
+
+  return key;
+}
+
+/**
+ * 오늘 날짜 (yyyy-MM-dd).
+ *
+ * 달과 같은 이유로 렌더 중에 구하지 않는다. 며칠씩 열려 있는 홈 화면 앱에서
+ * 자정이 지나도 어제에 머무르면 '모은 기간'이 하루 모자란 채로 굳는다.
+ */
+export function useToday(): string {
+  const [key, setKey] = useState(() => dayKeyOf(Date.now()));
+
+  useEffect(() => {
+    const sync = () => setKey(dayKeyOf(Date.now()));
     const timer = setInterval(sync, 60_000);
     document.addEventListener("visibilitychange", sync);
     return () => {
