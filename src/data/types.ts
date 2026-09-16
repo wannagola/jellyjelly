@@ -23,6 +23,8 @@ export interface Jelly {
   photo?: Blob;
   kcal?: number;
   note?: string;
+  createdAt: number;
+  updatedAt: number;
 }
 
 /** 기록: 젤리를 먹은 한 번의 사건 */
@@ -35,4 +37,6 @@ export interface Entry {
   rating?: number;
   review?: string;
   texture?: { chewy: number; sour: number; sweet: number };
+  createdAt: number;
+  updatedAt: number;
 }

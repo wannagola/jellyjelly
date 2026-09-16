@@ -1,13 +1,28 @@
-import { Route, Routes } from "react-router";
+import { Route, Routes, useLocation } from "react-router";
 import { TabBar } from "./components/TabBar";
+import { FinishScreen } from "./screens/FinishScreen";
+import { JellyDetailScreen } from "./screens/JellyDetailScreen";
+import { JellyFormScreen } from "./screens/JellyFormScreen";
+import { RecordScreen } from "./screens/RecordScreen";
 import { ShelfScreen } from "./screens/ShelfScreen";
 import { Soon } from "./screens/Soon";
 
+/** 탭바를 숨기는 화면들 — 하나의 일을 끝내고 돌아가는 곳이라 */
+const FULLSCREEN = [/^\/record/, /^\/finish\//, /^\/jelly\/[^/]+\/edit/];
+
 export default function App() {
+  const { pathname } = useLocation();
+  const bare = FULLSCREEN.some((re) => re.test(pathname));
+
   return (
     <div className="mx-auto flex h-full max-w-[480px] flex-col bg-bg">
       <Routes>
         <Route path="/" element={<ShelfScreen />} />
+        <Route path="/record" element={<RecordScreen />} />
+        <Route path="/record/new" element={<JellyFormScreen mode="create" />} />
+        <Route path="/finish/:id" element={<FinishScreen />} />
+        <Route path="/jelly/:id" element={<JellyDetailScreen />} />
+        <Route path="/jelly/:id/edit" element={<JellyFormScreen mode="edit" />} />
         <Route
           path="/calendar"
           element={
@@ -37,27 +52,15 @@ export default function App() {
           element={
             <Soon
               title="설정"
-              when="Day 2.5에 만듭니다"
-              what="로그인과 백업 내보내기가 들어갈 자리입니다."
+              when="Day 4에 만듭니다"
+              what="백업 내보내기와 복원이 들어갈 자리입니다."
               shape="ring"
               color="green"
             />
           }
         />
-        <Route
-          path="/record"
-          element={
-            <Soon
-              title="뭐 먹었어요?"
-              when="Day 2에 만듭니다"
-              what="초성으로 젤리를 찾고, 없으면 바로 추가합니다."
-              shape="worm"
-              color="berry"
-            />
-          }
-        />
       </Routes>
-      <TabBar />
+      {bare ? null : <TabBar />}
     </div>
   );
 }

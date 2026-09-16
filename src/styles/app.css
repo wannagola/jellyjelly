@@ -243,3 +243,51 @@
 .safe-b {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
+
+/* ===== 식감 슬라이더 =====
+   기본 range 는 어느 브라우저에서도 예쁘지 않아서 직접 그린다. */
+.texture-range {
+  appearance: none;
+  -webkit-appearance: none;
+  height: 22px;
+  background: transparent;
+  cursor: pointer;
+}
+.texture-range::-webkit-slider-runnable-track {
+  height: 7px;
+  border-radius: 4px;
+  background: linear-gradient(
+    to right,
+    var(--tint) 0 var(--fill),
+    var(--line) var(--fill) 100%
+  );
+}
+.texture-range::-moz-range-track {
+  height: 7px;
+  border-radius: 4px;
+  background: var(--line);
+}
+.texture-range::-moz-range-progress {
+  height: 7px;
+  border-radius: 4px;
+  background: var(--tint);
+}
+.texture-range::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 19px;
+  height: 19px;
+  margin-top: -6px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2.5px solid var(--tint);
+  box-shadow: 0 1px 3px rgba(59, 36, 48, 0.25);
+}
+.texture-range::-moz-range-thumb {
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2.5px solid var(--tint);
+  box-shadow: 0 1px 3px rgba(59, 36, 48, 0.25);
+}
