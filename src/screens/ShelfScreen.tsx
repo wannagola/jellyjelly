@@ -9,6 +9,7 @@ import { Toast } from "../components/Toast";
 import { db } from "../data/db";
 import type { Jelly } from "../data/types";
 import { JAR_CAPACITY, buildPile, jellyRatioFor } from "../lib/pile";
+import { useTilt } from "../lib/tilt";
 import { useSettings } from "../lib/settings";
 import { playDrop, playShake } from "../lib/sound";
 import { monthKeyOf, monthRange, parseMonthKey, seedFromKey, shiftMonth } from "../lib/month";
@@ -81,10 +82,14 @@ export function ShelfScreen() {
   // 병에서 고른 젤리 한 알
   const [picked, setPicked] = useState<string>();
 
+  const { tilt, live: tilting, enable: enableTilt } = useTilt();
+
   function shake() {
     setShakes((n) => n + 1);
     navigator.vibrate?.(12); // 안드로이드만. iOS 는 이 API 자체가 없어서 조용히 넘어간다
     if (!settings?.muted) playShake(count);
+    // 기울기를 물어볼 수 있는 건 누른 바로 이 순간뿐이다. 병을 만지는 김에 같이 묻는다.
+    if (!tilting) void enableTilt();
   }
 
   const count = doneJellies.length;
@@ -105,6 +110,7 @@ export function ShelfScreen() {
           <Jar
             items={pile}
             jellyRatio={jellyRatioFor(pile.length)}
+            tilt={tilt}
             dropKey={dropping ? pile.at(-1)?.key : undefined}
             shakeToken={shakes}
             onShake={count > 0 ? shake : undefined}
@@ -143,9 +149,11 @@ export function ShelfScreen() {
           <p className="mt-1 text-tiny text-ink-faint">
             {!isThisMonth
               ? "지난 병이에요 · 기록은 이번 달에만 담을 수 있어요"
-              : count > 1
-                ? "병을 톡 치면 젤리가 섞여요"
-                : "아래 ＋ 로 젤리를 담아보세요"}
+              : count <= 1
+                ? "아래 ＋ 로 젤리를 담아보세요"
+                : tilting
+                  ? "병을 톡 치면 섞이고, 폰을 기울이면 쏠려요"
+                  : "병을 톡 치면 젤리가 섞여요 · 한 번 치면 기울이기도 켜져요"}
           </p>
         </section>
 

@@ -410,12 +410,19 @@
   place-items: center;
   cursor: pointer;
 }
-/* 손잡이의 십자 막대 */
+/* 손잡이의 십자 막대.
+   자리를 직접 잡아준다. 좌표를 안 주면 브라우저가 알아서 놓는데, 그리드 안의
+   절대 배치를 크롬과 사파리가 다르게 해석해서 사파리에서만 왼쪽 위로 쏠린다.
+   가운데 정렬은 transform 대신 음수 마진으로 한다 - 막대 하나는 돌아가야 해서
+   transform 자리를 비워둬야 한다. */
 .gacha-knob i {
   position: absolute;
   display: block;
+  top: 50%;
+  left: 50%;
   width: 11cqw;
   height: 2.6cqw;
+  margin: -1.3cqw 0 0 -5.5cqw;
   border-radius: 1.5cqw;
   background: var(--accent);
 }

@@ -25,6 +25,8 @@ export function Jar({
   quiet = false,
   /** 젤리 한 알을 눌렀을 때. 키는 그 젤리를 담은 기록의 id다. */
   onPick,
+  /** -1(왼쪽) ~ 1(오른쪽). 폰을 기울인 만큼 젤리가 그쪽으로 쏠린다. */
+  tilt = 0,
 }: {
   items: PileItem[];
   className?: string;
@@ -34,10 +36,27 @@ export function Jar({
   shakeToken?: number;
   quiet?: boolean;
   onPick?: (key: string) => void;
+  tilt?: number;
 }) {
   const still = useReducedMotion();
   const size = `${jellyRatio * 100}%`;
   const [scope, animate] = useAnimate();
+
+  /**
+   * 기울였을 때 이 알이 가는 자리.
+   *
+   * 위에 얹힌 알일수록 많이 미끄러진다. 바닥에 깔린 알은 위에 눌려 있어서
+   * 조금밖에 못 움직인다. 다 똑같이 옮기면 더미가 아니라 그림 한 장이 통째로
+   * 미끄러지는 것처럼 보인다.
+   */
+  const slide = (it: PileItem) => {
+    if (!tilt || still) return it.x;
+    const lift = Math.min(1, Math.max(0, (0.95 - it.y) / 0.45));
+    const moved = it.x + tilt * (0.05 + 0.14 * lift);
+    // 유리를 뚫고 나가지 않게
+    return Math.min(0.88, Math.max(0.12, moved));
+  };
+  const lean = (it: PileItem) => (still ? it.rotate : it.rotate + tilt * 9);
 
   // 흔들림은 명령형으로 쏜다. animate prop 에 같은 키프레임을 다시 넣어봐야
   // 값이 안 바뀐 것으로 보고 두 번째부터는 아무 일도 일어나지 않는다.
@@ -92,15 +111,15 @@ export function Jar({
                     style={{ width: size }}
                     initial={
                       falling
-                        ? { left: `${it.x * 100}%`, top: "-30%", opacity: 0 }
+                        ? { left: `${slide(it) * 100}%`, top: "-30%", opacity: 0 }
                         : {
-                            left: `${it.x * 100}%`,
+                            left: `${slide(it) * 100}%`,
                             top: `${it.y * 100}%`,
                             opacity: 1,
                           }
                     }
                     animate={{
-                      left: `${it.x * 100}%`,
+                      left: `${slide(it) * 100}%`,
                       top: `${it.y * 100}%`,
                       opacity: 1,
                     }}
@@ -117,7 +136,7 @@ export function Jar({
                       className="block"
                       initial={
                         falling
-                          ? { rotate: it.rotate - 40, scale: 0.85 }
+                          ? { rotate: lean(it) - 40, scale: 0.85 }
                           : false
                       }
                       animate={
@@ -125,11 +144,11 @@ export function Jar({
                           ? { rotate: it.rotate, scale: 1 }
                           : falling
                             ? {
-                                rotate: it.rotate,
+                                rotate: lean(it),
                                 scaleX: [0.85, 1.18, 0.94, 1.04, 1],
                                 scaleY: [0.85, 0.8, 1.12, 0.96, 1],
                               }
-                            : { rotate: it.rotate, scale: 1 }
+                            : { rotate: lean(it), scale: 1 }
                       }
                       transition={
                         still
