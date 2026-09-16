@@ -53,7 +53,29 @@ export function ShelfScreen() {
 
   return (
     <>
-      <AppBar title="젤리젤리" side={count > 0 ? `${kinds}종 · ${count}개` : undefined} />
+      <AppBar
+        title="젤리젤리"
+        side={
+          <span className="flex items-center gap-3">
+            {count > 0 ? <span className="tabular-nums">{`${kinds}종 · ${count}개`}</span> : null}
+            <Link to="/settings" aria-label="설정" className="text-ink-faint">
+              <svg
+                viewBox="0 0 24 24"
+                className="size-[19px]"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+              >
+                <circle cx="12" cy="12" r="3.2" />
+                <path
+                  d="M12 2.6v2.6M12 18.8v2.6M21.4 12h-2.6M5.2 12H2.6M18.6 5.4l-1.9 1.9M7.3 16.7l-1.9 1.9M18.6 18.6l-1.9-1.9M7.3 7.3 5.4 5.4"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </Link>
+          </span>
+        }
+      />
 
       <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-8">
         <section className="flex flex-col items-center pt-2">

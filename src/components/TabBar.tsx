@@ -21,22 +21,21 @@ const ICONS = {
       <path d="M8 3v18" />
     </svg>
   ),
-  gear: (
-    <svg viewBox="0 0 24 24" {...s}>
-      <circle cx="12" cy="12" r="3.2" />
-      <path
-        d="M12 2.6v2.6M12 18.8v2.6M21.4 12h-2.6M5.2 12H2.6M18.6 5.4l-1.9 1.9M7.3 16.7l-1.9 1.9M18.6 18.6l-1.9-1.9M7.3 7.3 5.4 5.4"
-        strokeLinecap="round"
-      />
+  spark: (
+    <svg viewBox="0 0 24 24" {...s} strokeLinejoin="round">
+      <path d="M12 2.8c0 4.3 2.4 6.7 6.7 6.7-4.3 0-6.7 2.4-6.7 6.7 0-4.3-2.4-6.7-6.7-6.7 4.3 0 6.7-2.4 6.7-6.7Z" />
+      <path d="M18 15.4c0 2-1.1 3.1-3.1 3.1 2 0 3.1 1.1 3.1 3.1 0-2 1.1-3.1 3.1-3.1-2 0-3.1-1.1-3.1-3.1Z" />
     </svg>
   ),
 };
 
+/** 탭은 넷까지다. 다섯을 넘으면 손가락이 헤맨다.
+    설정은 자주 갈 일이 없어서 보관함 오른쪽 위로 뺐다. */
 const TABS = [
   { to: "/", icon: ICONS.jar, label: "보관함" },
   { to: "/calendar", icon: ICONS.cal, label: "달력" },
   { to: "/dex", icon: ICONS.book, label: "도감" },
-  { to: "/settings", icon: ICONS.gear, label: "설정" },
+  { to: "/recommend", icon: ICONS.spark, label: "추천" },
 ] as const;
 
 export function TabBar() {

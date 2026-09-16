@@ -5,6 +5,7 @@ import { DexScreen } from "./screens/DexScreen";
 import { FinishScreen } from "./screens/FinishScreen";
 import { JellyDetailScreen } from "./screens/JellyDetailScreen";
 import { JellyFormScreen } from "./screens/JellyFormScreen";
+import { RecommendScreen } from "./screens/RecommendScreen";
 import { RecordScreen } from "./screens/RecordScreen";
 import { SettingsScreen } from "./screens/SettingsScreen";
 import { ShelfScreen } from "./screens/ShelfScreen";
@@ -27,6 +28,7 @@ export default function App() {
         <Route path="/jelly/:id/edit" element={<JellyFormScreen mode="edit" />} />
         <Route path="/calendar" element={<CalendarScreen />} />
         <Route path="/dex" element={<DexScreen />} />
+        <Route path="/recommend" element={<RecommendScreen />} />
         <Route path="/settings" element={<SettingsScreen />} />
       </Routes>
       {bare ? null : <TabBar />}
