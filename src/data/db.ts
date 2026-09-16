@@ -1,12 +1,13 @@
 import Dexie, { type EntityTable } from "dexie";
 import { newId } from "../lib/id";
 import { SEED_JELLIES } from "./seed";
-import type { Entry, Jelly } from "./types";
+import type { Entry, Jelly, Tombstone } from "./types";
 
 class JellyDB extends Dexie {
   jellies!: EntityTable<Jelly, "id">;
   entries!: EntityTable<Entry, "id">;
   meta!: EntityTable<{ key: string; value: unknown }, "key">;
+  graveyard!: EntityTable<Tombstone, "id">;
 
   constructor() {
     super("jellyjelly");
@@ -14,6 +15,13 @@ class JellyDB extends Dexie {
       jellies: "id, name, updatedAt",
       entries: "id, jellyId, status, finishedAt, updatedAt",
       meta: "key",
+    });
+    // 동기화를 위해 '아직 못 올린 것'과 '지운 것'을 찾을 수 있어야 한다
+    this.version(2).stores({
+      jellies: "id, name, updatedAt, dirty",
+      entries: "id, jellyId, status, finishedAt, updatedAt, dirty",
+      meta: "key",
+      graveyard: "id, kind, dirty",
     });
   }
 }
@@ -43,12 +51,14 @@ export async function syncSeed(): Promise<void> {
   const stored = (await db.meta.get("seedVersion"))?.value;
   if (stored === SEED_VERSION) return;
 
-  const existing = await db.jellies.toArray();
+  const [existing, buried] = await Promise.all([db.jellies.toArray(), db.graveyard.toArray()]);
   const known = new Set<string>();
   for (const jelly of existing) {
     if (jelly.seedKey) known.add(jelly.seedKey);
     known.add(identity(jelly.brand, jelly.name));
   }
+  // 손수 지운 젤리는 업데이트해도 되살리지 않는다
+  for (const grave of buried) known.add(grave.id);
 
   const missing = SEED_JELLIES.filter(
     (s) => !known.has(s.seedKey) && !known.has(identity(s.brand, s.name)),
@@ -58,7 +68,7 @@ export async function syncSeed(): Promise<void> {
   await db.transaction("rw", db.jellies, db.meta, async () => {
     if (missing.length > 0) {
       await db.jellies.bulkAdd(
-        missing.map((j) => ({ ...j, id: newId(), createdAt: now, updatedAt: now })),
+        missing.map((j) => ({ ...j, id: newId(), createdAt: now, updatedAt: now, dirty: 1 as const })),
       );
     }
     await db.meta.put({ key: "seedVersion", value: SEED_VERSION });
@@ -80,19 +90,19 @@ export async function addJelly(
 ): Promise<string> {
   const now = Date.now();
   const id = newId();
-  await db.jellies.add({ ...input, id, createdAt: now, updatedAt: now });
+  await db.jellies.add({ ...input, id, createdAt: now, updatedAt: now, dirty: 1 });
   return id;
 }
 
 export async function updateJelly(id: string, patch: Partial<Jelly>): Promise<void> {
-  await db.jellies.update(id, { ...patch, updatedAt: Date.now() });
+  await db.jellies.update(id, { ...patch, updatedAt: Date.now(), dirty: 1 });
 }
 
 /** 최애 표시를 켜고 끈다 */
 export async function toggleFavorite(id: string): Promise<void> {
   const jelly = await db.jellies.get(id);
   if (!jelly) return;
-  await db.jellies.update(id, { favorite: !jelly.favorite, updatedAt: Date.now() });
+  await db.jellies.update(id, { favorite: !jelly.favorite, updatedAt: Date.now(), dirty: 1 });
 }
 
 /** 먹기 시작. 같은 젤리를 또 먹어도 기록은 새로 하나 생긴다. */
@@ -106,6 +116,7 @@ export async function startEating(jellyId: string): Promise<string> {
     startedAt: now,
     createdAt: now,
     updatedAt: now,
+    dirty: 1,
   });
   return id;
 }
@@ -114,18 +125,40 @@ export async function finishEntry(id: string, review?: Partial<Entry>): Promise<
   const now = Date.now();
   await db.transaction("rw", db.entries, db.jellies, async () => {
     const entry = await db.entries.get(id);
-    await db.entries.update(id, { ...review, status: "done", finishedAt: now, updatedAt: now });
+    await db.entries.update(id, {
+      ...review,
+      status: "done",
+      finishedAt: now,
+      updatedAt: now,
+      dirty: 1,
+    });
 
     // 그날 찍은 사진이 있는데 젤리엔 아직 대표 사진이 없으면 그걸 얼굴로 쓴다.
     // 따로 물어볼 만한 일이 아니다. 이미 있으면 건드리지 않는다.
     if (!review?.photo || !entry) return;
     const jelly = await db.jellies.get(entry.jellyId);
     if (jelly && !jelly.photo) {
-      await db.jellies.update(jelly.id, { photo: review.photo, updatedAt: now });
+      await db.jellies.update(jelly.id, { photo: review.photo, updatedAt: now, dirty: 1 });
     }
   });
 }
 
+/** 기록 지우기. 줄은 진짜로 지우고 묘비만 남긴다. */
 export async function deleteEntry(id: string): Promise<void> {
-  await db.entries.delete(id);
+  await bury("entry", id, () => db.entries.delete(id));
+}
+
+/** 젤리 지우기. 그 젤리의 기록도 같이 묻는다. */
+export async function deleteJelly(id: string): Promise<void> {
+  const entries = await db.entries.where("jellyId").equals(id).toArray();
+  for (const entry of entries) await deleteEntry(entry.id);
+  await bury("jelly", id, () => db.jellies.delete(id));
+}
+
+async function bury(kind: Tombstone["kind"], id: string, remove: () => Promise<unknown>) {
+  const deletedAt = Date.now();
+  await db.transaction("rw", db.jellies, db.entries, db.graveyard, async () => {
+    await remove();
+    await db.graveyard.put({ id, kind, deletedAt, dirty: 1 });
+  });
 }

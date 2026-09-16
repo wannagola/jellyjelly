@@ -15,6 +15,7 @@ import { ShelfScreen } from "./screens/ShelfScreen";
 import { WelcomeScreen } from "./screens/WelcomeScreen";
 import { useSettings } from "./lib/settings";
 import { applyTheme } from "./lib/theme";
+import { useAutoSync } from "./lib/useAutoSync";
 
 /** 탭바를 숨기는 화면들 — 하나의 일을 끝내고 돌아가는 곳이라 */
 const FULLSCREEN = [/^\/record/, /^\/finish\//, /^\/jelly\/[^/]+\/edit/, /^\/draw/];
@@ -23,6 +24,7 @@ export default function App() {
   const { pathname } = useLocation();
   const bare = FULLSCREEN.some((re) => re.test(pathname));
   const settings = useSettings();
+  useAutoSync();
 
   useEffect(() => {
     if (settings) applyTheme(settings.theme);

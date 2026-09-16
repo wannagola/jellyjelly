@@ -29,6 +29,10 @@ export interface Jelly {
   seedKey?: string;
   createdAt: number;
   updatedAt: number;
+  /** 서버에 아직 못 올린 변경. 인덱스를 태우려고 불리언 대신 0/1 을 쓴다. */
+  dirty?: 0 | 1;
+  /** 서버에 올라간 사진의 경로 */
+  photoPath?: string;
 }
 
 /** 기록: 젤리를 먹은 한 번의 사건 */
@@ -45,4 +49,20 @@ export interface Entry {
   photo?: Blob;
   createdAt: number;
   updatedAt: number;
+  dirty?: 0 | 1;
+  photoPath?: string;
+}
+
+/**
+ * 지운 것의 묘비.
+ *
+ * 줄에 '지움' 표시를 달아두면 화면마다 그걸 걸러내야 하고, 한 군데만 빠뜨려도
+ * 지운 젤리가 튀어나온다. 그래서 줄은 진짜로 지우고 지웠다는 사실만 여기 남긴다.
+ * 다른 기기가 "얘가 없네" 하고 되살리는 것도 이걸 보고 막는다.
+ */
+export interface Tombstone {
+  id: string;
+  kind: "jelly" | "entry";
+  deletedAt: number;
+  dirty?: 0 | 1;
 }

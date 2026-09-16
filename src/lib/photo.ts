@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 
 /**
- * 봉지 사진을 긴 변 640px WebP로 줄여 담는다.
- * 원본을 그대로 넣으면 기기 저장소가 금방 차고, 목록 스크롤이 버벅인다.
- * 장당 40~60KB면 300개를 모아도 20MB 안쪽이다.
+ * 봉지 사진을 긴 변 1024px WebP로 줄여 담는다.
+ * 아이폰 12MP 원본(3~5MB)을 그대로 넣으면 저장소가 금방 차고 목록이 버벅인다.
+ *
+ * 크기는 재보고 정했다. 디테일이 많은 사진 기준으로
+ * 640px/품질0.82 는 66KB, 1024px/품질0.82 는 143KB, 1024px/품질0.7 은 82KB.
+ * 3배 화면에서 크게 볼 때 640px 는 무르게 보여서, 품질을 조금 내리고 해상도를 올렸다.
  */
-export async function compressPhoto(file: File, maxSide = 640, quality = 0.82): Promise<Blob> {
+export async function compressPhoto(file: File, maxSide = 1024, quality = 0.7): Promise<Blob> {
   const bitmap = await createImageBitmap(file);
   const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
   const w = Math.max(1, Math.round(bitmap.width * scale));

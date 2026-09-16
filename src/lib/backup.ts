@@ -107,7 +107,12 @@ export async function restoreBackup(file: File): Promise<RestoreResult> {
 }
 
 export async function wipeEverything(): Promise<void> {
-  await db.transaction("rw", db.jellies, db.entries, db.meta, async () => {
-    await Promise.all([db.jellies.clear(), db.entries.clear(), db.meta.clear()]);
+  await db.transaction("rw", db.jellies, db.entries, db.meta, db.graveyard, async () => {
+    await Promise.all([
+      db.jellies.clear(),
+      db.entries.clear(),
+      db.meta.clear(),
+      db.graveyard.clear(),
+    ]);
   });
 }

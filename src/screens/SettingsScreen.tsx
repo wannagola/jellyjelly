@@ -1,8 +1,10 @@
 import { format } from "date-fns";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useRef, useState } from "react";
+import { AccountSection } from "../components/AccountSection";
 import { AppBar } from "../components/AppBar";
 import { db, syncSeed } from "../data/db";
+import { syncEnabled } from "../lib/supabase";
 import { setMuted, setNickname, setTheme, useSettings } from "../lib/settings";
 import { useIsStandalone } from "../lib/standalone";
 import { THEMES, applyTheme } from "../lib/theme";
@@ -79,7 +81,16 @@ export function SettingsScreen() {
       <AppBar title="설정" />
 
       <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-8">
-        <h2 className="mb-2 px-1 text-xs tracking-wide text-ink-soft">내 이름</h2>
+        {syncEnabled ? (
+          <>
+            <h2 className="mb-2 px-1 text-xs tracking-wide text-ink-soft">계정</h2>
+            <AccountSection />
+          </>
+        ) : null}
+
+        <h2 className={`${syncEnabled ? "mt-6 " : ""}mb-2 px-1 text-xs tracking-wide text-ink-soft`}>
+          내 이름
+        </h2>
         {settings ? <NicknameRow key={settings.nickname} initial={settings.nickname ?? ""} /> : null}
 
         <h2 className="mt-6 mb-2 px-1 text-xs tracking-wide text-ink-soft">색</h2>
