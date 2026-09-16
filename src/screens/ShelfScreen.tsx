@@ -79,7 +79,7 @@ export function ShelfScreen() {
 
   function shake() {
     setShakes((n) => n + 1);
-    navigator.vibrate?.(12);
+    navigator.vibrate?.(12); // 안드로이드만. iOS 는 이 API 자체가 없어서 조용히 넘어간다
     if (!settings?.muted) playShake(count);
   }
 

@@ -193,9 +193,13 @@ export function SettingsScreen() {
         <h2 className="mt-6 mb-2 px-1 text-xs tracking-wide text-ink-soft">홈 화면에 추가</h2>
         <section className="rounded-2xl bg-surface p-4">
           <p className="text-xs leading-relaxed text-ink-soft">
-            사파리에서 <b className="font-medium text-ink">공유 → 홈 화면에 추가</b>를 눌러
-            앱처럼 쓰세요. 브라우저 탭으로만 쓰면 한동안 안 열었을 때
-            사파리가 저장소를 지울 수 있어요.
+            <b className="font-medium text-ink">공유 → 홈 화면에 추가</b>를 눌러 앱처럼 쓰세요.
+            사파리든 크롬이든 됩니다. 탭으로만 쓰면 한동안 안 열었을 때
+            저장소가 지워질 수 있어요.
+          </p>
+          <p className="mt-2 text-tiny leading-relaxed text-ink-faint">
+            기록은 브라우저마다 따로 쌓입니다. 사파리에서 모은 젤리는 크롬에서 안 보여요.
+            한 곳을 정해서 쓰세요.
           </p>
         </section>
 
