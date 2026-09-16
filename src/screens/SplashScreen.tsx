@@ -3,27 +3,43 @@ import { useEffect, useMemo, useState } from "react";
 import { Jar } from "../components/Jar";
 import { buildPile } from "../lib/pile";
 
-/** 첫 화면에 담기는 여덟 알. 색과 모양이 겹치지 않게 골랐다. */
+/**
+ * 첫 화면에 담기는 열여덟 알.
+ *
+ * 여덟 알이면 한 줄에 다 들어가서 바닥에 납작하게 깔린다. 한 줄에 여덟
+ * 자리가 나는데 알 지름이 줄 폭보다 커서, 다 옆으로 겹쳐 찌부된 띠가 된다.
+ * 층이 쌓여야 더미로 보인다. 8 + 7 + 3 으로 세 층이 올라가는 수가 열여덟이다.
+ */
 const SAMPLE = [
-  { id: "s1", shape: "bear", color: "orange" },
-  { id: "s2", shape: "ring", color: "berry" },
-  { id: "s3", shape: "cube", color: "grape" },
-  { id: "s4", shape: "worm", color: "green" },
-  { id: "s5", shape: "heart", color: "peach" },
-  { id: "s6", shape: "bottle", color: "cola" },
-  { id: "s7", shape: "cube", color: "soda" },
-  { id: "s8", shape: "ring", color: "lemon" },
+  { id: "s01", shape: "bear", color: "orange" },
+  { id: "s02", shape: "ring", color: "berry" },
+  { id: "s03", shape: "cube", color: "grape" },
+  { id: "s04", shape: "worm", color: "green" },
+  { id: "s05", shape: "heart", color: "peach" },
+  { id: "s06", shape: "bottle", color: "cola" },
+  { id: "s07", shape: "cube", color: "soda" },
+  { id: "s08", shape: "ring", color: "lemon" },
+  { id: "s09", shape: "bear", color: "berry" },
+  { id: "s10", shape: "worm", color: "grape" },
+  { id: "s11", shape: "heart", color: "berry" },
+  { id: "s12", shape: "cube", color: "green" },
+  { id: "s13", shape: "ring", color: "orange" },
+  { id: "s14", shape: "bottle", color: "soda" },
+  { id: "s15", shape: "bear", color: "lemon" },
+  { id: "s16", shape: "worm", color: "peach" },
+  { id: "s17", shape: "cube", color: "berry" },
+  { id: "s18", shape: "ring", color: "grape" },
 ] as const;
 
 /** 전체 길이 (ms). 이 안에서 젤리가 다 떨어지고 이름이 뜨고 병이 한 번 흔들린다. */
-export const SPLASH_MS = 5000;
+export const SPLASH_MS = 8000;
 /** 첫 알이 떨어지는 때와 알 사이 간격 */
 const FIRST_DROP = 420;
 const GAP = 330;
-/** 마지막 알이 자리를 잡고 나서 병을 한 번 톡 친다 */
-const SETTLE = FIRST_DROP + 7 * GAP + 620;
+/** 한 알이 떨어져 자리를 잡기까지 (Jar 의 낙하 애니메이션 길이) */
+const LAND = 620;
 /** 걷히는 데 걸리는 시간 */
-const FADE = 460;
+const FADE = 500;
 
 /**
  * 시작 화면.
@@ -50,8 +66,9 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
     const timers = pile.map((_, i) =>
       window.setTimeout(() => setDropped(i + 1), FIRST_DROP + i * GAP),
     );
-    // 다 담기고 나면 병을 한 번 톡. 5초를 끝까지 보는 사람에게 줄 마지막 한 박자다.
-    timers.push(window.setTimeout(() => setShake(1), SETTLE));
+    // 다 담기고 나면 병을 한 번 톡. 끝까지 보는 사람에게 줄 마지막 한 박자다.
+    const settle = FIRST_DROP + (pile.length - 1) * GAP + LAND;
+    timers.push(window.setTimeout(() => setShake(1), settle));
     return () => timers.forEach(clearTimeout);
   }, [still, pile]);
 
@@ -67,7 +84,7 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
     >
       <Jar
         className="w-[min(212px,54vw)]"
-        jellyRatio={0.2}
+        jellyRatio={0.165}
         items={pile.slice(0, dropped)}
         dropKey={dropped > 0 ? pile[dropped - 1].key : undefined}
         shakeToken={shake}
