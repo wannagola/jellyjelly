@@ -1,6 +1,6 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { useMemo, useState } from "react";
-import { Link, useLocation } from "react-router";
+import { Link, useLocation, useSearchParams } from "react-router";
 import { AppBar } from "../components/AppBar";
 import { Jar } from "../components/Jar";
 import { JellyFace } from "../components/JellyFace";
@@ -8,11 +8,13 @@ import { Toast } from "../components/Toast";
 import { db } from "../data/db";
 import type { Jelly } from "../data/types";
 import { JAR_CAPACITY, buildPile } from "../lib/pile";
-import { monthRange, seedFromKey, shiftMonth } from "../lib/month";
+import { monthRange, parseMonthKey, seedFromKey, shiftMonth } from "../lib/month";
 
 /** 보관함 — 앱의 얼굴. 다 먹은 젤리가 그 달의 병에 쌓인다. */
 export function ShelfScreen() {
-  const [cursor, setCursor] = useState(() => new Date());
+  const [params] = useSearchParams();
+  // 선반에서 병을 고르면 그 달로 열린다
+  const [cursor, setCursor] = useState(() => parseMonthKey(params.get("month") ?? "") ?? new Date());
   const month = useMemo(() => monthRange(cursor), [cursor]);
   const location = useLocation() as { state?: { toast?: string; drop?: boolean } };
   // 방금 담은 젤리만 떨어지는 연출을 받는다. 마운트 때 한 번만 잡아둔다.
@@ -108,7 +110,14 @@ export function ShelfScreen() {
             >
               ‹
             </button>
-            <p className="min-w-[7.5rem] text-center font-display text-[16px]">{month.label}</p>
+            <Link
+              to="/jars"
+              aria-label="젤리 선반 보기"
+              className="min-w-[7.5rem] rounded-full py-0.5 text-center font-display text-[16px] active:bg-line"
+            >
+              {month.label}
+              <span className="ml-1 text-[11px] text-ink-faint">▾</span>
+            </Link>
             <button
               type="button"
               aria-label="다음 달"
@@ -126,9 +135,9 @@ export function ShelfScreen() {
                 ? `${count}개 담겼어요 · 병에는 ${JAR_CAPACITY}개까지 보여요`
                 : `${count}개 담겼어요`}
           </p>
-          {count > 1 ? (
-            <p className="mt-1 text-[10px] text-ink-faint">병을 톡 치면 젤리가 섞여요</p>
-          ) : null}
+          <p className="mt-1 text-[10px] text-ink-faint">
+            {count > 1 ? "병을 톡 치면 젤리가 섞여요 · 달 이름을 누르면 선반" : "달 이름을 누르면 선반이 열려요"}
+          </p>
         </section>
 
         {data && data.eating.length > 0 ? (

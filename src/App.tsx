@@ -3,6 +3,7 @@ import { TabBar } from "./components/TabBar";
 import { CalendarScreen } from "./screens/CalendarScreen";
 import { DexScreen } from "./screens/DexScreen";
 import { FinishScreen } from "./screens/FinishScreen";
+import { JarShelfScreen } from "./screens/JarShelfScreen";
 import { JellyDetailScreen } from "./screens/JellyDetailScreen";
 import { JellyFormScreen } from "./screens/JellyFormScreen";
 import { RecommendScreen } from "./screens/RecommendScreen";
@@ -21,6 +22,7 @@ export default function App() {
     <div className="mx-auto flex h-full max-w-[480px] flex-col bg-bg">
       <Routes>
         <Route path="/" element={<ShelfScreen />} />
+        <Route path="/jars" element={<JarShelfScreen />} />
         <Route path="/record" element={<RecordScreen />} />
         <Route path="/record/new" element={<JellyFormScreen mode="create" />} />
         <Route path="/finish/:id" element={<FinishScreen />} />

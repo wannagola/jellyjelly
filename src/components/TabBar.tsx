@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from "react-router";
+import { NavLink, useLocation, useNavigate } from "react-router";
 
 const s = { fill: "none", stroke: "currentColor", strokeWidth: 1.8 } as const;
 
@@ -40,6 +40,8 @@ const TABS = [
 
 export function TabBar() {
   const navigate = useNavigate();
+  // 선반은 보관함에서 펼쳐 보는 화면이라 탭도 보관함에 머문다
+  const onShelf = useLocation().pathname.startsWith("/jars");
 
   return (
     <nav className="relative flex-none border-t border-line bg-surface safe-b">
@@ -51,7 +53,7 @@ export function TabBar() {
             end={t.to === "/"}
             className={({ isActive }) =>
               `flex flex-col items-center gap-1 py-1 text-[10px] transition-colors ${
-                isActive ? "text-accent" : "text-ink-faint"
+                isActive || (onShelf && t.to === "/") ? "text-accent" : "text-ink-faint"
               }`
             }
           >

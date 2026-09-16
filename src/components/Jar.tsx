@@ -21,6 +21,8 @@ export function Jar({
   onShake,
   /** 값이 바뀔 때마다 병이 한 번 흔들린다 */
   shakeToken = 0,
+  /** 선반처럼 병을 여러 개 그릴 때. 애니메이션 없이 정적으로 그린다. */
+  quiet = false,
 }: {
   items: PileItem[];
   className?: string;
@@ -28,6 +30,7 @@ export function Jar({
   dropKey?: string;
   onShake?: () => void;
   shakeToken?: number;
+  quiet?: boolean;
 }) {
   const still = useReducedMotion();
   const size = `${jellyRatio * 100}%`;
@@ -45,60 +48,98 @@ export function Jar({
   }, [shakeToken, still, animate, scope]);
 
   const jar = (
-    <motion.div ref={scope} className={`jar ${className}`} style={{ aspectRatio: "200 / 275" }}>
+    <motion.div
+      ref={scope}
+      className={`jar ${className}`}
+      style={{ aspectRatio: "200 / 275" }}
+    >
       <div className="jar-cast" />
       <div className="jar-lid" />
       <div className="jar-neck" />
       <div className="jar-glass">
         <div className="jar-pile">
-          {items.map((it) => {
-            const falling = it.key === dropKey;
-            return (
-              <motion.span
-                key={it.key}
-                style={{ width: size }}
-                initial={
-                  falling
-                    ? { left: `${it.x * 100}%`, top: "-30%", opacity: 0 }
-                    : { left: `${it.x * 100}%`, top: `${it.y * 100}%`, opacity: 1 }
-                }
-                animate={{ left: `${it.x * 100}%`, top: `${it.y * 100}%`, opacity: 1 }}
-                transition={
-                  still
-                    ? { duration: 0 }
-                    : falling
-                      ? { type: "spring", stiffness: 380, damping: 17 }
-                      : { type: "spring", stiffness: 210, damping: 20 }
-                }
-              >
-                {/* 회전과 찌그러짐은 안쪽에서. 바깥은 자리만 잡는다. */}
-                <motion.span
-                  className="block"
-                  initial={falling ? { rotate: it.rotate - 40, scale: 0.85 } : false}
-                  animate={
-                    still
-                      ? { rotate: it.rotate, scale: 1 }
-                      : falling
-                        ? {
-                            rotate: it.rotate,
-                            scaleX: [0.85, 1.18, 0.94, 1.04, 1],
-                            scaleY: [0.85, 0.8, 1.12, 0.96, 1],
-                          }
-                        : { rotate: it.rotate, scale: 1 }
-                  }
-                  transition={
-                    still
-                      ? { duration: 0 }
-                      : falling
-                        ? { duration: 0.62, times: [0, 0.55, 0.72, 0.88, 1], ease: "easeOut" }
-                        : { type: "spring", stiffness: 210, damping: 18 }
-                  }
+          {quiet
+            ? items.map((it) => (
+                <span
+                  key={it.key}
+                  style={{
+                    left: `${it.x * 100}%`,
+                    top: `${it.y * 100}%`,
+                    width: size,
+                  }}
                 >
-                  <Jelly shape={it.shape} color={it.color} size="100%" />
-                </motion.span>
-              </motion.span>
-            );
-          })}
+                  <span
+                    className="block"
+                    style={{ transform: `rotate(${it.rotate}deg)` }}
+                  >
+                    <Jelly shape={it.shape} color={it.color} size="100%" />
+                  </span>
+                </span>
+              ))
+            : items.map((it) => {
+                const falling = it.key === dropKey;
+                return (
+                  <motion.span
+                    key={it.key}
+                    style={{ width: size }}
+                    initial={
+                      falling
+                        ? { left: `${it.x * 100}%`, top: "-30%", opacity: 0 }
+                        : {
+                            left: `${it.x * 100}%`,
+                            top: `${it.y * 100}%`,
+                            opacity: 1,
+                          }
+                    }
+                    animate={{
+                      left: `${it.x * 100}%`,
+                      top: `${it.y * 100}%`,
+                      opacity: 1,
+                    }}
+                    transition={
+                      still
+                        ? { duration: 0 }
+                        : falling
+                          ? { type: "spring", stiffness: 380, damping: 17 }
+                          : { type: "spring", stiffness: 210, damping: 20 }
+                    }
+                  >
+                    {/* 회전과 찌그러짐은 안쪽에서. 바깥은 자리만 잡는다. */}
+                    <motion.span
+                      className="block"
+                      initial={
+                        falling
+                          ? { rotate: it.rotate - 40, scale: 0.85 }
+                          : false
+                      }
+                      animate={
+                        still
+                          ? { rotate: it.rotate, scale: 1 }
+                          : falling
+                            ? {
+                                rotate: it.rotate,
+                                scaleX: [0.85, 1.18, 0.94, 1.04, 1],
+                                scaleY: [0.85, 0.8, 1.12, 0.96, 1],
+                              }
+                            : { rotate: it.rotate, scale: 1 }
+                      }
+                      transition={
+                        still
+                          ? { duration: 0 }
+                          : falling
+                            ? {
+                                duration: 0.62,
+                                times: [0, 0.55, 0.72, 0.88, 1],
+                                ease: "easeOut",
+                              }
+                            : { type: "spring", stiffness: 210, damping: 18 }
+                      }
+                    >
+                      <Jelly shape={it.shape} color={it.color} size="100%" />
+                    </motion.span>
+                  </motion.span>
+                );
+              })}
         </div>
         <div className="jar-glare" />
       </div>
