@@ -23,8 +23,79 @@
   /* 별점 */
   --star: #f5b731;
 
+  /* 병뚜껑과 선반 판자. 테마마다 달라진다. */
+  --lid-top: #fae8ed;
+  --lid-mid: #f2d2dc;
+  --lid-bottom: #e2aec0;
+  --plank-top: #efdfe6;
+  --plank-bottom: #dcc5cf;
+
   --font-display: "Jua", "Noto Sans KR", system-ui, sans-serif;
   --font-body: "Noto Sans KR", system-ui, -apple-system, sans-serif;
 
   color-scheme: light;
+}
+
+/* ===== 테마 =====
+   젤리 여덟 색은 건드리지 않는다. 젤리는 어느 테마에서나 젤리 색이어야 한다.
+   바뀌는 건 바탕, 글자, 강조색, 그리고 병뚜껑과 선반 판자다. */
+
+:root[data-theme="greengrape"] {
+  --bg: #f2f8f1;
+  --ink: #23331f;
+  --ink-soft: #6e8168;
+  --ink-faint: #b3c4ac;
+  --line: #e2eddf;
+  --accent: #4f9d58;
+  --accent-bg: #e4f2e2;
+  --lid-top: #e6f3e2;
+  --lid-mid: #cfe6c9;
+  --lid-bottom: #a9cfa2;
+  --plank-top: #dfeddb;
+  --plank-bottom: #c3dbbc;
+}
+
+:root[data-theme="soda"] {
+  --bg: #f1f6fa;
+  --ink: #1f3140;
+  --ink-soft: #667e90;
+  --ink-faint: #abbfcd;
+  --line: #e0eaf1;
+  --accent: #2f8fbe;
+  --accent-bg: #e0eff7;
+  --lid-top: #e3f1f8;
+  --lid-mid: #c8e2ee;
+  --lid-bottom: #9cc7dc;
+  --plank-top: #dceaf2;
+  --plank-bottom: #bcd4e2;
+}
+
+:root[data-theme="grape"] {
+  --bg: #f6f2fa;
+  --ink: #2c2140;
+  --ink-soft: #776a8c;
+  --ink-faint: #bcb0cd;
+  --line: #e9e1f1;
+  --accent: #7c53c2;
+  --accent-bg: #ede4f8;
+  --lid-top: #ece2f7;
+  --lid-mid: #d8c7ec;
+  --lid-bottom: #b79ed8;
+  --plank-top: #e6dcf1;
+  --plank-bottom: #cfc0e0;
+}
+
+:root[data-theme="cocoa"] {
+  --bg: #f8f4f0;
+  --ink: #3a2a1f;
+  --ink-soft: #8a7566;
+  --ink-faint: #c6b5a7;
+  --line: #ece2d9;
+  --accent: #a4693c;
+  --accent-bg: #f2e5d9;
+  --lid-top: #f3e6da;
+  --lid-mid: #e3cdb9;
+  --lid-bottom: #c9a887;
+  --plank-top: #ece0d3;
+  --plank-bottom: #d6c2ad;
 }

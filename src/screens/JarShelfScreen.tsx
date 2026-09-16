@@ -6,6 +6,7 @@ import { Jar } from "../components/Jar";
 import { db } from "../data/db";
 import type { JellyColor, JellyShape } from "../data/types";
 import { monthKeyOf, monthsFrom, seedFromKey } from "../lib/month";
+import { useSettings } from "../lib/settings";
 import { buildPile } from "../lib/pile";
 
 const PER_ROW = 3;
@@ -24,6 +25,7 @@ interface Jarful {
  * "올해 이만큼 모았네"가 안 보인다. 그 감동이 이 앱의 보상이다.
  */
 export function JarShelfScreen() {
+  const settings = useSettings();
   const data = useLiveQuery(async () => {
     const [entries, jellies] = await Promise.all([
       db.entries.where("status").equals("done").toArray(),
@@ -53,11 +55,13 @@ export function JarShelfScreen() {
     // 먼저 먹은 젤리가 아래에 깔리도록
     for (const list of buckets.values()) list.sort((a, b) => a.id.localeCompare(b.id));
 
-    return { buckets, kinds, first: Number.isFinite(first) ? first : undefined };
+    // 기록이 하나도 없으면 이번 달부터. 렌더 중에 Date.now() 를 부르지 않으려고 여기서 정한다.
+    return { buckets, kinds, first: Number.isFinite(first) ? first : Date.now() };
   }, []);
 
   const jars = useMemo<Jarful[]>(() => {
-    if (!data?.first) return [];
+    if (!data) return [];
+    // 기록이 없어도 이번 달 빈 병은 선반에 서 있어야 한다. 텅 빈 홈은 앱처럼 안 보인다.
     return monthsFrom(data.first)
       .reverse()
       .map((month) => ({
@@ -79,24 +83,22 @@ export function JarShelfScreen() {
 
   return (
     <>
-      <AppBar title="젤리 선반" side={<Link to="/" className="text-ink-soft">닫기</Link>} />
+      <AppBar
+        title={settings?.nickname ? `${settings.nickname}의 젤리 선반` : "젤리 선반"}
+        side={<SettingsLink />}
+      />
 
       <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-10">
-        {jars.length === 0 ? (
-          <p className="mt-16 text-center text-[13px] leading-relaxed text-ink-soft">
-            아직 선반이 비어 있어요
-            <br />첫 젤리를 기록하면 병이 하나 올라옵니다
-          </p>
-        ) : (
+        {jars.length === 0 ? null : (
           <>
             <div className="mb-4 flex items-baseline gap-2.5 rounded-2xl bg-surface px-4 py-3">
               <span className="font-display text-[25px] leading-none text-accent tabular-nums">
                 {total}
               </span>
               <span className="text-[11px] leading-snug text-ink-soft">
-                지금까지 병에 담은 젤리
+                {total > 0 ? "지금까지 병에 담은 젤리" : "아직 담은 젤리가 없어요"}
                 <br />
-                {jars.length}개월 · {allKinds}종
+                {total > 0 ? `${jars.length}개월 · ${allKinds}종` : "아래 ＋ 로 첫 젤리를 기록해 보세요"}
               </span>
             </div>
 
@@ -109,7 +111,7 @@ export function JarShelfScreen() {
                     {row.map((jar) => (
                       <li key={jar.key} className="min-w-0 flex-1">
                         <Link
-                          to={`/?month=${jar.key}`}
+                          to={`/month/${jar.key}`}
                           aria-label={`${jar.label} 보관함 열기`}
                           className="block transition active:scale-[.96]"
                         >
@@ -127,7 +129,7 @@ export function JarShelfScreen() {
                     ))}
                   </ul>
 
-                  <div className="h-2.5 rounded-[3px] bg-gradient-to-b from-[#EFDFE6] to-[#DCC5CF] shadow-[0_3px_7px_-3px_rgba(59,36,48,.45)]" />
+                  <div className="h-2.5 rounded-[3px] bg-gradient-to-b from-[var(--plank-top)] to-[var(--plank-bottom)] shadow-[0_3px_7px_-3px_rgba(59,36,48,.45)]" />
 
                   <ul className="flex gap-1 pt-1.5">
                     {row.map((jar) => (
@@ -151,5 +153,25 @@ export function JarShelfScreen() {
         )}
       </main>
     </>
+  );
+}
+
+function SettingsLink() {
+  return (
+    <Link to="/settings" aria-label="설정" className="text-ink-faint">
+      <svg
+        viewBox="0 0 24 24"
+        className="size-[19px]"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      >
+        <circle cx="12" cy="12" r="3.2" />
+        <path
+          d="M12 2.6v2.6M12 18.8v2.6M21.4 12h-2.6M5.2 12H2.6M18.6 5.4l-1.9 1.9M7.3 16.7l-1.9 1.9M18.6 18.6l-1.9-1.9M7.3 7.3 5.4 5.4"
+          strokeLinecap="round"
+        />
+      </svg>
+    </Link>
   );
 }

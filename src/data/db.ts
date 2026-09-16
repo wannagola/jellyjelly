@@ -66,6 +66,15 @@ export async function syncSeed(): Promise<void> {
   });
 }
 
+/** 설정값 한 칸. 없으면 undefined. */
+export async function readSetting<T>(key: string): Promise<T | undefined> {
+  return (await db.meta.get(key))?.value as T | undefined;
+}
+
+export async function writeSetting(key: string, value: unknown): Promise<void> {
+  await db.meta.put({ key, value });
+}
+
 export async function addJelly(
   input: Omit<Jelly, "id" | "createdAt" | "updatedAt">,
 ): Promise<string> {

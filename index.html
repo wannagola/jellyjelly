@@ -19,6 +19,13 @@
       rel="stylesheet"
     />
     <title>젤리젤리</title>
+    <script>
+      // 저장소를 읽기 전에 기본 분홍이 한 번 번쩍이는 걸 막는다
+      try {
+        var t = localStorage.getItem("jj-theme");
+        if (t && t !== "strawberry") document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

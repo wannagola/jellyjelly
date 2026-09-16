@@ -1,39 +1,36 @@
 import { useLiveQuery } from "dexie-react-hooks";
-import { useMemo, useState } from "react";
-import { Link, useLocation, useSearchParams } from "react-router";
-import { AppBar } from "../components/AppBar";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useLocation, useNavigate, useParams } from "react-router";
 import { Jar } from "../components/Jar";
 import { JellyFace } from "../components/JellyFace";
 import { Toast } from "../components/Toast";
 import { db } from "../data/db";
 import type { Jelly } from "../data/types";
 import { JAR_CAPACITY, buildPile } from "../lib/pile";
+import { useSettings } from "../lib/settings";
+import { playDrop, playShake } from "../lib/sound";
 import { monthKeyOf, monthRange, parseMonthKey, seedFromKey, shiftMonth } from "../lib/month";
+import { useCurrentMonth } from "../lib/useCurrentMonth";
 
 /** 보관함 — 앱의 얼굴. 다 먹은 젤리가 그 달의 병에 쌓인다. */
 export function ShelfScreen() {
-  // 어느 달을 보고 있는지는 주소에 둔다. 새로고침해도 유지되고,
-  // 탭바가 이걸 읽어서 지난 달에서는 기록 버튼을 잠근다.
-  const [params, setParams] = useSearchParams();
-  const monthParam = params.get("month");
-  const cursor = useMemo(() => parseMonthKey(monthParam ?? "") ?? new Date(), [monthParam]);
+  // 어느 달인지는 주소가 들고 있다(/month/2026-08).
+  // 새로고침해도 유지되고, 탭바가 이걸 읽어서 지난 달에서는 기록 버튼을 잠근다.
+  const { key } = useParams();
+  const navigate = useNavigate();
+  const cursor = useMemo(() => parseMonthKey(key ?? "") ?? new Date(), [key]);
   const month = useMemo(() => monthRange(cursor), [cursor]);
-  const isThisMonth = month.key === monthKeyOf(Date.now());
-  // 기본 화면이 아니면 돌아갈 길을 내준다.
-  // 홈 화면에 띄운 앱에는 브라우저 뒤로가기가 없다.
-  const showBack = Boolean(monthParam);
+  const thisMonth = useCurrentMonth();
+  const isThisMonth = month.key === thisMonth;
 
   function goMonth(delta: number) {
-    const next = monthKeyOf(shiftMonth(cursor, delta).getTime());
-    setParams(
-      next === monthKeyOf(Date.now()) ? {} : { month: next },
-      { replace: true },
-    );
+    navigate(`/month/${monthKeyOf(shiftMonth(cursor, delta).getTime())}`, { replace: true });
     setShakes(0);
   }
   const location = useLocation() as { state?: { toast?: string; drop?: boolean } };
   // 방금 담은 젤리만 떨어지는 연출을 받는다. 마운트 때 한 번만 잡아둔다.
-  const [playDrop] = useState(() => Boolean(location.state?.drop));
+  const [dropping] = useState(() => Boolean(location.state?.drop));
+  const settings = useSettings();
 
   const data = useLiveQuery(async () => {
     const [done, eating, jellies] = await Promise.all([
@@ -72,9 +69,17 @@ export function ShelfScreen() {
     [doneJellies.length, month.key, shakes],
   );
 
+  // 젤리가 바닥에 닿는 순간에 맞춰 한 알 떨어지는 소리
+  useEffect(() => {
+    if (!dropping || settings?.muted) return;
+    const timer = setTimeout(playDrop, 420);
+    return () => clearTimeout(timer);
+  }, [dropping, settings?.muted]);
+
   function shake() {
     setShakes((n) => n + 1);
     navigator.vibrate?.(12);
+    if (!settings?.muted) playShake(count);
   }
 
   const count = doneJellies.length;
@@ -83,32 +88,22 @@ export function ShelfScreen() {
 
   return (
     <>
-      {showBack ? (
-        <header className="flex flex-none items-center justify-between gap-2 px-5 pt-3 pb-2.5">
-          <Link to="/jars" className="text-[13px] text-ink-soft">
-            ‹ 선반
-          </Link>
-          {/* 달 이름은 병 아래에 앞뒤 화살표와 함께 나오니 여기선 두 번 적지 않는다 */}
-          <h1 className="font-display text-[17px]">보관함</h1>
-          <SettingsLink />
-        </header>
-      ) : (
-        <AppBar
-          title="젤리젤리"
-          side={
-            <span className="flex items-center gap-3">
-              {count > 0 ? <span className="tabular-nums">{`${kinds}종 · ${count}개`}</span> : null}
-              <SettingsLink />
-            </span>
-          }
-        />
-      )}
+      <header className="flex flex-none items-center justify-between gap-2 px-5 pt-3 pb-2.5">
+        <Link to="/" className="text-[13px] text-ink-soft">
+          ‹ 선반
+        </Link>
+        {/* 달 이름은 병 아래에 앞뒤 화살표와 함께 나오니 여기선 두 번 적지 않는다 */}
+        <h1 className="font-display text-[17px]">
+          {count > 0 ? `${kinds}종 · ${count}개` : "보관함"}
+        </h1>
+        <SettingsLink />
+      </header>
 
       <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-8">
         <section className="flex flex-col items-center pt-2">
           <Jar
             items={pile}
-            dropKey={playDrop ? pile.at(-1)?.key : undefined}
+            dropKey={dropping ? pile.at(-1)?.key : undefined}
             shakeToken={shakes}
             onShake={count > 0 ? shake : undefined}
           />
@@ -122,14 +117,7 @@ export function ShelfScreen() {
             >
               ‹
             </button>
-            <Link
-              to="/jars"
-              aria-label="젤리 선반 보기"
-              className="min-w-[7.5rem] rounded-full py-0.5 text-center font-display text-[16px] active:bg-line"
-            >
-              {month.label}
-              <span className="ml-1 text-[11px] text-ink-faint">▾</span>
-            </Link>
+            <p className="min-w-[7.5rem] text-center font-display text-[16px]">{month.label}</p>
             {/* 아직 오지 않은 달에는 먹은 젤리가 있을 수 없다 */}
             <button
               type="button"
@@ -153,8 +141,8 @@ export function ShelfScreen() {
             {!isThisMonth
               ? "지난 병이에요 · 기록은 이번 달에만 담을 수 있어요"
               : count > 1
-                ? "병을 톡 치면 젤리가 섞여요 · 달 이름을 누르면 선반"
-                : "달 이름을 누르면 선반이 열려요"}
+                ? "병을 톡 치면 젤리가 섞여요"
+                : "아래 ＋ 로 젤리를 담아보세요"}
           </p>
         </section>
 

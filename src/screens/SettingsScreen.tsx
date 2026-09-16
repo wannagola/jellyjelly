@@ -3,6 +3,9 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { useRef, useState } from "react";
 import { AppBar } from "../components/AppBar";
 import { db, syncSeed } from "../data/db";
+import { setMuted, setNickname, setTheme, useSettings } from "../lib/settings";
+import { THEMES, applyTheme } from "../lib/theme";
+import { playShake } from "../lib/sound";
 import { buildBackup, downloadBackup, restoreBackup, wipeEverything } from "../lib/backup";
 
 /** 설정 — 여기서 가장 중요한 건 백업이다. 서버가 없으면 사본이 하나뿐이다. */
@@ -12,6 +15,8 @@ export function SettingsScreen() {
   const [note, setNote] = useState<string>();
   const [error, setError] = useState<string>();
   const [confirmWipe, setConfirmWipe] = useState(false);
+
+  const settings = useSettings();
 
   const stats = useLiveQuery(async () => {
     const [jellies, entries] = await Promise.all([db.jellies.count(), db.entries.count()]);
@@ -72,6 +77,77 @@ export function SettingsScreen() {
       <AppBar title="설정" />
 
       <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-8">
+        <h2 className="mb-2 px-1 text-[11px] tracking-wide text-ink-soft">내 이름</h2>
+        {settings ? <NicknameRow key={settings.nickname} initial={settings.nickname ?? ""} /> : null}
+
+        <h2 className="mt-6 mb-2 px-1 text-[11px] tracking-wide text-ink-soft">색</h2>
+        <div className="rounded-2xl bg-surface p-4">
+          <div className="flex justify-between gap-2">
+            {THEMES.map((theme) => {
+              const on = settings?.theme === theme.key;
+              return (
+                <button
+                  key={theme.key}
+                  type="button"
+                  aria-pressed={on}
+                  onClick={() => {
+                    // 저장이 끝나기 전에 먼저 입혀야 누른 순간 바뀐다
+                    applyTheme(theme.key);
+                    void setTheme(theme.key);
+                  }}
+                  className="flex min-w-0 flex-1 flex-col items-center gap-1.5"
+                >
+                  <span
+                    className={`size-9 rounded-full transition ${
+                      on ? "ring-2 ring-ink/30 ring-offset-2 ring-offset-surface" : ""
+                    }`}
+                    style={{ background: theme.swatch }}
+                  />
+                  <span
+                    className={`truncate text-[10px] ${on ? "font-medium text-ink" : "text-ink-soft"}`}
+                  >
+                    {theme.name}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          <p className="mt-3 text-[10.5px] leading-snug text-ink-faint">
+            젤리 색은 그대로예요. 바탕과 뚜껑, 선반 색만 바뀝니다.
+          </p>
+        </div>
+
+        <h2 className="mt-6 mb-2 px-1 text-[11px] tracking-wide text-ink-soft">소리</h2>
+        <button
+          type="button"
+          onClick={() => {
+            const next = !settings?.muted;
+            void setMuted(next);
+            if (!next) playShake(14);
+          }}
+          aria-pressed={!settings?.muted}
+          className="flex w-full items-center gap-3 rounded-2xl bg-surface p-4 text-left transition active:scale-[.99]"
+        >
+          <span className="min-w-0 flex-1">
+            <span className="block text-[13px] font-medium">병 흔드는 소리</span>
+            <span className="mt-0.5 block text-[11px] leading-snug text-ink-soft">
+              병을 톡 칠 때 젤리 부딪히는 소리가 나요
+            </span>
+          </span>
+          <span
+            className={`relative h-6 w-11 flex-none rounded-full transition ${
+              settings?.muted ? "bg-line" : "bg-accent"
+            }`}
+          >
+            <span
+              className={`absolute top-0.5 size-5 rounded-full bg-white shadow-sm transition-all ${
+                settings?.muted ? "left-0.5" : "left-[1.375rem]"
+              }`}
+            />
+          </span>
+        </button>
+
+        <h2 className="mt-6 mb-2 px-1 text-[11px] tracking-wide text-ink-soft">저장</h2>
         <section className="rounded-2xl bg-surface p-4">
           <p className="text-[13px] font-medium">이 기기에만 저장돼요</p>
           <p className="mt-1 text-[11.5px] leading-relaxed text-ink-soft">
@@ -193,5 +269,37 @@ function Row({
         {action}
       </span>
     </button>
+  );
+}
+
+/** 이름 고치기. 바뀐 게 있을 때만 저장 버튼이 살아난다. */
+function NicknameRow({ initial }: { initial: string }) {
+  const [draft, setDraft] = useState(initial);
+  const trimmed = draft.trim();
+  const changed = trimmed.length > 0 && trimmed !== initial;
+
+  return (
+    <form
+      className="flex items-center gap-2 rounded-2xl bg-surface p-3"
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (changed) void setNickname(trimmed);
+      }}
+    >
+      <input
+        value={draft}
+        onChange={(e) => setDraft(e.target.value.slice(0, 12))}
+        maxLength={12}
+        enterKeyHint="done"
+        className="min-w-0 flex-1 rounded-xl bg-bg px-3 py-2 text-[14px] outline-none focus:shadow-[inset_0_0_0_1.5px_var(--accent)]"
+      />
+      <button
+        type="submit"
+        disabled={!changed}
+        className="flex-none rounded-full bg-accent-bg px-3.5 py-2 text-[12px] font-medium text-accent disabled:opacity-35"
+      >
+        저장
+      </button>
+    </form>
   );
 }

@@ -1,5 +1,5 @@
-import { NavLink, useLocation, useNavigate, useSearchParams } from "react-router";
-import { monthKeyOf } from "../lib/month";
+import { NavLink, useLocation, useNavigate } from "react-router";
+import { useCurrentMonth } from "../lib/useCurrentMonth";
 
 const s = { fill: "none", stroke: "currentColor", strokeWidth: 1.8 } as const;
 
@@ -33,7 +33,7 @@ const ICONS = {
 /** 탭은 넷까지다. 다섯을 넘으면 손가락이 헤맨다.
     설정은 자주 갈 일이 없어서 보관함 오른쪽 위로 뺐다. */
 const TABS = [
-  { to: "/", icon: ICONS.jar, label: "보관함" },
+  { to: "/", icon: ICONS.jar, label: "선반" },
   { to: "/calendar", icon: ICONS.cal, label: "달력" },
   { to: "/dex", icon: ICONS.book, label: "도감" },
   { to: "/recommend", icon: ICONS.spark, label: "추천" },
@@ -42,14 +42,13 @@ const TABS = [
 export function TabBar() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const [params] = useSearchParams();
-  // 선반은 보관함에서 펼쳐 보는 화면이라 탭도 보관함에 머문다
-  const onShelf = pathname.startsWith("/jars");
+  // 달 하나짜리 병도 선반에서 내려간 화면이라 탭은 보관함에 머문다
+  const viewingMonth = pathname.match(/^\/month\/(\d{4}-\d{2})/)?.[1];
 
   // 지난 달 병을 보는 중이면 기록을 잠근다. 지금 기록하면 오늘 날짜로 담겨서
   // 보고 있는 병이 아니라 이번 달 병에 들어간다. 눌러놓고 어디 갔나 찾게 된다.
-  const viewingPast =
-    pathname === "/" && Boolean(params.get("month")) && params.get("month") !== monthKeyOf(Date.now());
+  const thisMonth = useCurrentMonth();
+  const viewingPast = Boolean(viewingMonth) && viewingMonth !== thisMonth;
 
   return (
     <nav className="relative flex-none border-t border-line bg-surface safe-b">
@@ -61,7 +60,7 @@ export function TabBar() {
             end={t.to === "/"}
             className={({ isActive }) =>
               `flex flex-col items-center gap-1 py-1 text-[10px] transition-colors ${
-                isActive || (onShelf && t.to === "/") ? "text-accent" : "text-ink-faint"
+                isActive || (Boolean(viewingMonth) && t.to === "/") ? "text-accent" : "text-ink-faint"
               }`
             }
           >
