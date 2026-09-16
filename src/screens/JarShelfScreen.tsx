@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { Link } from "react-router";
 import { AppBar } from "../components/AppBar";
 import { Jar } from "../components/Jar";
+import { StatRow } from "../components/StatRow";
 import { db } from "../data/db";
 import type { JellyColor, JellyShape } from "../data/types";
 import { monthKeyOf, monthsFrom, seedFromKey } from "../lib/month";
@@ -91,16 +92,23 @@ export function JarShelfScreen() {
       <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-10">
         {jars.length === 0 ? null : (
           <>
-            <div className="mb-4 flex items-baseline gap-2.5 rounded-2xl bg-surface px-4 py-3">
-              <span className="font-display text-[25px] leading-none text-accent tabular-nums">
-                {total}
-              </span>
-              <span className="text-[11px] leading-snug text-ink-soft">
-                {total > 0 ? "지금까지 병에 담은 젤리" : "아직 담은 젤리가 없어요"}
+            {total > 0 ? (
+              <div className="mb-4">
+                <StatRow
+                  items={[
+                    { value: total, unit: "개", label: "담은 젤리" },
+                    { value: allKinds, unit: "종", label: "모은 종류" },
+                    { value: jars.length, unit: "달", label: "모은 기간" },
+                  ]}
+                />
+              </div>
+            ) : (
+              <p className="mb-4 rounded-2xl bg-surface px-4 py-3.5 text-center text-[12.5px] leading-relaxed text-ink-soft">
+                아직 담은 젤리가 없어요
                 <br />
-                {total > 0 ? `${jars.length}개월 · ${allKinds}종` : "아래 ＋ 로 첫 젤리를 기록해 보세요"}
-              </span>
-            </div>
+                아래 <span className="font-medium text-accent">＋</span> 로 첫 젤리를 기록해 보세요
+              </p>
+            )}
 
             <div className="flex flex-col gap-1">
               {rows.map((row) => (

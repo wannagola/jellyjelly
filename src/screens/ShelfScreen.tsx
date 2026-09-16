@@ -1,6 +1,7 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router";
+import { AppBar } from "../components/AppBar";
 import { Jar } from "../components/Jar";
 import { JellyFace } from "../components/JellyFace";
 import { Toast } from "../components/Toast";
@@ -88,16 +89,12 @@ export function ShelfScreen() {
 
   return (
     <>
-      <header className="flex flex-none items-center justify-between gap-2 px-5 pt-3 pb-2.5">
-        <Link to="/" className="text-[13px] text-ink-soft">
-          ‹ 선반
-        </Link>
-        {/* 달 이름은 병 아래에 앞뒤 화살표와 함께 나오니 여기선 두 번 적지 않는다 */}
-        <h1 className="font-display text-[17px]">
-          {count > 0 ? `${kinds}종 · ${count}개` : "보관함"}
-        </h1>
-        <SettingsLink />
-      </header>
+      {/* 달 이름은 병 아래에 앞뒤 화살표와 함께 나오니 여기선 두 번 적지 않는다 */}
+      <AppBar
+        title="보관함"
+        lead={<Link to="/">‹ 선반</Link>}
+        side={<SettingsLink />}
+      />
 
       <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-8">
         <section className="flex flex-col items-center pt-2">
@@ -134,8 +131,8 @@ export function ShelfScreen() {
             {count === 0
               ? "아직 비어 있어요"
               : overflow > 0
-                ? `${count}개 담겼어요 · 병에는 ${JAR_CAPACITY}개까지 보여요`
-                : `${count}개 담겼어요`}
+                ? `${kinds}종 · ${count}개 · 병에는 ${JAR_CAPACITY}개까지 보여요`
+                : `${kinds}종 · ${count}개 담겼어요`}
           </p>
           <p className="mt-1 text-[10px] text-ink-faint">
             {!isThisMonth

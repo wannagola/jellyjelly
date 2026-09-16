@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router";
 import { AppBar } from "../components/AppBar";
 import { JellyFace } from "../components/JellyFace";
+import { StatRow } from "../components/StatRow";
 import { Stars } from "../components/Stars";
 import { db } from "../data/db";
 import type { Entry, Jelly } from "../data/types";
@@ -65,17 +66,22 @@ export function CalendarScreen() {
 
       <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-8">
         {data && data.total > 0 ? (
-          <div className="mb-3 flex items-baseline gap-2.5 rounded-2xl bg-surface px-4 py-3">
-            <span className="font-display text-[25px] leading-none text-accent tabular-nums">
-              {data.counted > 0 ? data.kcal.toLocaleString() : "—"}
-            </span>
-            <span className="text-[11px] leading-snug text-ink-soft">
-              {data.counted > 0 ? "이번 달 먹은 칼로리" : "칼로리를 아는 젤리가 없어요"}
-              <br />
-              {data.counted === data.total
-                ? `${data.total}개 모두 계산했어요`
-                : `${data.total}개 중 ${data.total - data.counted}개는 칼로리를 몰라 빠졌어요`}
-            </span>
+          <div className="mb-3">
+            <StatRow
+              items={[
+                { value: data.total, unit: "개", label: "이번 달 먹은 젤리" },
+                {
+                  value: data.counted > 0 ? data.kcal.toLocaleString() : "—",
+                  unit: data.counted > 0 ? "kcal" : undefined,
+                  label: "합쳐서",
+                },
+              ]}
+            />
+            {data.counted < data.total ? (
+              <p className="mt-1.5 text-center text-[10px] text-ink-faint">
+                {data.total - data.counted}개는 칼로리를 몰라 빠졌어요
+              </p>
+            ) : null}
           </div>
         ) : null}
 

@@ -5,6 +5,7 @@ import { Link } from "react-router";
 import { AppBar } from "../components/AppBar";
 import { Heart } from "../components/Heart";
 import { JellyFace } from "../components/JellyFace";
+import { StatRow } from "../components/StatRow";
 import { db } from "../data/db";
 import { searchJellies } from "../lib/search";
 
@@ -50,19 +51,14 @@ export function DexScreen() {
       <AppBar title="내 젤리 도감" />
 
       <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-8">
-        <div className="mb-3 flex items-baseline gap-2.5 rounded-2xl bg-surface px-4 py-3">
-          <span className="font-display text-[27px] leading-none text-accent tabular-nums">
-            {collected}
-          </span>
-          <span className="text-[11px] leading-snug text-ink-soft">
-            지금까지 모은 젤리 종류
-            {data && data.thisYear.size > 0 ? (
-              <>
-                <br />
-                올해만 <b className="font-medium text-accent">{data.thisYear.size}종</b> 만났어요
-              </>
-            ) : null}
-          </span>
+        <div className="mb-3">
+          <StatRow
+            items={[
+              { value: collected, unit: "종", label: "모은 젤리" },
+              { value: data?.thisYear.size ?? 0, unit: "종", label: "올해 새로" },
+              { value: data?.jellies.length ?? 0, unit: "종", label: "도감 전체" },
+            ]}
+          />
         </div>
 
         <div className="mb-3 flex gap-1.5">
