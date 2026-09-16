@@ -184,12 +184,24 @@
   position: absolute;
   inset: 0;
   z-index: 1;
+  /* 젤리 사이의 빈 곳을 눌렀을 때는 뒤에 깔린 흔들기 버튼이 받아야 한다 */
+  pointer-events: none;
+}
+
+/* 병 안쪽 전체를 덮는 흔들기 버튼. 젤리 더미 뒤에 깔린다.
+   병을 통째로 button 으로 만들면 젤리 버튼이 그 안에 중첩돼서 쓸 수 없다. */
+.jar-shake {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  cursor: pointer;
 }
 /* 자리잡기는 CSS가, 회전과 찌그러짐은 안쪽 요소가 맡는다.
    바깥에서 transform 을 쓰면 motion 이 회전을 쓸 때 가운데 정렬이 날아간다. */
 .jar-pile > * {
   position: absolute;
   transform: translate(-50%, -50%);
+  pointer-events: auto;
 }
 
 /* 유리 반사 - 젤리 위에 덮인다 */

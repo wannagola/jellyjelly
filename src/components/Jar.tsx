@@ -23,6 +23,8 @@ export function Jar({
   shakeToken = 0,
   /** 선반처럼 병을 여러 개 그릴 때. 애니메이션 없이 정적으로 그린다. */
   quiet = false,
+  /** 젤리 한 알을 눌렀을 때. 키는 그 젤리를 담은 기록의 id다. */
+  onPick,
 }: {
   items: PileItem[];
   className?: string;
@@ -31,6 +33,7 @@ export function Jar({
   onShake?: () => void;
   shakeToken?: number;
   quiet?: boolean;
+  onPick?: (key: string) => void;
 }) {
   const still = useReducedMotion();
   const size = `${jellyRatio * 100}%`;
@@ -57,6 +60,9 @@ export function Jar({
       <div className="jar-lid" />
       <div className="jar-neck" />
       <div className="jar-glass">
+        {onShake ? (
+          <button type="button" className="jar-shake" aria-label="병 흔들기" onClick={onShake} />
+        ) : null}
         <div className="jar-pile">
           {quiet
             ? items.map((it) => (
@@ -72,7 +78,9 @@ export function Jar({
                     className="block"
                     style={{ transform: `rotate(${it.rotate}deg)` }}
                   >
-                    <Jelly shape={it.shape} color={it.color} size="100%" />
+                    <JellyHit onPick={onPick} pickKey={it.key}>
+                      <Jelly shape={it.shape} color={it.color} size="100%" />
+                    </JellyHit>
                   </span>
                 </span>
               ))
@@ -135,7 +143,9 @@ export function Jar({
                             : { type: "spring", stiffness: 210, damping: 18 }
                       }
                     >
-                      <Jelly shape={it.shape} color={it.color} size="100%" />
+                      <JellyHit onPick={onPick} pickKey={it.key}>
+                        <Jelly shape={it.shape} color={it.color} size="100%" />
+                      </JellyHit>
                     </motion.span>
                   </motion.span>
                 );
@@ -150,16 +160,29 @@ export function Jar({
     </motion.div>
   );
 
-  if (!onShake) return jar;
+  return jar;
+}
+
+/** 젤리 한 알의 누를 수 있는 껍데기. 누를 데가 없으면 그냥 통과시킨다. */
+function JellyHit({
+  onPick,
+  pickKey,
+  children,
+}: {
+  onPick?: (key: string) => void;
+  pickKey: string;
+  children: React.ReactNode;
+}) {
+  if (!onPick) return <>{children}</>;
 
   return (
     <button
       type="button"
-      onClick={onShake}
-      aria-label="병 흔들기"
-      className="block cursor-pointer appearance-none"
+      aria-label="이 젤리 기록 보기"
+      onClick={() => onPick(pickKey)}
+      className="block w-full appearance-none transition active:scale-90"
     >
-      {jar}
+      {children}
     </button>
   );
 }

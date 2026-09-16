@@ -2,6 +2,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router";
 import { AppBar } from "../components/AppBar";
+import { EntrySheet } from "../components/EntrySheet";
 import { Jar } from "../components/Jar";
 import { JellyFace } from "../components/JellyFace";
 import { Toast } from "../components/Toast";
@@ -77,6 +78,9 @@ export function ShelfScreen() {
     return () => clearTimeout(timer);
   }, [dropping, settings?.muted]);
 
+  // 병에서 고른 젤리 한 알
+  const [picked, setPicked] = useState<string>();
+
   function shake() {
     setShakes((n) => n + 1);
     navigator.vibrate?.(12); // 안드로이드만. iOS 는 이 API 자체가 없어서 조용히 넘어간다
@@ -103,6 +107,7 @@ export function ShelfScreen() {
             dropKey={dropping ? pile.at(-1)?.key : undefined}
             shakeToken={shakes}
             onShake={count > 0 ? shake : undefined}
+            onPick={setPicked}
           />
 
           <div className="mt-4 flex items-center gap-1">
@@ -183,6 +188,7 @@ export function ShelfScreen() {
         ) : null}
       </main>
 
+      <EntrySheet entryId={picked} onClose={() => setPicked(undefined)} />
       <Toast message={location.state?.toast} />
     </>
   );
