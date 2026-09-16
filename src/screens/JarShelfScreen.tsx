@@ -2,6 +2,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { useMemo } from "react";
 import { Link } from "react-router";
 import { AppBar } from "../components/AppBar";
+import { FirstRunHint } from "../components/FirstRunHint";
 import { Jar } from "../components/Jar";
 import { StatRow } from "../components/StatRow";
 import { db } from "../data/db";
@@ -84,6 +85,9 @@ export function JarShelfScreen() {
 
   return (
     <>
+      {/* 설명서가 톱니 안에 있다는 건 첫 화면에서만 알려줄 수 있다 */}
+      <FirstRunHint />
+
       <AppBar
         title={settings?.nickname ? `${settings.nickname}의 젤리 선반` : "젤리 선반"}
         side={<SettingsLink />}
