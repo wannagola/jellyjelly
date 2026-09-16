@@ -83,7 +83,13 @@ export function ShelfScreen() {
   const [picked, setPicked] = useState<string>();
 
   const { tilt, live: tilting, enable: enableTilt } = useTilt();
-  const [tiltDenied, setTiltDenied] = useState(false);
+  /**
+   * 기울이기가 안 될 때 왜 안 되는지.
+   *
+   * 조용히 실패하면 쓰는 사람도 만든 사람도 손을 못 댄다. 막힌 자리를 셋으로
+   * 갈라서 화면에 적는다 - 거절당했나, 허락은 받았는데 값이 안 오나, 셋 다 아닌가.
+   */
+  const [tiltNote, setTiltNote] = useState<"denied" | "silent" | undefined>();
 
   function shake() {
     setShakes((n) => n + 1);
@@ -164,17 +170,25 @@ export function ShelfScreen() {
             <button
               type="button"
               onClick={async () => {
+                setTiltNote(undefined);
                 const ok = await enableTilt();
-                setTiltDenied(!ok);
+                if (!ok) {
+                  setTiltNote("denied");
+                  return;
+                }
+                // 허락은 떨어졌는데 값이 안 들어오는 경우가 있다. 잠깐 기다려 보고 말해준다.
+                window.setTimeout(() => setTiltNote((n) => (n === undefined ? "silent" : n)), 1500);
               }}
               className="mt-2.5 rounded-full bg-accent-bg px-3.5 py-1.5 text-xs font-medium text-accent transition active:scale-95"
             >
               폰 기울이면 쏠리게 하기
             </button>
           ) : null}
-          {tiltDenied ? (
-            <p className="mt-2 max-w-[28ch] text-center text-tiny leading-relaxed text-ink-faint">
-              허락이 꺼져 있어요. 설정 → Safari → 동작 및 방향 접근을 켜고 다시 열어보세요.
+          {tiltNote && !tilting ? (
+            <p className="mt-2 max-w-[30ch] text-center text-tiny leading-relaxed text-ink-faint">
+              {tiltNote === "denied"
+                ? "허락을 못 받았어요. 아이폰 설정 → 앱 → Safari → 동작 및 방향 접근을 켜고 앱을 다시 열어보세요."
+                : "허락은 됐는데 기울기 값이 안 들어와요. 아이폰 설정 → 앱 → Safari → 동작 및 방향 접근을 확인해 주세요."}
             </p>
           ) : null}
         </section>

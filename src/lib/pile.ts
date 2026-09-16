@@ -58,7 +58,8 @@ const capacityOf = (width: number) => rowsOf(width).reduce((a, b) => a + b, 0);
  * 적게 담길수록 줄이 짧아지고, 짧은 줄일수록 알이 굵어진다.
  */
 export function rowWidthFor(count: number): number {
-  for (let width = 3; width < WIDEST; width += 1) {
+  // 세 칸까지 좁히면 알이 주먹만 해진다. 넷이 바닥이다.
+  for (let width = 4; width < WIDEST; width += 1) {
     if (capacityOf(width) >= count) return width;
   }
   return WIDEST;
@@ -70,8 +71,8 @@ export function rowWidthFor(count: number): number {
  */
 export function jellyRatioFor(count: number): number {
   const width = rowWidthFor(count);
-  // 한 알만 담긴 병에서 알이 너무 커지지 않게 천장을 둔다
-  return Math.min(0.33, (SPAN / (width + 1)) * OVERLAP);
+  // 적게 담긴 병에서 알이 너무 커지지 않게 천장을 둔다
+  return Math.min(0.25, (SPAN / (width + 1)) * OVERLAP);
 }
 
 /** 병 하나에 들어가는 최대 개수 — 넘치면 다음 달 병으로 */
