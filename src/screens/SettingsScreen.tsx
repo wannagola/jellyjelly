@@ -203,6 +203,27 @@ export function SettingsScreen() {
         {note ? <p className="mt-3 px-1 text-sm text-accent">{note}</p> : null}
         {error ? <p className="mt-3 px-1 text-sm text-accent">{error}</p> : null}
 
+        <h2 className="mt-6 mb-2 px-1 text-xs tracking-wide text-ink-soft">설명서</h2>
+        {/*
+          라우터가 아니라 그냥 주소다. 그리고 반드시 새 창으로 띄운다 -
+          홈 화면 앱 안에서 그대로 이동하면 뒤로 갈 방법이 없어서 갇힌다.
+        */}
+        <a
+          href="/manual/"
+          target="_blank"
+          rel="noopener"
+          className="flex items-center gap-3 rounded-2xl bg-surface px-4 py-3.5 transition active:scale-[.99]"
+        >
+          <span className="text-2xl leading-none">📖</span>
+          <span className="min-w-0 flex-1">
+            <span className="block font-display text-base">젤리젤리 설명서</span>
+            <span className="block text-xs text-ink-soft">
+              화면마다 뭘 할 수 있는지, 홈 화면에 어떻게 추가하는지
+            </span>
+          </span>
+          <span className="text-lg text-ink-faint">›</span>
+        </a>
+
         <h2 className="mt-6 mb-2 px-1 text-xs tracking-wide text-ink-soft">
           {standalone ? "지금 어디에 담기고 있나" : "홈 화면에 추가"}
         </h2>
