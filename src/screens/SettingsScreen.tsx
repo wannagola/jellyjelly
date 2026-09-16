@@ -1,0 +1,197 @@
+import { format } from "date-fns";
+import { useLiveQuery } from "dexie-react-hooks";
+import { useRef, useState } from "react";
+import { AppBar } from "../components/AppBar";
+import { db, seedOnce } from "../data/db";
+import { buildBackup, downloadBackup, restoreBackup, wipeEverything } from "../lib/backup";
+
+/** 설정 — 여기서 가장 중요한 건 백업이다. 서버가 없으면 사본이 하나뿐이다. */
+export function SettingsScreen() {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState<"export" | "import" | "wipe">();
+  const [note, setNote] = useState<string>();
+  const [error, setError] = useState<string>();
+  const [confirmWipe, setConfirmWipe] = useState(false);
+
+  const stats = useLiveQuery(async () => {
+    const [jellies, entries] = await Promise.all([db.jellies.count(), db.entries.count()]);
+    const lastBackup = await db.meta.get("lastBackupAt");
+    return { jellies, entries, lastBackup: lastBackup?.value as number | undefined };
+  }, []);
+
+  function reset() {
+    setNote(undefined);
+    setError(undefined);
+  }
+
+  async function onExport() {
+    reset();
+    setBusy("export");
+    try {
+      const backup = await buildBackup();
+      downloadBackup(backup);
+      await db.meta.put({ key: "lastBackupAt", value: backup.exportedAt });
+      setNote(`젤리 ${backup.jellies.length}종 · 기록 ${backup.entries.length}건을 내려받았어요`);
+    } catch {
+      setError("백업 파일을 만들지 못했어요");
+    } finally {
+      setBusy(undefined);
+    }
+  }
+
+  async function onImport(file?: File) {
+    if (!file) return;
+    reset();
+    setBusy("import");
+    try {
+      const result = await restoreBackup(file);
+      setNote(`젤리 ${result.jellies}종 · 기록 ${result.entries}건을 되살렸어요`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "복원하지 못했어요");
+    } finally {
+      setBusy(undefined);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  }
+
+  async function onWipe() {
+    reset();
+    setBusy("wipe");
+    try {
+      await wipeEverything();
+      await seedOnce();
+      setConfirmWipe(false);
+      setNote("모두 지웠어요");
+    } finally {
+      setBusy(undefined);
+    }
+  }
+
+  return (
+    <>
+      <AppBar title="설정" />
+
+      <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-8">
+        <section className="rounded-2xl bg-surface p-4">
+          <p className="text-[13px] font-medium">이 기기에만 저장돼요</p>
+          <p className="mt-1 text-[11.5px] leading-relaxed text-ink-soft">
+            기록과 사진이 폰 안에만 있어요. 서버로 나가지 않는 대신,
+            <b className="font-medium text-ink"> 사본도 여기 하나뿐</b>입니다.
+          </p>
+          <p className="mt-2.5 text-[10.5px] text-ink-faint tabular-nums">
+            젤리 {stats?.jellies ?? 0}종 · 기록 {stats?.entries ?? 0}건
+            {stats?.lastBackup
+              ? ` · 마지막 백업 ${format(stats.lastBackup, "yyyy.MM.dd")}`
+              : " · 아직 백업한 적 없음"}
+          </p>
+        </section>
+
+        <h2 className="mt-6 mb-2 px-1 text-[11px] tracking-wide text-ink-soft">백업</h2>
+        <div className="flex flex-col gap-2">
+          <Row
+            title="백업 파일 내려받기"
+            desc="기록과 사진을 파일 하나로. 한 달에 한 번이면 충분해요"
+            action={busy === "export" ? "만드는 중" : "내려받기"}
+            disabled={Boolean(busy)}
+            onClick={onExport}
+          />
+          <input
+            ref={fileRef}
+            type="file"
+            accept="application/json,.json"
+            className="hidden"
+            onChange={(e) => onImport(e.target.files?.[0])}
+          />
+          <Row
+            title="백업에서 되살리기"
+            desc="지금 기기에 있는 기록은 지우지 않고 합칩니다"
+            action={busy === "import" ? "읽는 중" : "파일 고르기"}
+            disabled={Boolean(busy)}
+            onClick={() => fileRef.current?.click()}
+          />
+        </div>
+
+        {note ? <p className="mt-3 px-1 text-[12px] text-accent">{note}</p> : null}
+        {error ? <p className="mt-3 px-1 text-[12px] text-accent">{error}</p> : null}
+
+        <h2 className="mt-6 mb-2 px-1 text-[11px] tracking-wide text-ink-soft">홈 화면에 추가</h2>
+        <section className="rounded-2xl bg-surface p-4">
+          <p className="text-[11.5px] leading-relaxed text-ink-soft">
+            사파리에서 <b className="font-medium text-ink">공유 → 홈 화면에 추가</b>를 눌러
+            앱처럼 쓰세요. 브라우저 탭으로만 쓰면 한동안 안 열었을 때
+            사파리가 저장소를 지울 수 있어요.
+          </p>
+        </section>
+
+        <h2 className="mt-6 mb-2 px-1 text-[11px] tracking-wide text-ink-soft">위험한 일</h2>
+        {confirmWipe ? (
+          <section className="rounded-2xl bg-surface p-4">
+            <p className="text-[12.5px] leading-relaxed">
+              젤리와 기록을 <b>전부</b> 지웁니다. 되돌릴 수 없어요.
+              <br />
+              <span className="text-ink-soft">백업 파일이 있는지 먼저 확인하세요.</span>
+            </p>
+            <div className="mt-3 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setConfirmWipe(false)}
+                className="flex-1 rounded-xl bg-line py-2.5 text-[13px]"
+              >
+                안 지울래요
+              </button>
+              <button
+                type="button"
+                onClick={onWipe}
+                disabled={busy === "wipe"}
+                className="flex-1 rounded-xl bg-accent py-2.5 text-[13px] text-white disabled:opacity-50"
+              >
+                {busy === "wipe" ? "지우는 중" : "정말 지우기"}
+              </button>
+            </div>
+          </section>
+        ) : (
+          <Row
+            title="모든 기록 지우기"
+            desc="되돌릴 수 없어요"
+            action="지우기"
+            disabled={Boolean(busy)}
+            onClick={() => setConfirmWipe(true)}
+          />
+        )}
+
+        <p className="mt-8 text-center text-[10px] text-ink-faint">젤리젤리 · 혼자 쓰는 기록장</p>
+      </main>
+    </>
+  );
+}
+
+function Row({
+  title,
+  desc,
+  action,
+  disabled,
+  onClick,
+}: {
+  title: string;
+  desc: string;
+  action: string;
+  disabled?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className="flex w-full items-center gap-3 rounded-2xl bg-surface p-4 text-left transition active:scale-[.99] disabled:opacity-50"
+    >
+      <span className="min-w-0 flex-1">
+        <span className="block text-[13px] font-medium">{title}</span>
+        <span className="mt-0.5 block text-[11px] leading-snug text-ink-soft">{desc}</span>
+      </span>
+      <span className="flex-none rounded-full bg-accent-bg px-3 py-1.5 text-[11.5px] font-medium text-accent">
+        {action}
+      </span>
+    </button>
+  );
+}
