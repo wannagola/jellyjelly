@@ -1,11 +1,115 @@
-# 젤리젤리 🫙
+<div align="center">
+  <img src="docs/logo/wordmark.png" alt="젤리젤리" width="380">
+  <p><b>먹은 젤리를 병에 담아 모으는 기록장</b></p>
+  <p>
+    <a href="https://jellyjelly.vercel.app">jellyjelly.vercel.app</a> ·
+    <a href="https://claude.ai/artifact/EDGTYJQzG59rNehn2wHAVR">설명서</a>
+  </p>
+</div>
 
-먹은 젤리를 병에 담아 모으는 개인 기록 앱.
-독서기록 앱 *북적북적*이 책을 쌓아 올리듯, 젤리를 쌓아 올린다.
+---
 
-혼자 쓰려고 만드는 앱이라 기록과 사진은 전부 기기 안(IndexedDB)에 저장된다.
+독서기록 앱 *북적북적*이 읽은 책을 쌓아 올리듯, 먹은 젤리를 쌓아 올린다.
+달마다 유리병이 하나씩 생기고, 하나 먹을 때마다 알맹이가 병 안으로 떨어진다.
+달이 끝나면 그 병은 선반에 남는다.
 
-## 지금 상태 — MVP 완성
+기록과 사진은 전부 기기 안(IndexedDB)에 있다. 서버는 선택이다.
+
+<br>
+
+## 화면
+
+### 선반과 병
+
+<table>
+<tr>
+<td width="33%"><img src="docs/screens/01-shelf.png" alt="젤리 선반"></td>
+<td width="33%"><img src="docs/screens/02-jar.png" alt="달 보관함"></td>
+<td width="33%"><img src="docs/screens/03-calendar.png" alt="달력"></td>
+</tr>
+<tr>
+<td><b>젤리 선반</b> — 첫 화면. 지금까지의 병이 최신 순으로 놓인다. 아무것도 안 먹은 달도 빈 병으로 남아서 쉰 달이 보인다.</td>
+<td><b>달 보관함</b> — 그 달의 병 하나를 크게. 병을 톡 치면 젤리가 실제로 섞이고 소리가 난다. 알맹이를 누르면 그때의 기록이 뜬다.</td>
+<td><b>달력</b> — 먹은 날에 젤리 색 점이 찍힌다. 위에는 이번 달 개수와 칼로리 합계, 날짜를 누르면 그날 목록.</td>
+</tr>
+</table>
+
+### 기록하기
+
+<table>
+<tr>
+<td width="33%"><img src="docs/screens/06-record.png" alt="젤리 고르기"></td>
+<td width="33%"><img src="docs/screens/08-finish.png" alt="다 먹었어요"></td>
+<td width="33%"><img src="docs/screens/07-detail.png" alt="젤리 상세"></td>
+</tr>
+<tr>
+<td><b>젤리 고르기</b> — 가운데 <code>+</code> 버튼. 초성으로 찾는다(ㅁㄱㅁ → 마이구미). 목록에 없으면 그 자리에서 새로 추가.</td>
+<td><b>다 먹었어요</b> — 오늘 찍은 사진, 별점, 식감 슬라이더 셋, 한 줄. 전부 건너뛰어도 담긴다. 담으면 알맹이가 병으로 떨어진다.</td>
+<td><b>젤리 상세</b> — 먹은 횟수, 내 평균 별점, 칼로리, 내가 기억하는 맛, 기록 타임라인. 하트를 누르면 최애.</td>
+</tr>
+</table>
+
+### 모으기
+
+<table>
+<tr>
+<td width="33%"><img src="docs/screens/04-dex.png" alt="도감"></td>
+<td width="33%"><img src="docs/screens/05-brand.png" alt="브랜드 수집률"></td>
+<td width="33%"><img src="docs/screens/09-recommend.png" alt="추천"></td>
+</tr>
+<tr>
+<td><b>도감</b> — 편의점 젤리 68종이 기본으로 깔려 있다. 안 먹어본 것은 흐리게. 최애 / 모은 것 / 전체로 나눠 본다.</td>
+<td><b>브랜드 수집률</b> — 브랜드마다 몇 종 중 몇 종. 한 칸 남은 브랜드가 위로 오게 정렬한다. 막대를 누르면 그 브랜드만 남는다.</td>
+<td><b>추천</b> — 외부 데이터 없이 내 기록만으로. 취향 프로필, 좋아했는데 요즘 안 먹은 것, 취향에 가까운 새 젤리.</td>
+</tr>
+</table>
+
+### 심심할 때
+
+<table>
+<tr>
+<td width="33%"><img src="docs/screens/11-draw-result.png" alt="젤리 뽑기"></td>
+<td width="33%"><img src="docs/screens/13-waxball-break.png" alt="왁뿌볼"></td>
+<td width="33%"><img src="docs/screens/15-tummy-eat.png" alt="코끼리 배"></td>
+</tr>
+<tr>
+<td><b>젤리 뽑기</b> — 못 고르겠을 때. 레버를 돌리면 캡슐이 섞이다가 투출구로 떨어지고 열린다.</td>
+<td><b>젤리 왁뿌볼</b> — 매끈한 왁스를 누른 자리부터 깨나간다. 다 벗기면 안에서 젤리 말랑이가 나와서 누르고 늘일 수 있다.</td>
+<td><b>코끼리 배</b> — 배를 두드리면 북처럼 운다. 누르는 위치마다 음이 다르다. 바닥 젤리를 누르면 코로 주워 먹고 야르 한다.</td>
+</tr>
+</table>
+
+### 설정
+
+<table>
+<tr>
+<td width="33%"><img src="docs/screens/16-settings.png" alt="설정"></td>
+<td width="33%"><img src="docs/screens/17-settings-bottom.png" alt="백업"></td>
+<td width="33%" valign="top"><br><b>설정</b> — 닉네임, 테마 5색(딸기우유·청포도·소다·포도·코코아), 병 흔드는 소리 끄기.<br><br><b>백업</b> — 기록과 사진을 파일 하나로 내려받고, 되살릴 때는 지금 기기 것을 지우지 않고 합친다.<br><br>지금 기록이 어디에 담기고 있는지(브라우저 탭인지 홈 화면 앱인지)도 여기서 알려준다.</td>
+</tr>
+</table>
+
+<br>
+
+## 홈 화면에 추가하기
+
+브라우저 탭으로도 되지만, 홈 화면에 추가해야 주소창 없이 앱처럼 열리고
+한동안 안 열어도 저장소가 안 지워진다.
+
+**아이폰 (사파리)** — 주소를 연다 → 아래 가운데 **공유** 버튼 → **홈 화면에 추가** → 추가
+
+**아이폰 (크롬)** — 크롬으로 열어도 잘 돌아가지만, 홈 화면 추가는 **사파리에서만** 제대로 된다.
+크롬에서 열었다면 주소창의 공유 → Safari로 열기를 거친다.
+
+**안드로이드 (크롬)** — 오른쪽 위 ⋮ → **앱 설치** 또는 **홈 화면에 추가**
+
+> 브라우저마다, 그리고 홈 화면 앱과 브라우저 탭 사이에도 기록이 **따로** 쌓인다.
+> 사파리 탭에서 모으다가 홈 화면 앱으로 옮기면 빈 병으로 시작한다.
+> 옮기기 전에 **설정 → 백업 파일 내려받기**로 챙긴다.
+
+<br>
+
+## 만든 것
 
 | 화면 | 하는 일 |
 |---|---|
@@ -29,8 +133,9 @@
 칼로리는 젤리마다 직접 넣는다. 국내 젤리 칼로리를 제품 단위로 주는 무료 API는
 식약처 식품영양성분DB뿐인데 키 발급이 필요해서, 지금은 봉지 뒷면을 보고 적는다.
 
-아직 안 한 것: 위시리스트, 월간 리포트 카드,
-바코드 스캔, 자동 누끼.
+아직 안 한 것: 위시리스트, 월간 리포트 카드, 바코드 스캔, 자동 누끼.
+
+<br>
 
 ## 실행
 
@@ -42,6 +147,24 @@ npm run dev
 `npm run dev`의 Network 주소는 **구경용**이다. 브라우저는 저장소를 주소(origin)
 단위로 나누는데, 그 주소는 공유기가 빌려준 IP라 언제든 바뀌고 포트도 밀린다.
 주소가 바뀌면 브라우저 입장에서는 완전히 다른 앱이라 빈 병이 뜬다.
+
+```bash
+npm run build    # 타입체크 + 빌드
+npm run lint     # oxlint
+```
+
+## 배포
+
+Vercel에 올린 고정 https 주소에서 쓴다. 그래야 주소가 안 바뀌어서 기록이 남고,
+서비스 워커가 등록돼 오프라인에서도 열리고, 홈 화면에 추가했을 때 제대로 앱처럼
+동작한다. 올라가는 건 HTML/JS 껍데기뿐이고 **기록과 사진은 폰 안에만 있다.**
+
+1. [vercel.com](https://vercel.com)에 GitHub 계정으로 로그인
+2. Add New → Project → 이 저장소를 Import
+3. Framework는 Vite로 자동 감지된다. 나머지 기본값 그대로 Deploy
+4. 나온 주소를 폰으로 열고 홈 화면에 추가
+
+이후로는 `git push`만 하면 자동으로 다시 배포된다.
 
 ## 서버 붙이기 (선택)
 
@@ -64,26 +187,7 @@ npm run dev
 한 군데만 빠뜨려도 지운 젤리가 튀어나온다. 그래서 줄은 진짜로 지우고 지웠다는
 사실만 따로 모은다. 다른 기기가 "얘가 없네" 하고 되살리는 것도 이걸로 막는다.
 
-## 배포
-
-Vercel에 올린 고정 https 주소에서 쓴다. 그래야 주소가 안 바뀌어서 기록이 남고,
-서비스 워커가 등록돼 오프라인에서도 열리고, 홈 화면에 추가했을 때 제대로 앱처럼
-동작한다. 올라가는 건 HTML/JS 껍데기뿐이고 **기록과 사진은 폰 안에만 있다.**
-
-1. [vercel.com](https://vercel.com)에 GitHub 계정으로 로그인
-2. Add New → Project → 이 저장소를 Import
-3. Framework는 Vite로 자동 감지된다. 나머지 기본값 그대로 Deploy
-4. 나온 주소를 폰 사파리로 열고 **공유 → 홈 화면에 추가**
-
-이후로는 `git push`만 하면 자동으로 다시 배포된다.
-
-주소를 옮길 때는 **설정 → 백업 파일 내려받기**로 먼저 챙긴다.
-다른 주소의 기록은 따라오지 않는다.
-
-```bash
-npm run build    # 타입체크 + 빌드
-npm run lint     # oxlint
-```
+<br>
 
 ## 기술
 
@@ -92,6 +196,9 @@ React Router · es-hangul(초성 검색) · date-fns · vite-plugin-pwa
 
 의도적으로 안 쓰는 것: Next.js, 상태관리 라이브러리(`useLiveQuery`가 대신한다),
 UI 컴포넌트 라이브러리(이 앱의 전부가 커스텀 귀여움이라), ORM.
+
+소리는 전부 Web Audio 로 그때그때 합성한다. 음원 파일이 하나도 없다.
+왁뿌볼과 코끼리는 캔버스에 직접 그린다.
 
 ## 구조
 
@@ -104,7 +211,7 @@ src/
   data/seed.ts             편의점 젤리 도감 68종
   lib/pile.ts              병에 젤리가 쌓이는 배치 알고리즘
   lib/search.ts            초성 검색
-  lib/photo.ts             사진 압축(640px WebP)과 URL 수명 관리
+  lib/photo.ts             사진 압축(WebP)과 URL 수명 관리
   lib/backup.ts            내보내기 / 되살리기
   lib/taste.ts             취향 프로필과 추천 (순수 함수)
   lib/sound.ts             병 흔드는 소리 (Web Audio 합성, 음원 파일 없음)
@@ -117,7 +224,13 @@ src/
   components/Jelly.tsx     알맹이 6종(곰·벌레·링·큐브·하트·콜라병) + 봉지
   components/Jar.tsx       유리병
   screens/                 화면 열넷
+docs/
+  logo/                    로고 원본(SVG)과 내보낸 PNG
+  screens/                 이 문서의 화면 캡처
+  manual.html              사용자용 설명서
 ```
+
+## 설계 노트
 
 **Jelly와 Entry는 분리한다.** 같은 젤리를 열 번 먹어도 카탈로그는 하나고,
 먹은 사건이 열 개 쌓인다.
@@ -154,15 +267,12 @@ px 로 두면 선반의 작은 병에서 뚜껑만 두꺼워 보인다.
 `finishedAt` 의 달로 묶어 그때그때 그릴 뿐이다. 그래서 10월 1일이 되면 빈 10월
 병이 저절로 기본 화면이 되고, 9월 병은 선반에 남는다. 만들거나 닫는 절차가 없다.
 
-보고 있는 달은 주소(`?month=2026-08`)에 있다. 새로고침해도 유지되고, 탭바가
-이걸 읽어서 지난 달에서는 기록 버튼을 잠근다. 지난 병을 보면서 기록하면
-오늘 날짜로 담겨서 이번 달 병에 들어가 버리기 때문이다.
-
 **백업은 타협 대상이 아니다.** 서버가 없으니 이 세상에 내 기록은 폰 안의 사본
 하나뿐이다. 설정에서 기록과 사진을 파일 하나로 내려받을 수 있고, 되살릴 때는
 지금 기기에 있는 것을 지우지 않고 합친다.
 
 ## 문서
 
+- [설명서](https://claude.ai/artifact/EDGTYJQzG59rNehn2wHAVR) — 화면별 설명 + 홈 화면 추가법 ([`docs/manual.html`](docs/manual.html) 과 같은 내용)
 - [`docs/plan.html`](docs/plan.html) — 타당성 검토와 기획안
 - [`docs/ui.html`](docs/ui.html) — UI 시안

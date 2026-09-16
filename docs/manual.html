@@ -1,0 +1,608 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FBF4F5">
+<title>젤리젤리 설명서</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #FBF4F5;
+    --paper-deep: #F5E9EE;
+    --card: #FFFFFF;
+    --ink: #3B2430;
+    --ink-soft: #7A6570;
+    --ink-faint: #A4939C;
+    --accent: #E0568C;
+    --accent-ink: #C23C71;
+    --accent-soft: #FCE7F0;
+    --line: #EFDFE5;
+    --shadow: 0 10px 30px rgba(59, 36, 48, .09);
+    --shadow-lift: 0 18px 44px rgba(59, 36, 48, .14);
+
+    --grape: #8E5BC9;
+    --berry: #EF5D7A;
+    --green: #7CC36A;
+    --orange: #F59940;
+    --soda: #5BB8E0;
+    --lemon: #D8B321;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #211A1E;
+      --paper-deep: #1A1418;
+      --card: #2D2329;
+      --ink: #F7ECF0;
+      --ink-soft: #C2ADB6;
+      --ink-faint: #8D7B84;
+      --accent: #FF93BA;
+      --accent-ink: #FFB3CE;
+      --accent-soft: #3A2831;
+      --line: #3B2E35;
+      --shadow: 0 10px 30px rgba(0, 0, 0, .34);
+      --shadow-lift: 0 18px 44px rgba(0, 0, 0, .44);
+      --lemon: #EFC93C;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper: #211A1E;
+    --paper-deep: #1A1418;
+    --card: #2D2329;
+    --ink: #F7ECF0;
+    --ink-soft: #C2ADB6;
+    --ink-faint: #8D7B84;
+    --accent: #FF93BA;
+    --accent-ink: #FFB3CE;
+    --accent-soft: #3A2831;
+    --line: #3B2E35;
+    --shadow: 0 10px 30px rgba(0, 0, 0, .34);
+    --shadow-lift: 0 18px 44px rgba(0, 0, 0, .44);
+    --lemon: #EFC93C;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Noto Sans KR", system-ui, -apple-system, sans-serif;
+    font-size: 16px;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 880px;
+    margin: 0 auto;
+    padding-inline: 20px;
+    padding-block: 0 72px;
+  }
+
+  h1, h2, h3, .display { font-family: Jua, "Noto Sans KR", system-ui, sans-serif; font-weight: 400; }
+  h2, h3 { text-wrap: balance; }
+  p { margin: 0; }
+
+  /* ── 표지 ─────────────────────────────────────── */
+  .cover {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    text-align: center;
+    padding-block: 56px 44px;
+  }
+  .cover .mark { width: 104px; height: 104px; filter: drop-shadow(0 12px 26px rgba(224, 86, 140, .24)); }
+  .cover h1 { margin: 0; font-size: 2.6rem; line-height: 1.1; letter-spacing: -.01em; }
+  .cover .tag { color: var(--ink-soft); font-size: 1.02rem; max-width: 30ch; }
+  .go {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--accent); color: #fff; text-decoration: none;
+    font-family: Jua, sans-serif; font-size: 1.05rem;
+    padding: 12px 26px; border-radius: 999px;
+    box-shadow: 0 8px 22px rgba(224, 86, 140, .34);
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .go:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(224, 86, 140, .42); }
+  .go .url { font-family: "Noto Sans KR", sans-serif; font-size: .85rem; opacity: .85; }
+
+  /* ── 탭 안내 ───────────────────────────────────── */
+  .tabs {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 22px; padding: 16px 14px; box-shadow: var(--shadow);
+  }
+  .tab { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+  .tab .dot { width: 26px; height: 26px; }
+  .tab b { font-family: Jua, sans-serif; font-weight: 400; font-size: 1rem; }
+  .tab span { color: var(--ink-faint); font-size: .76rem; line-height: 1.45; }
+  .tabs-note { margin-top: 10px; color: var(--ink-faint); font-size: .84rem; text-align: center; }
+
+  /* ── 섹션 ─────────────────────────────────────── */
+  .chapter { margin-top: 64px; }
+  .chapter-head { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+  .chapter-head svg { width: 30px; height: 30px; flex: none; }
+  .chapter-head h2 { margin: 0; font-size: 1.62rem; }
+  .chapter-lead { color: var(--ink-soft); margin-bottom: 30px; max-width: 58ch; }
+  .chapter-rule { height: 3px; border-radius: 2px; margin-bottom: 18px; opacity: .5; }
+
+  .feature { display: grid; grid-template-columns: 236px 1fr; gap: 34px; align-items: start; }
+  .feature + .feature { margin-top: 46px; padding-top: 46px; border-top: 1px dashed var(--line); }
+
+  .shot {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 28px; padding: 7px; box-shadow: var(--shadow-lift);
+  }
+  .shot img { display: block; width: 100%; max-width: 100%; border-radius: 22px; }
+
+  .feature h3 { margin: 0 0 4px; font-size: 1.28rem; }
+  .eyebrow {
+    display: inline-block; font-size: .72rem; letter-spacing: .1em;
+    color: var(--accent-ink); background: var(--accent-soft);
+    padding: 3px 10px; border-radius: 999px; margin-bottom: 10px;
+  }
+  .feature p + p { margin-top: 12px; }
+  .feature .body { color: var(--ink-soft); }
+  .feature .body b { color: var(--ink); font-weight: 500; }
+
+  .points { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
+  .points li { position: relative; padding-left: 20px; color: var(--ink-soft); font-size: .95rem; }
+  .points li::before {
+    content: ""; position: absolute; left: 0; top: .62em;
+    width: 8px; height: 8px; border-radius: 3px; background: var(--accent); opacity: .65;
+  }
+  .points b { color: var(--ink); font-weight: 500; }
+
+  /* ── 사용방법 ─────────────────────────────────── */
+  .howto { margin-top: 76px; background: var(--paper-deep); border-radius: 30px; padding: 40px 32px; }
+  .howto > h2 { margin: 0 0 6px; font-size: 1.8rem; text-align: center; }
+  .howto > .chapter-lead { margin: 0 auto 32px; text-align: center; }
+
+  .ways { display: grid; grid-template-columns: repeat(auto-fit, minmax(258px, 1fr)); gap: 18px; }
+  .way {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 22px; padding: 22px 22px 24px; box-shadow: var(--shadow);
+  }
+  .way h3 { margin: 0 0 3px; font-size: 1.14rem; }
+  .way .who { color: var(--ink-faint); font-size: .8rem; margin-bottom: 14px; }
+  ol.steps { list-style: none; counter-reset: s; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+  ol.steps li { counter-increment: s; position: relative; padding-left: 34px; font-size: .95rem; color: var(--ink-soft); line-height: 1.6; }
+  ol.steps li::before {
+    content: counter(s); position: absolute; left: 0; top: 1px;
+    width: 23px; height: 23px; border-radius: 50%;
+    background: var(--accent); color: #fff;
+    font-family: Jua, sans-serif; font-size: .82rem;
+    display: grid; place-items: center;
+  }
+  ol.steps b { color: var(--ink); font-weight: 500; }
+  .way .after { margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--line); font-size: .86rem; color: var(--ink-faint); }
+
+  .warn {
+    margin-top: 22px; background: var(--card); border: 1px solid var(--line);
+    border-left: 4px solid var(--orange);
+    border-radius: 16px; padding: 18px 20px;
+  }
+  .warn h3 { margin: 0 0 6px; font-size: 1.04rem; }
+  .warn p { color: var(--ink-soft); font-size: .94rem; }
+  .warn p + p { margin-top: 8px; }
+
+  footer { margin-top: 56px; text-align: center; color: var(--ink-faint); font-size: .85rem; }
+  footer a { color: var(--accent-ink); }
+
+  @media (max-width: 720px) {
+    body { font-size: 15px; }
+    .cover { padding-block: 40px 32px; }
+    .cover h1 { font-size: 2.1rem; }
+    .feature { grid-template-columns: 1fr; gap: 20px; }
+    .shot { max-width: 300px; }
+    .tabs { grid-template-columns: repeat(2, 1fr); gap: 16px 10px; }
+    .howto { padding: 30px 20px; border-radius: 24px; }
+    .chapter { margin-top: 52px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+
+  <header class="cover">
+    <svg class="mark" viewBox="0 0 120 120" aria-label="젤리젤리 로고">
+      <defs>
+        <linearGradient id="cPlate" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#FDEFF4"/><stop offset="1" stop-color="#FAE0EA"/>
+        </linearGradient>
+        <linearGradient id="cGlass" x1=".12" y1="0" x2=".88" y2="1">
+          <stop offset="0" stop-color="#FBFDFE"/><stop offset=".5" stop-color="#F1F6FA"/><stop offset="1" stop-color="#E7EFF6"/>
+        </linearGradient>
+        <linearGradient id="cLid" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#F0C3D2"/><stop offset="1" stop-color="#DD9EB4"/>
+        </linearGradient>
+        <clipPath id="cInside"><rect x="27" y="37" width="66" height="68" rx="19"/></clipPath>
+      </defs>
+      <rect width="120" height="120" rx="27" fill="url(#cPlate)"/>
+      <rect x="43" y="30" width="34" height="9" rx="2.5" fill="#F3D3DF"/>
+      <rect x="35" y="19" width="50" height="14" rx="5.5" fill="url(#cLid)"/>
+      <rect x="40" y="22.5" width="40" height="3.4" rx="1.7" fill="#FFFFFF" opacity=".48"/>
+      <rect x="27" y="37" width="66" height="68" rx="19" fill="url(#cGlass)"/>
+      <g clip-path="url(#cInside)">
+        <g transform="translate(28 79) scale(1.08) rotate(-9 12 12)" fill="#8E5BC9">
+          <circle cx="6.6" cy="5.4" r="2.5"/><circle cx="17.4" cy="5.4" r="2.5"/>
+          <path d="M12 4.6c-3.5 0-5.9 2.6-5.9 6 0 1.7.5 2.7.5 4 0 1.3-.9 1.8-.9 3.3 0 1.9 1.7 3.1 3.4 3.1 1.2 0 1.9-.6 2.9-.6s1.7.6 2.9.6c1.7 0 3.4-1.2 3.4-3.1 0-1.5-.9-2-.9-3.3 0-1.3.5-2.3.5-4 0-3.4-2.4-6-5.9-6z"/>
+          <circle cx="9.6" cy="10.3" r="1.05" fill="rgba(255,255,255,.55)"/>
+          <circle cx="14.4" cy="10.3" r="1.05" fill="rgba(255,255,255,.55)"/>
+        </g>
+        <g transform="translate(50 82) scale(1.02) rotate(10 12 12)">
+          <circle cx="12" cy="12" r="7.4" fill="none" stroke="#EF5D7A" stroke-width="5.2"/>
+        </g>
+        <g transform="translate(69 84) scale(.88) rotate(-16 12 12)" fill="#EFC93C">
+          <rect x="3.6" y="3.6" width="16.8" height="16.8" rx="4.6"/>
+          <rect x="6.4" y="6.4" width="5.4" height="4.4" rx="2" fill="rgba(255,255,255,.4)"/>
+        </g>
+        <g transform="translate(34 61) scale(.9) rotate(-13 12 12)" fill="#5BB8E0">
+          <rect x="3.6" y="3.6" width="16.8" height="16.8" rx="4.6"/>
+          <rect x="6.4" y="6.4" width="5.4" height="4.4" rx="2" fill="rgba(255,255,255,.4)"/>
+        </g>
+        <g transform="translate(52 62) scale(.98) rotate(7 12 12)">
+          <g fill="none" stroke="#7CC36A" stroke-width="4.6" stroke-linecap="round">
+            <path d="M4.4 17.8c0-3 3.5-3 3.5-6s-3.5-3-3.5-6"/>
+            <path d="M11.4 17.8c0-3 3.5-3 3.5-6s-3.5-3-3.5-6" opacity=".82"/>
+            <path d="M18.4 17.8c0-3 1.4-3.6 1.4-5.8" opacity=".64"/>
+          </g>
+        </g>
+        <g transform="translate(44 45) scale(.88) rotate(-5 12 12)" fill="#F59940">
+          <path d="M12 20.6S2.8 14.9 2.8 8.9c0-3.1 2.4-5.3 5.1-5.3 2 0 3.3 1.1 4.1 2.3.8-1.2 2.1-2.3 4.1-2.3 2.7 0 5.1 2.2 5.1 5.3 0 6-9.2 11.7-9.2 11.7z"/>
+          <ellipse cx="8.5" cy="8.6" rx="1.5" ry="1.1" fill="rgba(255,255,255,.45)" transform="rotate(-28 8.5 8.6)"/>
+        </g>
+      </g>
+      <rect x="34" y="46" width="5.2" height="32" rx="2.6" fill="#FFFFFF" opacity=".92"/>
+      <rect x="43" y="46" width="2.8" height="17" rx="1.4" fill="#FFFFFF" opacity=".7"/>
+      <rect x="27.8" y="37.8" width="64.4" height="66.4" rx="18.2" fill="none" stroke="#FFFFFF" stroke-opacity=".9" stroke-width="1.6"/>
+    </svg>
+
+    <h1>젤리젤리 설명서</h1>
+    <p class="tag">먹은 젤리를 병에 담아 모으는 기록장.<br>한 봉지 먹을 때마다 알맹이가 병 안으로 떨어집니다.</p>
+    <a class="go" href="https://jellyjelly.vercel.app">지금 열어보기 <span class="url">jellyjelly.vercel.app</span></a>
+  </header>
+
+  <nav class="tabs" aria-label="화면 아래 탭 넷">
+    <div class="tab">
+      <svg class="dot" viewBox="0 0 24 24" fill="#8E5BC9" aria-hidden="true"><rect x="3.6" y="3.6" width="16.8" height="16.8" rx="4.6"/><rect x="6.4" y="6.4" width="5.4" height="4.4" rx="2" fill="rgba(255,255,255,.4)"/></svg>
+      <b>선반</b><span>모아둔 병</span>
+    </div>
+    <div class="tab">
+      <svg class="dot" viewBox="0 0 24 24" fill="#EF5D7A" aria-hidden="true"><path d="M12 20.6S2.8 14.9 2.8 8.9c0-3.1 2.4-5.3 5.1-5.3 2 0 3.3 1.1 4.1 2.3.8-1.2 2.1-2.3 4.1-2.3 2.7 0 5.1 2.2 5.1 5.3 0 6-9.2 11.7-9.2 11.7z"/></svg>
+      <b>달력</b><span>언제 먹었나</span>
+    </div>
+    <div class="tab">
+      <svg class="dot" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.4" fill="none" stroke="#7CC36A" stroke-width="5.2"/></svg>
+      <b>도감</b><span>모은 종류</span>
+    </div>
+    <div class="tab">
+      <svg class="dot" viewBox="0 0 24 24" fill="#F59940" aria-hidden="true"><circle cx="6.6" cy="5.4" r="2.5"/><circle cx="17.4" cy="5.4" r="2.5"/><path d="M12 4.6c-3.5 0-5.9 2.6-5.9 6 0 1.7.5 2.7.5 4 0 1.3-.9 1.8-.9 3.3 0 1.9 1.7 3.1 3.4 3.1 1.2 0 1.9-.6 2.9-.6s1.7.6 2.9.6c1.7 0 3.4-1.2 3.4-3.1 0-1.5-.9-2-.9-3.3 0-1.3.5-2.3.5-4 0-3.4-2.4-6-5.9-6z"/></svg>
+      <b>추천</b><span>뭐 먹을까</span>
+    </div>
+  </nav>
+  <p class="tabs-note">가운데 <b style="color:var(--accent)">+</b> 버튼이 기록하기입니다. 설정은 선반 오른쪽 위 톱니에 있어요.</p>
+
+  <!-- ── 선반과 병 ── -->
+  <section class="chapter">
+    <div class="chapter-head">
+      <svg viewBox="0 0 24 24" fill="#8E5BC9" aria-hidden="true"><rect x="3.6" y="3.6" width="16.8" height="16.8" rx="4.6"/><rect x="6.4" y="6.4" width="5.4" height="4.4" rx="2" fill="rgba(255,255,255,.4)"/></svg>
+      <h2>병에 담기</h2>
+    </div>
+    <p class="chapter-lead">달마다 유리병이 하나씩 생깁니다. 젤리를 하나 먹고 기록하면 알맹이가 그 달의 병으로 떨어지고, 달이 끝나면 병은 선반으로 갑니다.</p>
+    <div class="chapter-rule" style="background:#8E5BC9"></div>
+
+    <article class="feature">
+      <div class="shot"><img src="screens/01-shelf.png" alt="젤리 선반 화면. 9월·8월·7월 병 세 개가 나란히 놓여 있다" loading="lazy"></div>
+      <div class="body">
+        <span class="eyebrow">첫 화면</span>
+        <h3>젤리 선반</h3>
+        <p>앱을 켜면 제일 먼저 나오는 화면. 지금까지 모은 병이 최신 달부터 나란히 놓입니다. 병을 누르면 그 달 안으로 들어가요.</p>
+        <ul class="points">
+          <li>위쪽 숫자 셋은 <b>담은 젤리 · 모은 종류 · 모은 기간</b></li>
+          <li>한 개도 안 먹은 달도 <b>빈 병으로 남습니다.</b> 쉬어간 달이 보이는 게 기록이니까요</li>
+          <li>제목의 이름은 설정에서 바꿀 수 있어요</li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="feature">
+      <div class="shot"><img src="screens/02-jar.png" alt="2026년 9월 보관함. 큰 유리병 안에 젤리가 쌓여 있고 아래에 먹는 중 목록이 있다" loading="lazy"></div>
+      <div class="body">
+        <span class="eyebrow">달 보관함</span>
+        <h3>병 하나를 크게</h3>
+        <p>그 달에 먹은 젤리가 전부 이 병에 들어 있습니다. 좌우 화살표로 달을 넘길 수 있어요.</p>
+        <ul class="points">
+          <li><b>병을 톡 치면</b> 젤리가 진짜로 섞이면서 부딪히는 소리가 납니다</li>
+          <li><b>알맹이 하나를 누르면</b> 언제 먹었고 몇 번째였고 뭐라고 적었는지가 뜹니다</li>
+          <li>봉지를 다 못 비웠으면 <b>먹는 중</b>으로 남겨뒀다가 나중에 「다 먹었어요」를 누르세요</li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="feature">
+      <div class="shot"><img src="screens/03-calendar.png" alt="9월 달력. 먹은 날마다 젤리 색 점이 찍혀 있고 아래에 그날 먹은 젤리 목록이 있다" loading="lazy"></div>
+      <div class="body">
+        <span class="eyebrow">달력</span>
+        <h3>언제 먹었는지</h3>
+        <p>먹은 날에 젤리 색으로 점이 찍힙니다. 점 색은 그날 먹은 젤리의 색이라, 한 달을 멀리서 보면 무슨 색을 좋아했는지가 보여요.</p>
+        <ul class="points">
+          <li>맨 위에 <b>이번 달 개수와 칼로리 합계</b></li>
+          <li>칼로리를 안 적은 젤리는 합계에서 빠지고, 몇 개가 빠졌는지 알려줍니다</li>
+          <li><b>날짜를 누르면</b> 그날 먹은 젤리가 별점과 함께 아래에 뜹니다</li>
+        </ul>
+      </div>
+    </article>
+  </section>
+
+  <!-- ── 기록하기 ── -->
+  <section class="chapter">
+    <div class="chapter-head">
+      <svg viewBox="0 0 24 24" fill="#EF5D7A" aria-hidden="true"><path d="M12 20.6S2.8 14.9 2.8 8.9c0-3.1 2.4-5.3 5.1-5.3 2 0 3.3 1.1 4.1 2.3.8-1.2 2.1-2.3 4.1-2.3 2.7 0 5.1 2.2 5.1 5.3 0 6-9.2 11.7-9.2 11.7z"/></svg>
+      <h2>기록하기</h2>
+    </div>
+    <p class="chapter-lead">한 봉지 먹었으면 두 번만 누르면 끝납니다. 별점도 사진도 한 줄도 전부 건너뛰어도 담겨요.</p>
+    <div class="chapter-rule" style="background:#EF5D7A"></div>
+
+    <article class="feature">
+      <div class="shot"><img src="screens/06-record.png" alt="젤리 고르기 화면. 검색창에 초성 ㅁㄱㅁ을 넣자 마이구미 세 종류가 나온다" loading="lazy"></div>
+      <div class="body">
+        <span class="eyebrow">1단계</span>
+        <h3>뭐 먹었어요?</h3>
+        <p>가운데 <b>+</b> 버튼을 누르면 나오는 화면. 편의점 젤리 <b>68종</b>이 이미 들어 있어서 대부분 검색만 하면 됩니다.</p>
+        <ul class="points">
+          <li><b>초성으로 찾을 수 있어요.</b> ㅁㄱㅁ 만 쳐도 마이구미가 나옵니다</li>
+          <li>오른쪽에 <b>몇 번째로 먹는 건지</b> 표시됩니다</li>
+          <li>목록에 없으면 맨 아래 <b>「새로 추가하기」</b>로 이름·모양·색을 정해 만들면 돼요</li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="feature">
+      <div class="shot"><img src="screens/08-finish.png" alt="다 먹었어요 화면. 사진 올리기, 별 네 개, 식감 슬라이더 셋, 한 줄 후기가 채워져 있다" loading="lazy"></div>
+      <div class="body">
+        <span class="eyebrow">2단계</span>
+        <h3>다 먹었어요</h3>
+        <p><b>「병에 담기」</b>를 누르면 알맹이가 위에서 통통 튀며 병으로 떨어집니다. 그게 전부예요.</p>
+        <ul class="points">
+          <li><b>오늘 먹은 사진</b>을 찍어서 올릴 수 있어요. 세로로 찍은 사진도 잘리지 않고 그대로 들어갑니다</li>
+          <li><b>식감 슬라이더</b>는 쫀득함 · 신맛 · 단맛 셋. 나중에 취향 추천의 재료가 됩니다</li>
+          <li>별점과 한 줄은 안 써도 담겨요</li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="feature">
+      <div class="shot"><img src="screens/07-detail.png" alt="마이구미 포도 상세 화면. 먹은 횟수 3, 평균 별점 5.0, 66kcal, 식감 막대와 기록 타임라인" loading="lazy"></div>
+      <div class="body">
+        <span class="eyebrow">젤리 하나를 열면</span>
+        <h3>이 젤리와 나</h3>
+        <p>같은 젤리를 여러 번 먹어도 카드는 하나입니다. 그 아래에 먹은 기록이 차곡차곡 쌓여요.</p>
+        <ul class="points">
+          <li>오른쪽 위 <b>하트</b>를 누르면 최애로 등록됩니다</li>
+          <li><b>내가 기억하는 맛</b>은 그동안 적은 식감의 평균</li>
+          <li><b>kcal / 봉</b>은 「고치기」에서 봉지 뒷면을 보고 적어 넣으면 달력 합계에 반영됩니다</li>
+        </ul>
+      </div>
+    </article>
+  </section>
+
+  <!-- ── 모으기 ── -->
+  <section class="chapter">
+    <div class="chapter-head">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.4" fill="none" stroke="#7CC36A" stroke-width="5.2"/></svg>
+      <h2>모으기</h2>
+    </div>
+    <p class="chapter-lead">도감은 계정마다 따로입니다. 친구가 추가한 젤리가 내 도감에 끼어들지 않아요.</p>
+    <div class="chapter-rule" style="background:#7CC36A"></div>
+
+    <article class="feature">
+      <div class="shot"><img src="screens/04-dex.png" alt="내 젤리 도감. 젤리 카드가 3열 격자로 놓여 있고 안 먹어본 것은 흐리다" loading="lazy"></div>
+      <div class="body">
+        <span class="eyebrow">도감</span>
+        <h3>모은 것과 아직인 것</h3>
+        <p>기본으로 깔린 편의점 젤리 68종에, 직접 추가한 젤리가 더해집니다. <b>안 먹어본 젤리는 흐리게</b> 나와서 뭐가 남았는지 한눈에 보여요.</p>
+        <ul class="points">
+          <li><b>최애</b> — 하트를 누른 것만</li>
+          <li><b>모은 것</b> — 한 번이라도 먹은 것</li>
+          <li><b>전체</b> — 도감에 있는 전부. 여기서도 초성 검색이 됩니다</li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="feature">
+      <div class="shot"><img src="screens/05-brand.png" alt="브랜드별 수집률. 트롤리 3/6, 하리보 3/5 처럼 막대로 표시된다" loading="lazy"></div>
+      <div class="body">
+        <span class="eyebrow">브랜드</span>
+        <h3>어디를 제일 많이 먹었나</h3>
+        <p>브랜드마다 몇 종 중 몇 종을 먹었는지 막대로 보여줍니다.</p>
+        <ul class="points">
+          <li><b>한 칸 남은 브랜드가 위로</b> 옵니다. 다 모은 브랜드는 아래로 내려가요</li>
+          <li><b>막대를 누르면</b> 그 브랜드 젤리만 남습니다. 뭘 안 먹어봤는지 바로 보여요</li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="feature">
+      <div class="shot"><img src="screens/09-recommend.png" alt="뭐 먹을까 화면. 취향 프로필 막대와 다시 만날 때 목록" loading="lazy"></div>
+      <div class="body">
+        <span class="eyebrow">추천</span>
+        <h3>뭐 먹을까</h3>
+        <p>인터넷에서 가져오는 게 아니라 <b>내가 남긴 기록만으로</b> 계산합니다. 기록이 쌓일수록 정확해져요.</p>
+        <ul class="points">
+          <li><b>내 취향</b> — 지금까지 적은 식감의 평균, 그리고 자주 고른 브랜드 · 맛 · 모양</li>
+          <li><b>다시 만날 때</b> — 별점은 높았는데 요즘 안 먹은 것</li>
+          <li><b>취향에 가까운</b> — 아직 안 먹어본 젤리 중 내 취향에 제일 가까운 것</li>
+        </ul>
+      </div>
+    </article>
+  </section>
+
+  <!-- ── 심심할 때 ── -->
+  <section class="chapter">
+    <div class="chapter-head">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="#F59940" stroke-width="4.6" stroke-linecap="round"><path d="M4.4 17.8c0-3 3.5-3 3.5-6s-3.5-3-3.5-6"/><path d="M11.4 17.8c0-3 3.5-3 3.5-6s-3.5-3-3.5-6" opacity=".82"/><path d="M18.4 17.8c0-3 1.4-3.6 1.4-5.8" opacity=".64"/></g></svg>
+      <h2>심심할 때</h2>
+    </div>
+    <p class="chapter-lead">기록과 상관없이 그냥 만지작거리는 것들. 소리가 나니까 무음 모드는 풀고 해보세요.</p>
+    <div class="chapter-rule" style="background:#F59940"></div>
+
+    <article class="feature">
+      <div class="shot"><img src="screens/11-draw-result.png" alt="젤리 뽑기. 캡슐이 투출구로 나오고 오늘 먹을 젤리가 아래에 뜬다" loading="lazy"></div>
+      <div class="body">
+        <span class="eyebrow">추천 → 그냥 뽑아줘요</span>
+        <h3>젤리 뽑기</h3>
+        <p>고르기 귀찮을 때. 손잡이를 돌리면 캡슐이 로또 추첨처럼 섞이다가 투출구로 떨어져 열립니다.</p>
+        <ul class="points">
+          <li>나온 젤리가 마음에 들면 <b>「이거 먹을래요」</b>로 바로 먹는 중에 담깁니다</li>
+          <li>안 먹어본 젤리가 조금 더 잘 나옵니다</li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="feature">
+      <div class="shot"><img src="screens/13-waxball-break.png" alt="왁뿌볼. 매끈한 왁스가 반쯤 깨져 안에서 주황색 젤리가 드러났다" loading="lazy"></div>
+      <div class="body">
+        <span class="eyebrow">선반 → 젤리 왁뿌볼</span>
+        <h3>왁뿌볼</h3>
+        <p>매끈한 왁스 공을 <b>누른 자리부터</b> 깨나갑니다. 깨지는 동안에도 누른 곳은 푹 들어가고 옆구리는 늘어나요.</p>
+        <ul class="points">
+          <li>왁스를 다 벗기면 <b>말랑이</b>가 됩니다. 누르면 끈적한 소리가 나고 문지르면 늘어나요</li>
+          <li>다 갖고 놀았으면 오른쪽 위 <b>「새 왁뿌볼 받기」</b>로 새 공을 받으세요. 색은 매번 다릅니다</li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="feature">
+      <div class="shot"><img src="screens/15-tummy-eat.png" alt="코끼리 배. 코끼리가 눈을 감고 웃으며 야르! 하고 외치고 있다" loading="lazy"></div>
+      <div class="body">
+        <span class="eyebrow">선반 → 코끼리 배</span>
+        <h3>코끼리 배</h3>
+        <p>배를 두드리면 북처럼 웁니다. <b>누르는 위치마다 음이 달라서</b> 손가락으로 간단한 가락도 칠 수 있어요.</p>
+        <ul class="points">
+          <li>가운데일수록 낮고 둥근 소리, 가장자리일수록 높고 짧은 소리</li>
+          <li><b>바닥에 떨어진 젤리</b>를 누르면 코로 주워 먹고 「야르!」 하고 외칩니다</li>
+          <li>외치는 글씨 색은 방금 먹은 젤리 색이에요</li>
+        </ul>
+      </div>
+    </article>
+  </section>
+
+  <!-- ── 설정 ── -->
+  <section class="chapter">
+    <div class="chapter-head">
+      <svg viewBox="0 0 24 24" fill="#5BB8E0" aria-hidden="true"><path d="M9.4 2.2h5.2v2.1c0 .9.3 1.3.9 1.9.9.9 1.4 1.9 1.4 3.3v9.1c0 2-1.4 3.2-3.3 3.2h-3.2c-1.9 0-3.3-1.2-3.3-3.2V9.5c0-1.4.5-2.4 1.4-3.3.6-.6.9-1 .9-1.9V2.2z"/><rect x="8.3" y="10.2" width="7.4" height="2.5" fill="rgba(255,255,255,.42)"/></svg>
+      <h2>설정</h2>
+    </div>
+    <p class="chapter-lead">선반 오른쪽 위 톱니 버튼. 자주 갈 일은 없지만 백업만큼은 꼭 한 번 봐두세요.</p>
+    <div class="chapter-rule" style="background:#5BB8E0"></div>
+
+    <article class="feature">
+      <div class="shot"><img src="screens/16-settings.png" alt="설정 화면. 내 이름, 테마 색 다섯 개, 병 흔드는 소리 스위치" loading="lazy"></div>
+      <div class="body">
+        <span class="eyebrow">꾸미기</span>
+        <h3>이름과 색</h3>
+        <p>선반 제목에 들어갈 <b>이름</b>과 앱 전체의 <b>색</b>을 바꿉니다.</p>
+        <ul class="points">
+          <li>색은 다섯 가지 — 딸기우유 · 청포도 · 소다 · 포도 · 코코아</li>
+          <li>젤리 알맹이 색은 그대로고, 바탕과 뚜껑·선반 색만 바뀝니다</li>
+          <li>병 흔드는 소리가 거슬리면 여기서 끄세요</li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="feature">
+      <div class="shot"><img src="screens/17-settings-bottom.png" alt="설정 아래쪽. 저장 위치 안내, 백업 파일 내려받기와 되살리기, 모든 기록 지우기" loading="lazy"></div>
+      <div class="body">
+        <span class="eyebrow">가장 중요한 부분</span>
+        <h3>백업</h3>
+        <p>기록과 사진은 서버가 아니라 <b>이 폰 안에만</b> 있습니다. 그래서 사본이 세상에 하나뿐이에요.</p>
+        <ul class="points">
+          <li><b>백업 파일 내려받기</b> — 기록과 사진을 파일 하나로. 한 달에 한 번이면 충분합니다</li>
+          <li><b>백업에서 되살리기</b> — 지금 폰에 있는 기록을 지우지 않고 합칩니다</li>
+          <li>폰을 바꾸거나 브라우저를 옮기기 <b>전에</b> 먼저 내려받으세요</li>
+        </ul>
+      </div>
+    </article>
+  </section>
+
+  <!-- ── 사용방법 ── -->
+  <section class="howto">
+    <h2>사용방법</h2>
+    <p class="chapter-lead">주소만 열어도 바로 쓸 수 있지만, <b>홈 화면에 추가</b>하면 주소창 없이 앱처럼 열리고 기록이 안전하게 남습니다.</p>
+
+    <div class="ways">
+      <div class="way">
+        <h3>아이폰 · 사파리</h3>
+        <p class="who">아이폰이라면 이 방법이 정답입니다</p>
+        <ol class="steps">
+          <li><b>사파리</b>를 열고 주소창에 <b>jellyjelly.vercel.app</b> 을 칩니다</li>
+          <li>화면 <b>아래 가운데 공유 버튼</b>(네모에 화살표)을 누릅니다</li>
+          <li>목록을 내려 <b>「홈 화면에 추가」</b>를 고릅니다</li>
+          <li>이름을 확인하고 오른쪽 위 <b>「추가」</b></li>
+        </ol>
+        <p class="after">홈 화면에 병 아이콘이 생깁니다. 이제부터는 그 아이콘으로만 여세요.</p>
+      </div>
+
+      <div class="way">
+        <h3>아이폰 · 크롬</h3>
+        <p class="who">크롬으로 링크를 받았다면</p>
+        <ol class="steps">
+          <li>크롬에서 열어도 <b>기능은 전부 똑같이</b> 돌아갑니다</li>
+          <li>다만 홈 화면 추가는 아이폰에서 <b>사파리로만</b> 제대로 됩니다</li>
+          <li>주소창 오른쪽 <b>공유 → 「Safari로 열기」</b>를 누르세요</li>
+          <li>사파리로 넘어간 다음 왼쪽 방법대로 하면 됩니다</li>
+        </ol>
+        <p class="after">크롬에서 모은 기록은 크롬에만 남습니다. 옮기려면 먼저 백업 파일을 내려받으세요.</p>
+      </div>
+
+      <div class="way">
+        <h3>안드로이드 · 크롬</h3>
+        <p class="who">갤럭시 등</p>
+        <ol class="steps">
+          <li><b>크롬</b>으로 <b>jellyjelly.vercel.app</b> 을 엽니다</li>
+          <li>오른쪽 위 <b>점 세 개(⋮)</b>를 누릅니다</li>
+          <li><b>「앱 설치」</b> 또는 <b>「홈 화면에 추가」</b>를 고릅니다</li>
+          <li><b>「설치」</b>를 누르면 끝</li>
+        </ol>
+        <p class="after">앱 서랍에도 같이 들어갑니다.</p>
+      </div>
+
+      <div class="way">
+        <h3>컴퓨터</h3>
+        <p class="who">맥 · 윈도우</p>
+        <ol class="steps">
+          <li>크롬이나 엣지로 주소를 엽니다</li>
+          <li>주소창 오른쪽 끝의 <b>설치 아이콘</b>(화면에 아래 화살표)을 누릅니다</li>
+          <li>창 하나짜리 앱으로 떨어져 나옵니다</li>
+        </ol>
+        <p class="after">폰으로 찍은 사진을 올리기는 어려우니, 구경용으로 쓰기 좋습니다.</p>
+      </div>
+    </div>
+
+    <div class="warn">
+      <h3>기록이 따로 쌓이는 경우</h3>
+      <p>브라우저는 기록을 <b>브라우저마다, 그리고 홈 화면 앱과 브라우저 탭 사이에도 따로</b> 보관합니다. 사파리 탭에서 모으다가 홈 화면 앱으로 옮기면 빈 병으로 시작해요.</p>
+      <p>그래서 <b>처음부터 홈 화면에 추가해두고 그 아이콘으로만</b> 여는 게 가장 편합니다. 이미 모아둔 게 있다면 옮기기 전에 <b>설정 → 백업 파일 내려받기</b>를 먼저 하세요.</p>
+    </div>
+  </section>
+
+  <footer>
+    <p>젤리젤리 · 혼자 쓰는 기록장 · <a href="https://jellyjelly.vercel.app">jellyjelly.vercel.app</a></p>
+  </footer>
+
+</div>
+
+</body>
+</html>
