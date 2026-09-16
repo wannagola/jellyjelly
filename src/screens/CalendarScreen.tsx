@@ -78,7 +78,7 @@ export function CalendarScreen() {
               ]}
             />
             {data.counted < data.total ? (
-              <p className="mt-1.5 text-center text-[10px] text-ink-faint">
+              <p className="mt-1.5 text-center text-tiny text-ink-faint">
                 {data.total - data.counted}개는 칼로리를 몰라 빠졌어요
               </p>
             ) : null}
@@ -94,7 +94,7 @@ export function CalendarScreen() {
           >
             ‹
           </button>
-          <span className="min-w-[6.5rem] text-center text-[12px] text-ink-soft">
+          <span className="min-w-[6.5rem] text-center text-sm text-ink-soft">
             {month.label}
           </span>
           <button
@@ -107,7 +107,7 @@ export function CalendarScreen() {
           </button>
         </div>
 
-        <div className="grid grid-cols-7 pb-1.5 text-center text-[10px] text-ink-faint">
+        <div className="grid grid-cols-7 pb-1.5 text-center text-tiny text-ink-faint">
           {WEEKDAYS.map((w) => (
             <span key={w}>{w}</span>
           ))}
@@ -134,7 +134,7 @@ export function CalendarScreen() {
                 } ${on ? "shadow-[inset_0_0_0_1.5px_var(--accent)]" : isToday ? "shadow-[inset_0_0_0_1.5px_var(--line)]" : ""}`}
               >
                 <span
-                  className={`text-[10px] tabular-nums ${list.length ? "text-ink" : "text-ink-faint"}`}
+                  className={`text-tiny tabular-nums ${list.length ? "text-ink" : "text-ink-faint"}`}
                 >
                   {day}
                 </span>
@@ -158,11 +158,11 @@ export function CalendarScreen() {
 
         <section className="mt-5">
           {picked === undefined ? (
-            <p className="text-center text-[12px] text-ink-soft">
+            <p className="text-center text-sm text-ink-soft">
               날짜를 누르면 그날 먹은 젤리를 볼 수 있어요
             </p>
           ) : selected.length === 0 ? (
-            <p className="text-center text-[12px] text-ink-soft">
+            <p className="text-center text-sm text-ink-soft">
               {format(cursor, "M월")} {picked}일에는 기록이 없어요
             </p>
           ) : (
@@ -173,10 +173,10 @@ export function CalendarScreen() {
                     to={`/jelly/${jelly.id}`}
                     className="flex items-center gap-3 rounded-2xl bg-surface p-3 transition active:scale-[.99]"
                   >
-                    <JellyFace jelly={jelly} size={38} radius={12} />
+                    <JellyFace jelly={{ ...jelly, photo: entry.photo ?? jelly.photo }} size={38} radius={12} />
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[13px] font-medium">{jelly.name}</span>
-                      <span className="block truncate text-[10.5px] text-ink-soft">
+                      <span className="block truncate text-base font-medium">{jelly.name}</span>
+                      <span className="block truncate text-tiny text-ink-soft">
                         {entry.review ?? jelly.brand ?? "—"}
                       </span>
                     </span>

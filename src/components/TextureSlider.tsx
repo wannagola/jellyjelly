@@ -17,7 +17,7 @@ export function TextureSlider({
 
   return (
     <label className="mb-3 block">
-      <span className="mb-1.5 flex items-baseline justify-between text-[11px] text-ink-soft">
+      <span className="mb-1.5 flex items-baseline justify-between text-xs text-ink-soft">
         {label}
         <b className="font-medium text-ink">{word}</b>
       </span>

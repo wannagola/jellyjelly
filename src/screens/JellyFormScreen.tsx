@@ -8,6 +8,7 @@ import { addJelly, db, startEating, updateJelly } from "../data/db";
 import type { Jelly, JellyColor, JellyShape } from "../data/types";
 import { COLOR_KEYS, COLOR_NAMES, JELLY_COLORS, SHAPE_KEYS, SHAPE_NAMES } from "../lib/jelly";
 import { compressPhoto } from "../lib/photo";
+import { useCurrentMonth } from "../lib/useCurrentMonth";
 
 /**
  * 젤리 추가 / 수정.
@@ -49,6 +50,7 @@ function JellyForm({ mode, initial }: { mode: "create" | "edit"; initial: Draft 
   // 고치기에서 돌아갈 곳은 그 젤리 상세다. 히스토리가 없을 때만 쓰인다.
   const goBack = useGoBack(mode === "edit" && initial.id ? `/jelly/${initial.id}` : "/");
   const fileRef = useRef<HTMLInputElement>(null);
+  const thisMonth = useCurrentMonth();
 
   const [name, setName] = useState(initial.name);
   const [brand, setBrand] = useState(initial.brand ?? "");
@@ -95,7 +97,10 @@ function JellyForm({ mode, initial }: { mode: "create" | "edit"; initial: Draft 
       }
       const jellyId = await addJelly(fields);
       await startEating(jellyId);
-      navigate("/", { replace: true, state: { toast: `${trimmed} 먹는 중으로 담았어요` } });
+      navigate(`/month/${thisMonth}`, {
+        replace: true,
+        state: { toast: `${trimmed} 먹는 중으로 담았어요` },
+      });
     } finally {
       setBusy(false);
     }
@@ -104,17 +109,17 @@ function JellyForm({ mode, initial }: { mode: "create" | "edit"; initial: Draft 
   return (
     <>
       <header className="flex flex-none items-center justify-between gap-2 px-5 pt-3 pb-2.5">
-        <button type="button" onClick={goBack} className="text-[13px] text-ink-soft">
+        <button type="button" onClick={goBack} className="text-base text-ink-soft">
           ‹ 뒤로
         </button>
-        <h1 className="font-display text-[17px]">
+        <h1 className="font-display text-lg">
           {mode === "edit" ? "젤리 고치기" : "새 젤리"}
         </h1>
         <button
           type="button"
           onClick={save}
           disabled={busy}
-          className="text-[13px] font-medium text-accent disabled:opacity-40"
+          className="text-base font-medium text-accent disabled:opacity-40"
         >
           {mode === "edit" ? "저장" : "담기"}
         </button>
@@ -134,7 +139,7 @@ function JellyForm({ mode, initial }: { mode: "create" | "edit"; initial: Draft 
             <button
               type="button"
               onClick={() => fileRef.current?.click()}
-              className="rounded-full bg-accent-bg px-3.5 py-1.5 text-[12px] font-medium text-accent"
+              className="rounded-full bg-accent-bg px-3.5 py-1.5 text-sm font-medium text-accent"
             >
               {photo ? "사진 바꾸기" : "봉지 사진 넣기"}
             </button>
@@ -142,14 +147,14 @@ function JellyForm({ mode, initial }: { mode: "create" | "edit"; initial: Draft 
               <button
                 type="button"
                 onClick={() => setPhoto(undefined)}
-                className="rounded-full px-3 py-1.5 text-[12px] text-ink-soft"
+                className="rounded-full px-3 py-1.5 text-sm text-ink-soft"
               >
                 지우기
               </button>
             ) : null}
           </div>
           {!photo ? (
-            <p className="mt-2 text-[10.5px] text-ink-faint">사진은 나중에 채워도 돼요</p>
+            <p className="mt-2 text-tiny text-ink-faint">사진은 나중에 채워도 돼요</p>
           ) : null}
         </div>
 
@@ -158,7 +163,7 @@ function JellyForm({ mode, initial }: { mode: "create" | "edit"; initial: Draft 
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="마이구미 포도"
-            className="w-full rounded-2xl bg-surface px-3.5 py-2.5 text-[14px] outline-none placeholder:text-ink-faint focus:shadow-[inset_0_0_0_1.5px_var(--accent)]"
+            className="w-full rounded-2xl bg-surface px-3.5 py-2.5 text-md outline-none placeholder:text-ink-faint focus:shadow-[inset_0_0_0_1.5px_var(--accent)]"
           />
         </Field>
 
@@ -167,7 +172,7 @@ function JellyForm({ mode, initial }: { mode: "create" | "edit"; initial: Draft 
             value={brand}
             onChange={(e) => setBrand(e.target.value)}
             placeholder="오리온"
-            className="w-full rounded-2xl bg-surface px-3.5 py-2.5 text-[14px] outline-none placeholder:text-ink-faint focus:shadow-[inset_0_0_0_1.5px_var(--accent)]"
+            className="w-full rounded-2xl bg-surface px-3.5 py-2.5 text-md outline-none placeholder:text-ink-faint focus:shadow-[inset_0_0_0_1.5px_var(--accent)]"
           />
         </Field>
 
@@ -178,9 +183,9 @@ function JellyForm({ mode, initial }: { mode: "create" | "edit"; initial: Draft 
               onChange={(e) => setKcal(e.target.value.replace(/[^0-9]/g, "").slice(0, 4))}
               inputMode="numeric"
               placeholder="66"
-              className="w-24 rounded-2xl bg-surface px-3.5 py-2.5 text-[14px] tabular-nums outline-none placeholder:text-ink-faint focus:shadow-[inset_0_0_0_1.5px_var(--accent)]"
+              className="w-24 rounded-2xl bg-surface px-3.5 py-2.5 text-md tabular-nums outline-none placeholder:text-ink-faint focus:shadow-[inset_0_0_0_1.5px_var(--accent)]"
             />
-            <span className="text-[12px] text-ink-soft">kcal · 1봉 기준</span>
+            <span className="text-sm text-ink-soft">kcal · 1봉 기준</span>
           </div>
         </Field>
 
@@ -221,7 +226,7 @@ function JellyForm({ mode, initial }: { mode: "create" | "edit"; initial: Draft 
           </div>
         </Field>
 
-        {error ? <p className="mt-4 text-[12.5px] text-accent">{error}</p> : null}
+        {error ? <p className="mt-4 text-sm text-accent">{error}</p> : null}
       </main>
     </>
   );
@@ -239,8 +244,8 @@ function Field({
   return (
     <div className="mb-4">
       <div className="mb-1.5 flex items-baseline gap-2 px-1">
-        <span className="text-[11px] font-medium text-ink-soft">{label}</span>
-        {hint ? <span className="text-[10px] text-ink-faint">{hint}</span> : null}
+        <span className="text-xs font-medium text-ink-soft">{label}</span>
+        {hint ? <span className="text-tiny text-ink-faint">{hint}</span> : null}
       </div>
       {children}
     </div>

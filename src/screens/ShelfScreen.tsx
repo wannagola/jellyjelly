@@ -114,7 +114,7 @@ export function ShelfScreen() {
             >
               ‹
             </button>
-            <p className="min-w-[7.5rem] text-center font-display text-[16px]">{month.label}</p>
+            <p className="min-w-[7.5rem] text-center font-display text-lg">{month.label}</p>
             {/* 아직 오지 않은 달에는 먹은 젤리가 있을 수 없다 */}
             <button
               type="button"
@@ -127,14 +127,14 @@ export function ShelfScreen() {
             </button>
           </div>
 
-          <p className="mt-0.5 text-[11px] text-ink-soft">
+          <p className="mt-0.5 text-xs text-ink-soft">
             {count === 0
               ? "아직 비어 있어요"
               : overflow > 0
                 ? `${kinds}종 · ${count}개 · 병에는 ${JAR_CAPACITY}개까지 보여요`
                 : `${kinds}종 · ${count}개 담겼어요`}
           </p>
-          <p className="mt-1 text-[10px] text-ink-faint">
+          <p className="mt-1 text-tiny text-ink-faint">
             {!isThisMonth
               ? "지난 병이에요 · 기록은 이번 달에만 담을 수 있어요"
               : count > 1
@@ -145,7 +145,7 @@ export function ShelfScreen() {
 
         {data && data.eating.length > 0 ? (
           <section className="mt-7">
-            <h2 className="mb-2 px-1 text-[11px] tracking-wide text-ink-soft">먹는 중</h2>
+            <h2 className="mb-2 px-1 text-xs tracking-wide text-ink-soft">먹는 중</h2>
             <ul className="flex flex-col gap-2">
               {data.eating.map((entry) => {
                 const jelly = data.byId.get(entry.jellyId);
@@ -158,12 +158,12 @@ export function ShelfScreen() {
                     >
                       <JellyFace jelly={jelly} size={44} />
                       <span className="min-w-0 flex-1">
-                        <span className="block truncate text-[14px] font-medium">{jelly.name}</span>
-                        <span className="block text-[11px] text-ink-soft">
+                        <span className="block truncate text-md font-medium">{jelly.name}</span>
+                        <span className="block text-xs text-ink-soft">
                           {jelly.brand ?? "브랜드 없음"}
                         </span>
                       </span>
-                      <span className="flex-none rounded-full bg-accent-bg px-3 py-1.5 text-[12px] font-medium text-accent">
+                      <span className="flex-none rounded-full bg-accent-bg px-3 py-1.5 text-sm font-medium text-accent">
                         다 먹었어요
                       </span>
                     </Link>
@@ -175,7 +175,7 @@ export function ShelfScreen() {
         ) : null}
 
         {isThisMonth && count === 0 && (!data || data.eating.length === 0) ? (
-          <p className="mt-8 text-center text-[13px] leading-relaxed text-ink-soft">
+          <p className="mt-8 text-center text-base leading-relaxed text-ink-soft">
             아래 <span className="font-medium text-accent">＋</span> 를 눌러
             <br />
             지금 먹는 젤리를 기록해 보세요

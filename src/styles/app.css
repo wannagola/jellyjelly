@@ -2,6 +2,19 @@
 @import "./tokens.css";
 
 @theme {
+  /* 글자 크기는 rem 으로만 적는다. 뿌리 크기 하나만 움직이면
+     글자도 여백도 같이 따라온다 (Tailwind 간격도 rem 기반이다). */
+  --text-micro: 0.575rem;
+  --text-tiny: 0.66rem;
+  --text-xs: 0.72rem;
+  --text-sm: 0.78rem;
+  --text-base: 0.83rem;
+  --text-md: 0.9rem;
+  --text-lg: 1.05rem;
+  --text-xl: 1.19rem;
+  --text-2xl: 1.375rem;
+  --text-3xl: 1.875rem;
+
   --color-bg: var(--bg);
   --color-surface: var(--surface);
   --color-ink: var(--ink);
@@ -17,6 +30,14 @@
 /* base 레이어에 넣어야 유틸리티 클래스가 이 리셋을 이긴다.
    (레이어 밖에 두면 button{background:none}이 bg-* 를 지워버린다) */
 @layer base {
+  /* 화면 폭에 맞춰 앱 전체가 커지고 작아진다.
+     390px(아이폰 14/15)에서 16px 이 되도록 맞췄고, 좁은 폰에서 너무 작아지거나
+     태블릿에서 우스꽝스럽게 커지지 않도록 위아래를 막아뒀다.
+     앱 폭은 480px 에서 멈추므로 그 위로는 어차피 상한에 걸린다. */
+  html {
+    font-size: clamp(15px, 4.1vw, 18px);
+  }
+
   html,
   body,
   #root {
@@ -52,71 +73,76 @@
 }
 
 /* ===== 유리병 =====
-   시안의 층 구조를 그대로 옮김: 젤리 더미 위에 반사층이 덮여야
-   젤리가 '유리 앞'이 아니라 '유리 안'에 있는 것처럼 보인다. */
+   내부 치수를 전부 cqw(병 너비의 1%)로 잡는다. px 로 두면 선반의 작은 병에서
+   뚜껑만 두꺼워 보인다. 기준은 너비 200 · 높이 275 이므로 1px = 0.5cqw.
+   너비 기준 하나로 통일해야 모서리 둥글기까지 같은 비율로 줄어든다. */
 .jar {
   position: relative;
+  container-type: inline-size;
 }
 
+/* 바닥 그림자 */
 .jar-cast {
   position: absolute;
   left: 50%;
-  bottom: -5px;
+  bottom: -2.5cqw;
   transform: translateX(-50%);
   width: 85%;
-  height: 17px;
-  border-radius: 50%;
+  height: 8.5cqw;
   background: radial-gradient(
     ellipse at center,
     rgba(108, 86, 100, 0.26),
     rgba(108, 86, 100, 0) 72%
   );
+  border-radius: 50%;
 }
 
+/* 뚜껑 */
 .jar-lid {
   position: absolute;
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 63%;
-  height: 19px;
-  border-radius: 9px 9px 4px 4px;
+  width: 57%;
+  height: 9.5cqw;
+  border-radius: 4.5cqw 4.5cqw 2cqw 2cqw;
   background: linear-gradient(180deg, var(--lid-top) 0%, var(--lid-mid) 42%, var(--lid-bottom) 100%);
   box-shadow:
-    inset 0 -2px 3px rgba(150, 100, 120, 0.22),
-    0 2px 4px rgba(120, 90, 105, 0.16);
+    inset 0 -1cqw 1.5cqw rgba(150, 100, 120, 0.22),
+    0 1cqw 2cqw rgba(120, 90, 105, 0.16);
   overflow: hidden;
 }
 .jar-lid::before {
   content: "";
   position: absolute;
-  inset: 4px 7px 5px;
-  border-radius: 4px;
+  inset: 2cqw 3.5cqw 2.5cqw;
+  border-radius: 2cqw;
   background: repeating-linear-gradient(
     90deg,
-    rgba(255, 255, 255, 0.55) 0 1.5px,
-    rgba(255, 255, 255, 0) 1.5px 6px
+    rgba(255, 255, 255, 0.55) 0 0.75cqw,
+    rgba(255, 255, 255, 0) 0.75cqw 3cqw
   );
   opacity: 0.7;
 }
 .jar-lid::after {
   content: "";
   position: absolute;
-  left: 12px;
-  top: 3px;
+  left: 6cqw;
+  top: 1.5cqw;
   width: 32%;
-  height: 4px;
-  border-radius: 3px;
+  height: 2cqw;
+  border-radius: 1.5cqw;
   background: rgba(255, 255, 255, 0.85);
 }
 
+/* 목 */
 .jar-neck {
   position: absolute;
-  top: 17px;
+  top: 8.5cqw;
   left: 50%;
   transform: translateX(-50%);
-  width: 53%;
-  height: 14px;
+  width: 48%;
+  height: 7cqw;
   background: linear-gradient(
     90deg,
     rgba(255, 255, 255, 0.9) 0 4%,
@@ -125,16 +151,17 @@
     rgba(205, 224, 232, 0.42) 86%,
     rgba(255, 255, 255, 0.78) 100%
   );
-  box-shadow: inset 0 -3px 5px -2px rgba(140, 170, 184, 0.45);
+  box-shadow: inset 0 -1.5cqw 2.5cqw -1cqw rgba(140, 170, 184, 0.45);
 }
 
+/* 유리 몸통 */
 .jar-glass {
   position: absolute;
-  top: 29px;
+  top: 14.5cqw;
   left: 0;
   right: 0;
   bottom: 0;
-  border-radius: 26px 26px 38px 38px;
+  border-radius: 13cqw 13cqw 19cqw 19cqw;
   overflow: hidden;
   background: linear-gradient(
     96deg,
@@ -148,9 +175,9 @@
     rgba(176, 201, 212, 0.7) 100%
   );
   box-shadow:
-    inset 0 3px 7px -2px rgba(255, 255, 255, 0.95),
-    inset 0 -18px 24px -14px rgba(138, 170, 184, 0.55),
-    0 8px 20px -12px rgba(72, 94, 106, 0.4);
+    inset 0 1.5cqw 3.5cqw -1cqw rgba(255, 255, 255, 0.95),
+    inset 0 -9cqw 12cqw -7cqw rgba(138, 170, 184, 0.55),
+    0 4cqw 10cqw -6cqw rgba(72, 94, 106, 0.4);
 }
 
 .jar-pile {
@@ -165,12 +192,13 @@
   transform: translate(-50%, -50%);
 }
 
+/* 유리 반사 - 젤리 위에 덮인다 */
 .jar-glare {
   position: absolute;
   inset: 0;
   z-index: 2;
   pointer-events: none;
-  border-radius: 26px 26px 38px 38px;
+  border-radius: 13cqw 13cqw 19cqw 19cqw;
   background:
     linear-gradient(
       180deg,
@@ -196,11 +224,11 @@
   pointer-events: none;
 }
 .jar-shine {
-  top: 16px;
+  top: 8cqw;
   left: 9%;
-  width: 11px;
-  height: 39%;
-  border-radius: 7px;
+  width: 5.5cqw;
+  height: 53cqw;
+  border-radius: 3.5cqw;
   background: linear-gradient(
     180deg,
     rgba(255, 255, 255, 0.96),
@@ -209,19 +237,19 @@
   );
 }
 .jar-shine2 {
-  top: 28px;
+  top: 14cqw;
   left: 18%;
-  width: 5px;
-  height: 17%;
-  border-radius: 4px;
+  width: 2.5cqw;
+  height: 23cqw;
+  border-radius: 2cqw;
   background: rgba(255, 255, 255, 0.62);
 }
 .jar-shine-r {
-  top: 34px;
+  top: 17cqw;
   right: 8%;
-  width: 6px;
-  height: 50%;
-  border-radius: 5px;
+  width: 3cqw;
+  height: 68cqw;
+  border-radius: 2.5cqw;
   background: linear-gradient(
     180deg,
     rgba(255, 255, 255, 0.55),
@@ -231,15 +259,15 @@
 .jar-floor {
   left: 5%;
   right: 5%;
-  bottom: 6px;
-  height: 15px;
+  bottom: 3cqw;
+  height: 7.5cqw;
   border-radius: 50%;
   background: linear-gradient(
     180deg,
     rgba(255, 255, 255, 0.08),
     rgba(255, 255, 255, 0.62)
   );
-  box-shadow: 0 -4px 11px rgba(255, 255, 255, 0.45);
+  box-shadow: 0 -2cqw 5.5cqw rgba(255, 255, 255, 0.45);
 }
 
 .safe-b {

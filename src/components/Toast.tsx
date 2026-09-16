@@ -23,7 +23,7 @@ export function Toast({ message, duration = 2200 }: { message?: string; duration
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 12 }}
           transition={{ type: "spring", stiffness: 420, damping: 32 }}
-          className="pointer-events-none fixed inset-x-0 bottom-28 z-30 mx-auto w-fit max-w-[80%] rounded-full bg-ink/90 px-4 py-2 text-center text-[13px] text-white"
+          className="pointer-events-none fixed inset-x-0 bottom-28 z-30 mx-auto w-fit max-w-[80%] rounded-full bg-ink/90 px-4 py-2 text-center text-base text-white"
         >
           {shown}
         </motion.p>

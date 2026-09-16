@@ -59,7 +59,7 @@ export function TabBar() {
             to={t.to}
             end={t.to === "/"}
             className={({ isActive }) =>
-              `flex flex-col items-center gap-1 py-1 text-[10px] transition-colors ${
+              `flex flex-col items-center gap-1 py-1 text-tiny transition-colors ${
                 isActive || (Boolean(viewingMonth) && t.to === "/") ? "text-accent" : "text-ink-faint"
               }`
             }

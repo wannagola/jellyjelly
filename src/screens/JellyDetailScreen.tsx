@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from "react-router";
 import { Heart } from "../components/Heart";
 import { JellyFace } from "../components/JellyFace";
 import { Stars } from "../components/Stars";
+import { usePhotoUrl } from "../lib/photo";
 import { useGoBack } from "../lib/goBack";
 import { db, toggleFavorite } from "../data/db";
 import type { Entry } from "../data/types";
@@ -27,8 +28,8 @@ export function JellyDetailScreen() {
   if (data && !data.jelly) {
     return (
       <main className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 px-10 text-center">
-        <p className="font-display text-[17px]">없는 젤리예요</p>
-        <button type="button" onClick={() => navigate("/dex")} className="text-[13px] text-accent">
+        <p className="font-display text-lg">없는 젤리예요</p>
+        <button type="button" onClick={() => navigate("/dex")} className="text-base text-accent">
           도감으로
         </button>
       </main>
@@ -45,7 +46,7 @@ export function JellyDetailScreen() {
   return (
     <>
       <header className="flex flex-none items-center justify-between gap-2 px-5 pt-3 pb-1">
-        <button type="button" onClick={goBack} className="text-[13px] text-ink-soft">
+        <button type="button" onClick={goBack} className="text-base text-ink-soft">
           ‹ 뒤로
         </button>
         {jelly ? (
@@ -59,7 +60,7 @@ export function JellyDetailScreen() {
             >
               <Heart on={Boolean(jelly.favorite)} size={21} />
             </button>
-            <Link to={`/jelly/${jelly.id}/edit`} className="text-[13px] text-accent">
+            <Link to={`/jelly/${jelly.id}/edit`} className="text-base text-accent">
               고치기
             </Link>
           </span>
@@ -71,11 +72,11 @@ export function JellyDetailScreen() {
           <>
             <div className="flex flex-col items-center rounded-b-[26px] bg-surface px-5 pt-1 pb-5 text-center">
               <JellyFace jelly={jelly} size={112} radius={34} />
-              <h1 className="mt-3 flex items-center justify-center gap-1.5 font-display text-[19px]">
+              <h1 className="mt-3 flex items-center justify-center gap-1.5 font-display text-xl">
                 {jelly.favorite ? <Heart on size={15} /> : null}
                 {jelly.name}
               </h1>
-              <p className="mt-0.5 text-[11.5px] text-ink-soft">
+              <p className="mt-0.5 text-xs text-ink-soft">
                 {[jelly.brand, `${COLOR_NAMES[jelly.color]} ${SHAPE_NAMES[jelly.shape]}`]
                   .filter(Boolean)
                   .join(" · ")}
@@ -96,22 +97,15 @@ export function JellyDetailScreen() {
 
               <TextureSummary entries={entries} />
 
-              <h2 className="mt-6 mb-2 px-1 text-[11px] tracking-wide text-ink-soft">내 기록</h2>
+              <h2 className="mt-6 mb-2 px-1 text-xs tracking-wide text-ink-soft">내 기록</h2>
               {entries.length === 0 ? (
-                <p className="px-1 text-[12.5px] text-ink-soft">
+                <p className="px-1 text-sm text-ink-soft">
                   아직 다 먹은 기록이 없어요
                 </p>
               ) : (
                 <ol className="ml-1.5 flex flex-col gap-3 border-l-2 border-line pl-3.5">
                   {entries.map((e) => (
-                    <li key={e.id} className="relative">
-                      <span className="absolute -left-[1.32rem] top-1.5 size-2 rounded-full border-2 border-bg bg-accent" />
-                      <p className="text-[10px] text-ink-faint">
-                        {e.finishedAt ? format(e.finishedAt, "yyyy.MM.dd") : ""}
-                        {typeof e.rating === "number" ? ` · ★${e.rating}` : ""}
-                      </p>
-                      {e.review ? <p className="text-[12.5px]">{e.review}</p> : null}
-                    </li>
+                    <TimelineRow key={e.id} entry={e} />
                   ))}
                 </ol>
               )}
@@ -126,8 +120,8 @@ export function JellyDetailScreen() {
 function Stat({ value, label }: { value: string; label: string }) {
   return (
     <div className="flex-1 rounded-2xl bg-surface px-1 py-2.5 text-center">
-      <b className="block font-display text-[18px] text-accent tabular-nums">{value}</b>
-      <span className="text-[9.5px] text-ink-soft">{label}</span>
+      <b className="block font-display text-xl text-accent tabular-nums">{value}</b>
+      <span className="text-micro text-ink-soft">{label}</span>
     </div>
   );
 }
@@ -148,10 +142,10 @@ function TextureSummary({ entries }: { entries: Entry[] }) {
 
   return (
     <div className="mt-3.5 rounded-2xl bg-surface p-4">
-      <p className="mb-2.5 text-[10.5px] text-ink-soft">내가 기억하는 맛</p>
+      <p className="mb-2.5 text-tiny text-ink-soft">내가 기억하는 맛</p>
       {bars.map((bar) => (
         <div key={bar.label} className="mb-2 last:mb-0">
-          <div className="mb-1 flex justify-between text-[10.5px] text-ink-soft">
+          <div className="mb-1 flex justify-between text-tiny text-ink-soft">
             <span>{bar.label}</span>
             <span className="tabular-nums">{Math.round(bar.value)}</span>
           </div>
@@ -164,5 +158,30 @@ function TextureSummary({ entries }: { entries: Entry[] }) {
         </div>
       ))}
     </div>
+  );
+}
+
+/** 기록 한 줄. 그날 찍은 사진이 있으면 옆에 붙는다. */
+function TimelineRow({ entry }: { entry: Entry }) {
+  const photo = usePhotoUrl(entry.photo);
+
+  return (
+    <li className="relative flex gap-2.5">
+      <span className="absolute -left-[1.32rem] top-1.5 size-2 rounded-full border-2 border-bg bg-accent" />
+      <div className="min-w-0 flex-1">
+        <p className="text-tiny text-ink-faint">
+          {entry.finishedAt ? format(entry.finishedAt, "yyyy.MM.dd") : ""}
+          {typeof entry.rating === "number" ? ` · ★${entry.rating}` : ""}
+        </p>
+        {entry.review ? <p className="text-sm">{entry.review}</p> : null}
+      </div>
+      {photo ? (
+        <img
+          src={photo}
+          alt=""
+          className="size-14 flex-none rounded-xl object-cover shadow-[inset_0_0_0_1px_var(--line)]"
+        />
+      ) : null}
+    </li>
   );
 }

@@ -112,11 +112,17 @@ export async function startEating(jellyId: string): Promise<string> {
 
 export async function finishEntry(id: string, review?: Partial<Entry>): Promise<void> {
   const now = Date.now();
-  await db.entries.update(id, {
-    ...review,
-    status: "done",
-    finishedAt: now,
-    updatedAt: now,
+  await db.transaction("rw", db.entries, db.jellies, async () => {
+    const entry = await db.entries.get(id);
+    await db.entries.update(id, { ...review, status: "done", finishedAt: now, updatedAt: now });
+
+    // 그날 찍은 사진이 있는데 젤리엔 아직 대표 사진이 없으면 그걸 얼굴로 쓴다.
+    // 따로 물어볼 만한 일이 아니다. 이미 있으면 건드리지 않는다.
+    if (!review?.photo || !entry) return;
+    const jelly = await db.jellies.get(entry.jellyId);
+    if (jelly && !jelly.photo) {
+      await db.jellies.update(jelly.id, { photo: review.photo, updatedAt: now });
+    }
   });
 }
 

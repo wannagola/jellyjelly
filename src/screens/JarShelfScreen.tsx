@@ -103,7 +103,7 @@ export function JarShelfScreen() {
                 />
               </div>
             ) : (
-              <p className="mb-4 rounded-2xl bg-surface px-4 py-3.5 text-center text-[12.5px] leading-relaxed text-ink-soft">
+              <p className="mb-4 rounded-2xl bg-surface px-4 py-3.5 text-center text-sm leading-relaxed text-ink-soft">
                 아직 담은 젤리가 없어요
                 <br />
                 아래 <span className="font-medium text-accent">＋</span> 로 첫 젤리를 기록해 보세요
@@ -142,8 +142,8 @@ export function JarShelfScreen() {
                   <ul className="flex gap-1 pt-1.5">
                     {row.map((jar) => (
                       <li key={jar.key} className="min-w-0 flex-1 text-center">
-                        <span className="block font-display text-[12.5px]">{jar.short}</span>
-                        <span className="block text-[9.5px] text-ink-faint tabular-nums">
+                        <span className="block font-display text-sm">{jar.short}</span>
+                        <span className="block text-micro text-ink-faint tabular-nums">
                           {jar.jellies.length > 0
                             ? `${jar.kinds}종 · ${jar.jellies.length}개`
                             : "비었어요"}

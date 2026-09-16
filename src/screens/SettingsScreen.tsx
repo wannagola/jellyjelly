@@ -77,10 +77,10 @@ export function SettingsScreen() {
       <AppBar title="설정" />
 
       <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-8">
-        <h2 className="mb-2 px-1 text-[11px] tracking-wide text-ink-soft">내 이름</h2>
+        <h2 className="mb-2 px-1 text-xs tracking-wide text-ink-soft">내 이름</h2>
         {settings ? <NicknameRow key={settings.nickname} initial={settings.nickname ?? ""} /> : null}
 
-        <h2 className="mt-6 mb-2 px-1 text-[11px] tracking-wide text-ink-soft">색</h2>
+        <h2 className="mt-6 mb-2 px-1 text-xs tracking-wide text-ink-soft">색</h2>
         <div className="rounded-2xl bg-surface p-4">
           <div className="flex justify-between gap-2">
             {THEMES.map((theme) => {
@@ -104,7 +104,7 @@ export function SettingsScreen() {
                     style={{ background: theme.swatch }}
                   />
                   <span
-                    className={`truncate text-[10px] ${on ? "font-medium text-ink" : "text-ink-soft"}`}
+                    className={`truncate text-tiny ${on ? "font-medium text-ink" : "text-ink-soft"}`}
                   >
                     {theme.name}
                   </span>
@@ -112,12 +112,12 @@ export function SettingsScreen() {
               );
             })}
           </div>
-          <p className="mt-3 text-[10.5px] leading-snug text-ink-faint">
+          <p className="mt-3 text-tiny leading-snug text-ink-faint">
             젤리 색은 그대로예요. 바탕과 뚜껑, 선반 색만 바뀝니다.
           </p>
         </div>
 
-        <h2 className="mt-6 mb-2 px-1 text-[11px] tracking-wide text-ink-soft">소리</h2>
+        <h2 className="mt-6 mb-2 px-1 text-xs tracking-wide text-ink-soft">소리</h2>
         <button
           type="button"
           onClick={() => {
@@ -129,8 +129,8 @@ export function SettingsScreen() {
           className="flex w-full items-center gap-3 rounded-2xl bg-surface p-4 text-left transition active:scale-[.99]"
         >
           <span className="min-w-0 flex-1">
-            <span className="block text-[13px] font-medium">병 흔드는 소리</span>
-            <span className="mt-0.5 block text-[11px] leading-snug text-ink-soft">
+            <span className="block text-base font-medium">병 흔드는 소리</span>
+            <span className="mt-0.5 block text-xs leading-snug text-ink-soft">
               병을 톡 칠 때 젤리 부딪히는 소리가 나요
             </span>
           </span>
@@ -147,14 +147,14 @@ export function SettingsScreen() {
           </span>
         </button>
 
-        <h2 className="mt-6 mb-2 px-1 text-[11px] tracking-wide text-ink-soft">저장</h2>
+        <h2 className="mt-6 mb-2 px-1 text-xs tracking-wide text-ink-soft">저장</h2>
         <section className="rounded-2xl bg-surface p-4">
-          <p className="text-[13px] font-medium">이 기기에만 저장돼요</p>
-          <p className="mt-1 text-[11.5px] leading-relaxed text-ink-soft">
+          <p className="text-base font-medium">이 기기에만 저장돼요</p>
+          <p className="mt-1 text-xs leading-relaxed text-ink-soft">
             기록과 사진이 폰 안에만 있어요. 서버로 나가지 않는 대신,
             <b className="font-medium text-ink"> 사본도 여기 하나뿐</b>입니다.
           </p>
-          <p className="mt-2.5 text-[10.5px] text-ink-faint tabular-nums">
+          <p className="mt-2.5 text-tiny text-ink-faint tabular-nums">
             젤리 {stats?.jellies ?? 0}종 · 기록 {stats?.entries ?? 0}건
             {stats?.lastBackup
               ? ` · 마지막 백업 ${format(stats.lastBackup, "yyyy.MM.dd")}`
@@ -162,7 +162,7 @@ export function SettingsScreen() {
           </p>
         </section>
 
-        <h2 className="mt-6 mb-2 px-1 text-[11px] tracking-wide text-ink-soft">백업</h2>
+        <h2 className="mt-6 mb-2 px-1 text-xs tracking-wide text-ink-soft">백업</h2>
         <div className="flex flex-col gap-2">
           <Row
             title="백업 파일 내려받기"
@@ -187,22 +187,22 @@ export function SettingsScreen() {
           />
         </div>
 
-        {note ? <p className="mt-3 px-1 text-[12px] text-accent">{note}</p> : null}
-        {error ? <p className="mt-3 px-1 text-[12px] text-accent">{error}</p> : null}
+        {note ? <p className="mt-3 px-1 text-sm text-accent">{note}</p> : null}
+        {error ? <p className="mt-3 px-1 text-sm text-accent">{error}</p> : null}
 
-        <h2 className="mt-6 mb-2 px-1 text-[11px] tracking-wide text-ink-soft">홈 화면에 추가</h2>
+        <h2 className="mt-6 mb-2 px-1 text-xs tracking-wide text-ink-soft">홈 화면에 추가</h2>
         <section className="rounded-2xl bg-surface p-4">
-          <p className="text-[11.5px] leading-relaxed text-ink-soft">
+          <p className="text-xs leading-relaxed text-ink-soft">
             사파리에서 <b className="font-medium text-ink">공유 → 홈 화면에 추가</b>를 눌러
             앱처럼 쓰세요. 브라우저 탭으로만 쓰면 한동안 안 열었을 때
             사파리가 저장소를 지울 수 있어요.
           </p>
         </section>
 
-        <h2 className="mt-6 mb-2 px-1 text-[11px] tracking-wide text-ink-soft">위험한 일</h2>
+        <h2 className="mt-6 mb-2 px-1 text-xs tracking-wide text-ink-soft">위험한 일</h2>
         {confirmWipe ? (
           <section className="rounded-2xl bg-surface p-4">
-            <p className="text-[12.5px] leading-relaxed">
+            <p className="text-sm leading-relaxed">
               젤리와 기록을 <b>전부</b> 지웁니다. 되돌릴 수 없어요.
               <br />
               <span className="text-ink-soft">백업 파일이 있는지 먼저 확인하세요.</span>
@@ -211,7 +211,7 @@ export function SettingsScreen() {
               <button
                 type="button"
                 onClick={() => setConfirmWipe(false)}
-                className="flex-1 rounded-xl bg-line py-2.5 text-[13px]"
+                className="flex-1 rounded-xl bg-line py-2.5 text-base"
               >
                 안 지울래요
               </button>
@@ -219,7 +219,7 @@ export function SettingsScreen() {
                 type="button"
                 onClick={onWipe}
                 disabled={busy === "wipe"}
-                className="flex-1 rounded-xl bg-accent py-2.5 text-[13px] text-white disabled:opacity-50"
+                className="flex-1 rounded-xl bg-accent py-2.5 text-base text-white disabled:opacity-50"
               >
                 {busy === "wipe" ? "지우는 중" : "정말 지우기"}
               </button>
@@ -235,7 +235,7 @@ export function SettingsScreen() {
           />
         )}
 
-        <p className="mt-8 text-center text-[10px] text-ink-faint">젤리젤리 · 혼자 쓰는 기록장</p>
+        <p className="mt-8 text-center text-tiny text-ink-faint">젤리젤리 · 혼자 쓰는 기록장</p>
       </main>
     </>
   );
@@ -262,10 +262,10 @@ function Row({
       className="flex w-full items-center gap-3 rounded-2xl bg-surface p-4 text-left transition active:scale-[.99] disabled:opacity-50"
     >
       <span className="min-w-0 flex-1">
-        <span className="block text-[13px] font-medium">{title}</span>
-        <span className="mt-0.5 block text-[11px] leading-snug text-ink-soft">{desc}</span>
+        <span className="block text-base font-medium">{title}</span>
+        <span className="mt-0.5 block text-xs leading-snug text-ink-soft">{desc}</span>
       </span>
-      <span className="flex-none rounded-full bg-accent-bg px-3 py-1.5 text-[11.5px] font-medium text-accent">
+      <span className="flex-none rounded-full bg-accent-bg px-3 py-1.5 text-xs font-medium text-accent">
         {action}
       </span>
     </button>
@@ -291,12 +291,12 @@ function NicknameRow({ initial }: { initial: string }) {
         onChange={(e) => setDraft(e.target.value.slice(0, 12))}
         maxLength={12}
         enterKeyHint="done"
-        className="min-w-0 flex-1 rounded-xl bg-bg px-3 py-2 text-[14px] outline-none focus:shadow-[inset_0_0_0_1.5px_var(--accent)]"
+        className="min-w-0 flex-1 rounded-xl bg-bg px-3 py-2 text-md outline-none focus:shadow-[inset_0_0_0_1.5px_var(--accent)]"
       />
       <button
         type="submit"
         disabled={!changed}
-        className="flex-none rounded-full bg-accent-bg px-3.5 py-2 text-[12px] font-medium text-accent disabled:opacity-35"
+        className="flex-none rounded-full bg-accent-bg px-3.5 py-2 text-sm font-medium text-accent disabled:opacity-35"
       >
         저장
       </button>

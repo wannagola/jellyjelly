@@ -6,11 +6,13 @@ import { JellyFace } from "../components/JellyFace";
 import { useGoBack } from "../lib/goBack";
 import { db, startEating } from "../data/db";
 import { searchJellies } from "../lib/search";
+import { useCurrentMonth } from "../lib/useCurrentMonth";
 
 /** 기록하기 — 찾아서 한 번 탭하면 끝. 없으면 바로 만들 수 있어야 한다. */
 export function RecordScreen() {
   const navigate = useNavigate();
   const goBack = useGoBack("/");
+  const thisMonth = useCurrentMonth();
   const [query, setQuery] = useState("");
 
   const jellies = useLiveQuery(() => db.jellies.orderBy("name").toArray(), []);
@@ -32,14 +34,17 @@ export function RecordScreen() {
 
   async function pick(jellyId: string, name: string) {
     await startEating(jellyId);
-    navigate("/", { replace: true, state: { toast: `${name} 먹는 중으로 담았어요` } });
+    navigate(`/month/${thisMonth}`, {
+      replace: true,
+      state: { toast: `${name} 먹는 중으로 담았어요` },
+    });
   }
 
   return (
     <>
       <header className="flex flex-none items-center justify-between gap-2 px-5 pt-3 pb-2.5">
-        <h1 className="font-display text-[22px]">뭐 먹었어요?</h1>
-        <button type="button" onClick={goBack} className="text-[13px] text-ink-soft">
+        <h1 className="font-display text-2xl">뭐 먹었어요?</h1>
+        <button type="button" onClick={goBack} className="text-base text-ink-soft">
           닫기
         </button>
       </header>
@@ -52,9 +57,9 @@ export function RecordScreen() {
           onChange={(e) => setQuery(e.target.value)}
           placeholder="젤리 이름"
           enterKeyHint="search"
-          className="w-full rounded-2xl border-[1.5px] border-accent bg-surface px-3.5 py-2.5 text-[14px] outline-none placeholder:text-ink-faint"
+          className="w-full rounded-2xl border-[1.5px] border-accent bg-surface px-3.5 py-2.5 text-md outline-none placeholder:text-ink-faint"
         />
-        <p className="px-1 pt-1.5 pb-2 text-[10.5px] text-ink-soft">
+        <p className="px-1 pt-1.5 pb-2 text-tiny text-ink-soft">
           초성으로도 찾을 수 있어요 · ㅁㄱㅁ → 마이구미
         </p>
       </div>
@@ -74,11 +79,11 @@ export function RecordScreen() {
                   <span className="min-w-0 flex-1">
                     <span className="flex items-center gap-1">
                       {jelly.favorite ? <Heart on size={11} /> : null}
-                      <span className="truncate text-[13.5px] font-medium">{jelly.name}</span>
+                      <span className="truncate text-base font-medium">{jelly.name}</span>
                     </span>
-                    <span className="block text-[10.5px] text-ink-soft">{jelly.brand ?? "—"}</span>
+                    <span className="block text-tiny text-ink-soft">{jelly.brand ?? "—"}</span>
                   </span>
-                  <span className="flex-none text-[10.5px] text-accent">
+                  <span className="flex-none text-tiny text-accent">
                     {n === 0 ? "첫 만남" : `${n + 1}번째`}
                   </span>
                 </button>
@@ -92,7 +97,7 @@ export function RecordScreen() {
           onClick={() =>
             navigate(`/record/new${query.trim() ? `?name=${encodeURIComponent(query.trim())}` : ""}`)
           }
-          className="mt-2 w-full rounded-2xl border-[1.5px] border-dashed border-ink-faint px-4 py-3 text-[12.5px] text-ink-soft transition active:scale-[.99]"
+          className="mt-2 w-full rounded-2xl border-[1.5px] border-dashed border-ink-faint px-4 py-3 text-sm text-ink-soft transition active:scale-[.99]"
         >
           ＋ {query.trim() ? `"${query.trim()}" 새로 추가하기` : "새 젤리 직접 추가하기"}
         </button>

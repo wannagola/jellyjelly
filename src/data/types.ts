@@ -41,6 +41,8 @@ export interface Entry {
   rating?: number;
   review?: string;
   texture?: { chewy: number; sour: number; sweet: number };
+  /** 그날 찍은 봉지 사진. 젤리 대표 사진과 별개로, 이 한 번의 기록에 붙는다. */
+  photo?: Blob;
   createdAt: number;
   updatedAt: number;
 }

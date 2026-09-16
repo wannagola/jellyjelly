@@ -77,11 +77,11 @@ export function DexScreen() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="이름이나 초성으로 찾기"
-          className="mb-3 w-full rounded-2xl bg-surface px-3.5 py-2.5 text-[13px] outline-none placeholder:text-ink-faint focus:shadow-[inset_0_0_0_1.5px_var(--accent)]"
+          className="mb-3 w-full rounded-2xl bg-surface px-3.5 py-2.5 text-base outline-none placeholder:text-ink-faint focus:shadow-[inset_0_0_0_1.5px_var(--accent)]"
         />
 
         {shown.length === 0 ? (
-          <p className="mt-10 whitespace-pre-line text-center text-[13px] leading-relaxed text-ink-soft">
+          <p className="mt-10 whitespace-pre-line text-center text-base leading-relaxed text-ink-soft">
             {query.trim()
               ? "찾는 젤리가 없어요"
               : tab === "fav"
@@ -108,10 +108,10 @@ export function DexScreen() {
                       </span>
                     ) : null}
                     <JellyFace jelly={jelly} size={44} radius={14} />
-                    <span className="mt-1.5 line-clamp-2 text-[9.5px] leading-tight">
+                    <span className="mt-1.5 line-clamp-2 text-micro leading-tight">
                       {jelly.name}
                     </span>
-                    <span className="mt-0.5 text-[8.5px] text-ink-faint tabular-nums">
+                    <span className="mt-0.5 text-micro text-ink-faint tabular-nums">
                       {n === 0 ? "아직" : `×${n}`}
                     </span>
                   </Link>
@@ -139,7 +139,7 @@ function Segment({
       type="button"
       onClick={onClick}
       aria-pressed={on}
-      className={`flex-1 rounded-full py-2 text-[12px] transition ${
+      className={`flex-1 rounded-full py-2 text-sm transition ${
         on ? "bg-accent-bg font-medium text-accent" : "bg-surface text-ink-soft"
       }`}
     >
