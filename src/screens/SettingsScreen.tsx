@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { AppBar } from "../components/AppBar";
 import { db, syncSeed } from "../data/db";
 import { setMuted, setNickname, setTheme, useSettings } from "../lib/settings";
+import { useIsStandalone } from "../lib/standalone";
 import { THEMES, applyTheme } from "../lib/theme";
 import { playShake } from "../lib/sound";
 import { buildBackup, downloadBackup, restoreBackup, wipeEverything } from "../lib/backup";
@@ -17,6 +18,7 @@ export function SettingsScreen() {
   const [confirmWipe, setConfirmWipe] = useState(false);
 
   const settings = useSettings();
+  const standalone = useIsStandalone();
 
   const stats = useLiveQuery(async () => {
     const [jellies, entries] = await Promise.all([db.jellies.count(), db.entries.count()]);
@@ -190,7 +192,18 @@ export function SettingsScreen() {
         {note ? <p className="mt-3 px-1 text-sm text-accent">{note}</p> : null}
         {error ? <p className="mt-3 px-1 text-sm text-accent">{error}</p> : null}
 
-        <h2 className="mt-6 mb-2 px-1 text-xs tracking-wide text-ink-soft">홈 화면에 추가</h2>
+        <h2 className="mt-6 mb-2 px-1 text-xs tracking-wide text-ink-soft">
+          {standalone ? "지금 어디에 담기고 있나" : "홈 화면에 추가"}
+        </h2>
+        {standalone ? (
+          <section className="mb-2 rounded-2xl bg-accent-bg p-4">
+            <p className="text-base font-medium text-accent">홈 화면 앱으로 열려 있어요</p>
+            <p className="mt-1 text-xs leading-relaxed text-ink-soft">
+              여기가 기록이 가장 안전하게 쌓이는 자리예요. 앞으로도 홈 화면 아이콘으로
+              열어 주세요.
+            </p>
+          </section>
+        ) : null}
         <section className="rounded-2xl bg-surface p-4">
           <p className="text-xs leading-relaxed text-ink-soft">
             <b className="font-medium text-ink">공유 → 홈 화면에 추가</b>를 눌러 앱처럼 쓰세요.
@@ -198,8 +211,9 @@ export function SettingsScreen() {
             저장소가 지워질 수 있어요.
           </p>
           <p className="mt-2 text-tiny leading-relaxed text-ink-faint">
-            기록은 브라우저마다 따로 쌓입니다. 사파리에서 모은 젤리는 크롬에서 안 보여요.
-            한 곳을 정해서 쓰세요.
+            기록은 <b className="font-medium text-ink-soft">브라우저마다, 그리고 홈 화면 앱과
+            브라우저 탭 사이에도</b> 따로 쌓입니다. 지금 모은 젤리를 옮기려면
+            먼저 백업 파일을 내려받으세요.
           </p>
         </section>
 
