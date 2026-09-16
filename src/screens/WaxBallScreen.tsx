@@ -12,6 +12,7 @@ import {
   hold,
   makeChip,
   peeled,
+  pressAt,
   relax,
   restingSquish,
 } from "../lib/waxball";
@@ -220,11 +221,12 @@ export function WaxBallScreen() {
 
       // 깨지든 말랑이든 누르는 감각은 언제나 있어야 한다
       const carved = carve(p.x, p.y);
-      // 손가락이 깊이 들어갈수록 더 푹 눌린다
-      const deep = 0.45 + Math.min(1, Math.hypot(p.x, p.y)) * 0.55;
+      // 짚은 자리에 따라 홈과 납작함을 나눠 받는다
+      const poke = pressAt(Math.hypot(p.x, p.y), chipsRemain() ? 0.62 : 0.92);
       squish.current = hold(squish.current, {
         pressAngle: Math.atan2(p.y, p.x),
-        pressDepth: (chipsRemain() ? 0.6 : 0.88) * deep,
+        pressDepth: poke.dent,
+        squash: poke.squash,
       });
       if (carved) return;
       if (chipsRemain()) return;
@@ -248,9 +250,11 @@ export function WaxBallScreen() {
 
       // 왁스가 남아 있어도 공은 눌리고 딸려온다. 다만 굳은 껍질이라 덜 무르다.
       if (chipsRemain()) {
+        const shell = pressAt(pull, 0.62 * (1 - drag * 0.6));
         squish.current = hold(squish.current, {
           pressAngle: angle,
-          pressDepth: 0.6 * (1 - drag * 0.6),
+          pressDepth: shell.dent,
+          squash: shell.squash,
           stretchAngle: angle,
           stretch: Math.min(1, pull * 0.5),
         });
@@ -259,9 +263,11 @@ export function WaxBallScreen() {
       if (carved) return;
       // 잡아당기면 잡은 자리는 들어가는 게 아니라 딸려 나온다.
       // 손가락이 빠를수록 누름을 접고 끌기에 자리를 내준다.
+      const knead = pressAt(pull, 0.92 * (1 - drag * 0.85));
       squish.current = hold(squish.current, {
         pressAngle: angle,
-        pressDepth: 0.88 * (1 - drag * 0.85),
+        pressDepth: knead.dent,
+        squash: knead.squash,
         stretchAngle: angle,
         stretch: Math.min(1, pull * 0.95),
       });
@@ -425,14 +431,15 @@ function shade(hex: string, amount: number): string {
 function squashWhole(ctx: CanvasRenderingContext2D, s: Squish, radius: number) {
   const push = s.pressDepth;
   const pull = s.stretch;
+  const flat = s.squash;
   // 되튈 때는 음수가 된다. 껍질도 한 번 지나쳤다가 돌아와야 탱글해 보인다.
-  if (Math.abs(push) < 0.002 && Math.abs(pull) < 0.002) return;
+  if (Math.abs(push) < 0.002 && Math.abs(pull) < 0.002 && Math.abs(flat) < 0.002) return;
 
   ctx.translate(
     Math.cos(s.stretchAngle) * radius * 0.16 * pull + Math.cos(s.pressAngle) * radius * 0.06 * push,
     Math.sin(s.stretchAngle) * radius * 0.16 * pull + Math.sin(s.pressAngle) * radius * 0.06 * push,
   );
   ctx.rotate(s.pressAngle);
-  ctx.scale(1 - 0.17 * push, 1 + 0.11 * push);
+  ctx.scale(1 - 0.17 * push - 0.1 * flat, 1 + 0.11 * push - 0.1 * flat);
   ctx.rotate(-s.pressAngle);
 }

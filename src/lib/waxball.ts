@@ -93,6 +93,9 @@ export interface Squish {
   pressAngle: number;
   pressDepth: number;
   pressVel: number;
+  /** 한복판을 눌렀을 때 공 전체가 납작해지는 몫 */
+  squash: number;
+  squashVel: number;
   /** 끌어당기는 방향과 세기 */
   stretchAngle: number;
   stretch: number;
@@ -103,6 +106,8 @@ export const restingSquish = (): Squish => ({
   pressAngle: 0,
   pressDepth: 0,
   pressVel: 0,
+  squash: 0,
+  squashVel: 0,
   stretchAngle: 0,
   stretch: 0,
   stretchVel: 0,
@@ -117,7 +122,7 @@ function angleGap(a: number, b: number): number {
 }
 
 /** 손가락이 닿는 자리의 폭 */
-const DENT_WIDTH = 0.58;
+const DENT_WIDTH = 0.72;
 
 /**
  * 어느 각도에서 표면이 얼마나 멀리 있는지.
@@ -128,15 +133,21 @@ const DENT_WIDTH = 0.58;
  */
 export function blobRadius(theta: number, s: Squish): number {
   const u = angleGap(theta, s.pressAngle) / DENT_WIDTH;
-  const hat = (1 - u * u) * Math.exp(-(u * u) / 2);
-  const dent = s.pressDepth * 0.56 * hat;
+
+  // 손가락 바닥은 평평하다. 뾰족한 산으로 파면 V 자로 갈라진 것처럼 보인다.
+  // 네제곱을 쓰면 가운데가 넓고 평평한 봉우리가 된다.
+  const core = Math.exp(-(u * u * u * u) * 0.8);
+  // 밀려난 살이 쌓이는 둘레. 홈에서 조금 떨어진 자리에 봉우리를 따로 세운다.
+  const shoulder = Math.exp(-(((Math.abs(u) - 1.45) / 0.72) ** 2));
+  const dent = s.pressDepth * (0.5 * core - 0.24 * shoulder);
 
   // 끄는 쪽으로만 뾰족하게 딸려 나온다.
   // 코사인으로 퍼뜨리면 반쪽이 통째로 밀려서 뭉툭하게 잘린 것처럼 보인다.
   const away = angleGap(theta, s.stretchAngle);
   const stretch = s.stretch * 0.72 * Math.exp(-(away * away) / (2 * 0.6 * 0.6));
 
-  return Math.max(0.22, 1 - dent + stretch);
+  // 한복판을 누르면 파이는 게 아니라 공 전체가 조금 납작해진다
+  return Math.max(0.22, 1 - dent - s.squash * 0.13 + stretch);
 }
 
 /**
@@ -153,26 +164,50 @@ export function relax(s: Squish, dt: number): Squish {
   };
   const press = step(s.pressDepth, s.pressVel);
   const pull = step(s.stretch, s.stretchVel);
+  const flat = step(s.squash, s.squashVel);
   return {
     ...s,
     pressDepth: press.x,
     pressVel: press.v,
     stretch: pull.x,
     stretchVel: pull.v,
+    squash: flat.x,
+    squashVel: flat.v,
   };
 }
 
 /** 손가락이 닿아 있는 동안은 용수철을 끄고 값을 바로 밀어 넣는다 */
 export function hold(
   s: Squish,
-  next: { pressAngle: number; pressDepth: number; stretchAngle?: number; stretch?: number },
+  next: {
+    pressAngle: number;
+    pressDepth: number;
+    squash?: number;
+    stretchAngle?: number;
+    stretch?: number;
+  },
 ): Squish {
   return {
     pressAngle: next.pressAngle,
     pressDepth: next.pressDepth,
     pressVel: 0,
+    squash: next.squash ?? 0,
+    squashVel: 0,
     stretchAngle: next.stretchAngle ?? s.stretchAngle,
     stretch: next.stretch ?? s.stretch,
     stretchVel: 0,
+  };
+}
+
+/**
+ * 손가락이 어디를 짚었는지에 따라 홈과 납작함을 나눠 준다.
+ * 가장자리를 누르면 그 자리가 파이고, 한복판을 누르면 파일 방향이 없으니
+ * 공 전체가 눌린다. 가운데를 눌렀는데 옆구리가 V 자로 파이면 가짜로 보인다.
+ */
+export function pressAt(reach: number, strength: number) {
+  const rho = Math.min(1, Math.max(0, reach));
+  return {
+    dent: strength * rho ** 1.2,
+    squash: strength * (1 - rho) ** 1.4,
   };
 }
