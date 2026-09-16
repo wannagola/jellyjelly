@@ -1,7 +1,13 @@
 import { motion, useAnimate, useReducedMotion } from "motion/react";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { Jelly } from "./Jelly";
 import type { PileItem } from "../lib/pile";
+
+/** 쏟아진 더미의 끝이 가서 붙는 자리 */
+const WALL_L = 0.16;
+const WALL_R = 0.84;
+/** 쏟아지면서 가로 폭이 이만큼으로 줄어든다 */
+const SQUEEZE = 0.62;
 
 /**
  * 유리병. 크기는 CSS가 정하고 내부는 전부 % 로 배치해서
@@ -42,21 +48,42 @@ export function Jar({
   const size = `${jellyRatio * 100}%`;
   const [scope, animate] = useAnimate();
 
+  // 더미의 양 끝. 기운 쪽 끝이 벽에 딱 붙어야 '쏟아졌다'로 보인다.
+  const edges = useMemo(() => {
+    let lo = 1;
+    let hi = 0;
+    for (const it of items) {
+      lo = Math.min(lo, it.x);
+      hi = Math.max(hi, it.x);
+    }
+    return { lo, hi };
+  }, [items]);
+
   /**
    * 기울였을 때 이 알이 가는 자리.
    *
-   * 위에 얹힌 알일수록 많이 미끄러진다. 바닥에 깔린 알은 위에 눌려 있어서
-   * 조금밖에 못 움직인다. 다 똑같이 옮기면 더미가 아니라 그림 한 장이 통째로
-   * 미끄러지는 것처럼 보인다.
+   * 다 같이 옆으로 조금씩 밀면 더미가 움찔하고 만다. 진짜 병을 기울이면
+   * 젤리가 한쪽 벽으로 쏟아져 쌓인다. 그래서 두 가지를 같이 한다 -
+   * 더미의 기운 쪽 끝을 벽에 붙이고, 가로로 퍼진 폭을 좁힌다.
+   *
+   * 그리고 위에 얹힌 알일수록 더 멀리 간다. 바닥 알은 위에 눌려 있어서
+   * 조금밖에 못 움직인다. 다 똑같이 옮기면 더미가 아니라 그림 한 장이
+   * 통째로 미끄러지는 것처럼 보인다.
    */
   const slide = (it: PileItem) => {
     if (!tilt || still) return it.x;
+    const k = Math.min(1, Math.abs(tilt));
     const lift = Math.min(1, Math.max(0, (0.95 - it.y) / 0.45));
-    const moved = it.x + tilt * (0.05 + 0.14 * lift);
-    // 유리를 뚫고 나가지 않게
-    return Math.min(0.88, Math.max(0.12, moved));
+
+    const wall = tilt > 0 ? WALL_R : WALL_L;
+    const lead = tilt > 0 ? edges.hi : edges.lo;
+    const poured = wall + (it.x - lead) * SQUEEZE + tilt * 0.1 * lift;
+
+    // 기울기를 0 으로 되돌렸을 때 제자리로 이어지도록 섞는다
+    const x = it.x * (1 - k) + poured * k;
+    return Math.min(0.92, Math.max(0.08, x));
   };
-  const lean = (it: PileItem) => (still ? it.rotate : it.rotate + tilt * 9);
+  const lean = (it: PileItem) => (still ? it.rotate : it.rotate + tilt * 13);
 
   // 흔들림은 명령형으로 쏜다. animate prop 에 같은 키프레임을 다시 넣어봐야
   // 값이 안 바뀐 것으로 보고 두 번째부터는 아무 일도 일어나지 않는다.

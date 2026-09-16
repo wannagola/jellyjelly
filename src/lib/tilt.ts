@@ -20,8 +20,8 @@ type OrientationCtor = typeof DeviceOrientationEvent & {
 
 /** 손에 들고만 있어도 이만큼은 기울어져 있다. 그 안은 안 움직인 걸로 본다. */
 const DEAD = 5;
-/** 이 이상 기울여도 더는 안 쏠린다 */
-const FULL = 34;
+/** 이 이상 기울여도 더는 안 쏠린다. 손목만 살짝 틀어도 끝까지 가야 시원하다. */
+const FULL = 26;
 
 function ctor(): OrientationCtor | undefined {
   if (typeof window === "undefined") return undefined;
@@ -83,7 +83,7 @@ export function useTilt(): { tilt: number; live: boolean; enable: () => Promise<
     if (!live) return;
     let raf = 0;
     const step = () => {
-      smooth.current += (raw.current - smooth.current) * 0.14;
+      smooth.current += (raw.current - smooth.current) * 0.19;
       // 스프링이 어차피 한 번 더 부드럽게 해주니 잔떨림까지 전할 필요는 없다
       if (Math.abs(smooth.current - tilt) > 0.025) setTilt(smooth.current);
       raf = requestAnimationFrame(step);
