@@ -1,7 +1,7 @@
 import { motion, useReducedMotion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
 import { Jar } from "../components/Jar";
-import { buildPile } from "../lib/pile";
+import { buildPile, jellyRatioFor } from "../lib/pile";
 
 /**
  * 첫 화면에 담기는 열여덟 알.
@@ -84,7 +84,7 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
     >
       <Jar
         className="w-[min(212px,54vw)]"
-        jellyRatio={0.165}
+        jellyRatio={jellyRatioFor(SAMPLE.length)}
         items={pile.slice(0, dropped)}
         dropKey={dropped > 0 ? pile[dropped - 1].key : undefined}
         shakeToken={shake}

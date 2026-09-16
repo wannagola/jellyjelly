@@ -27,31 +27,78 @@ function makeRandom(seed: number) {
   };
 }
 
-/** 아래부터 한 줄씩 좁혀가며 쌓는다 */
-const ROWS = [8, 7, 6, 5, 4, 3, 3, 2];
+/** 병 너비 대비 높이. 자리를 세로로 잡을 때 쓴다. */
+const ASPECT = 200 / 275;
+/** 병 벽에 붙은 젤리는 잘려 보인다. 양옆을 비워두고 그 안에만 쌓는다. */
+const INSET = 0.12;
+const SPAN = 1 - INSET * 2;
+/** 알맹이 가운데가 이 높이에 오면 바닥에 닿아 보인다 */
+const FLOOR = 0.988;
+/** 옆 알과 이만큼 겹친다. 젤리는 원래 서로 파고들며 쌓인다. */
+const OVERLAP = 1.9;
+/** 가장 아래 줄에 들어갈 수 있는 최대 개수 */
+const WIDEST = 8;
+
+/** 가장 넓은 병은 위에 한 줄을 더 얹어 서른여덟 알까지 받는다 */
+function rowsOf(width: number): number[] {
+  if (width >= WIDEST) return [8, 7, 6, 5, 4, 3, 3, 2];
+  const rows: number[] = [];
+  for (let n = width; n >= 2; n -= 1) rows.push(n);
+  return rows;
+}
+
+const capacityOf = (width: number) => rowsOf(width).reduce((a, b) => a + b, 0);
+
+/**
+ * 맨 아랫줄에 몇 알을 놓을지.
+ *
+ * 줄 수를 고정해두면 조금 먹은 달은 여덟 자리짜리 줄 한 칸에 서너 알만 박혀서,
+ * 큰 병 바닥에 좁쌀이 흩어진 그림이 된다. 한 달에 젤리를 서른 개씩 먹는 사람은
+ * 드무니 그게 보통 풍경이 돼버린다. 그래서 담긴 개수에 맞춰 줄을 좁힌다 -
+ * 적게 담길수록 줄이 짧아지고, 짧은 줄일수록 알이 굵어진다.
+ */
+export function rowWidthFor(count: number): number {
+  for (let width = 3; width < WIDEST; width += 1) {
+    if (capacityOf(width) >= count) return width;
+  }
+  return WIDEST;
+}
+
+/**
+ * 이만큼 담겼을 때 알맹이 지름 (병 너비 대비).
+ * 줄이 짧아지면 자리 간격이 벌어지고, 그 간격에 맞춰 알도 굵어진다.
+ */
+export function jellyRatioFor(count: number): number {
+  const width = rowWidthFor(count);
+  // 한 알만 담긴 병에서 알이 너무 커지지 않게 천장을 둔다
+  return Math.min(0.33, (SPAN / (width + 1)) * OVERLAP);
+}
 
 /** 병 하나에 들어가는 최대 개수 — 넘치면 다음 달 병으로 */
-export const JAR_CAPACITY = ROWS.reduce((a, b) => a + b, 0);
+export const JAR_CAPACITY = capacityOf(WIDEST);
 
 export function layoutSlots(count: number, seed = 1): Slot[] {
   const rnd = makeRandom(seed);
+  const rows = rowsOf(rowWidthFor(count));
+  const ratio = jellyRatioFor(count);
+  // 줄 간격과 바닥 높이는 알 크기를 따라간다. 고정해두면 굵은 알이 서로 파묻힌다.
+  const rowHeight = ratio * ASPECT * 0.62;
+  const baseY = FLOOR - (ratio * ASPECT) / 2;
+
   const slots: Slot[] = [];
-  const rowHeight = 0.072;
-  const baseY = 0.93;
-
-  // 병 벽에 붙은 젤리는 잘려 보인다. 양옆을 비워두고 그 안에만 쌓는다.
-  const inset = 0.12;
-  const span = 1 - inset * 2;
-
-  for (let row = 0; row < ROWS.length && slots.length < count; row++) {
-    const n = ROWS[row];
+  for (let row = 0; row < rows.length && slots.length < count; row++) {
+    const n = rows[row];
+    const here = Math.min(n, count - slots.length);
     const gap = 1 / (n + 1);
-    // 한 줄 걸러 반 칸씩 밀어야 위층이 아래층 틈에 얹힌다
-    const stagger = row % 2 === 0 ? 0 : gap * 0.5;
-    for (let i = 0; i < n && slots.length < count; i++) {
+    // 덜 찬 줄은 가운데로 모은다. 안 그러면 왼쪽에만 붙어서 병이 기운 것처럼 보인다.
+    const center = ((n - here) / 2) * gap;
+    // 한 줄 걸러 반 칸씩 밀어야 위층이 아래층 틈에 얹힌다. 덜 찬 줄은 이미 밀려 있다.
+    const stagger = here === n && row % 2 === 1 ? gap * 0.5 : 0;
+
+    for (let i = 0; i < here; i++) {
       slots.push({
-        x: inset + (gap * (i + 1) + stagger + (rnd() - 0.5) * 0.07) * span,
-        y: baseY - row * rowHeight + (rnd() - 0.5) * 0.028,
+        x: INSET + (gap * (i + 1) + center + stagger + (rnd() - 0.5) * 0.07) * SPAN,
+        y: baseY - row * rowHeight + (rnd() - 0.5) * rowHeight * 0.38,
         rotate: (rnd() - 0.5) * 42,
       });
     }

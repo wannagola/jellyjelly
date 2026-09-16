@@ -8,7 +8,7 @@ import { JellyFace } from "../components/JellyFace";
 import { Toast } from "../components/Toast";
 import { db } from "../data/db";
 import type { Jelly } from "../data/types";
-import { JAR_CAPACITY, buildPile } from "../lib/pile";
+import { JAR_CAPACITY, buildPile, jellyRatioFor } from "../lib/pile";
 import { useSettings } from "../lib/settings";
 import { playDrop, playShake } from "../lib/sound";
 import { monthKeyOf, monthRange, parseMonthKey, seedFromKey, shiftMonth } from "../lib/month";
@@ -104,6 +104,7 @@ export function ShelfScreen() {
         <section className="flex flex-col items-center pt-2">
           <Jar
             items={pile}
+            jellyRatio={jellyRatioFor(pile.length)}
             dropKey={dropping ? pile.at(-1)?.key : undefined}
             shakeToken={shakes}
             onShake={count > 0 ? shake : undefined}

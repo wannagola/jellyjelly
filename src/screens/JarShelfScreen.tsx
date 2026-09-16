@@ -9,7 +9,7 @@ import { db } from "../data/db";
 import type { JellyColor, JellyShape } from "../data/types";
 import { monthKeyOf, monthsFrom, seedFromKey } from "../lib/month";
 import { useSettings } from "../lib/settings";
-import { buildPile } from "../lib/pile";
+import { buildPile, jellyRatioFor } from "../lib/pile";
 
 const PER_ROW = 3;
 
@@ -130,7 +130,7 @@ export function JarShelfScreen() {
                           <Jar
                             quiet
                             className="w-full"
-                            jellyRatio={0.21}
+                            jellyRatio={jellyRatioFor(jar.jellies.length)}
                             items={buildPile(jar.jellies, seedFromKey(jar.key))}
                           />
                         </Link>
