@@ -241,16 +241,16 @@ export function TummyScreen() {
       ctx.fill();
       ctx.restore();
 
-      // 코. 머리보다 먼저 그려서 머리 밑에서 나온 것처럼 보이게 한다.
-      // 배를 칠 때마다 휘청인다.
-      const swing = squish.current.pressDepth * 0.55 + Math.sin(now / 900) * 0.07;
-      drawTrunk(ctx, bx, headY + headR * 0.55, headR, radius, swing);
-
       // 머리
       ctx.fillStyle = SKIN;
       ctx.beginPath();
       ctx.arc(bx, headY, headR, 0, Math.PI * 2);
       ctx.fill();
+
+      // 코는 얼굴에 붙어 있다. 머리 밑에서 따로 나오면 꼬리처럼 보인다.
+      // 눈 바로 아래에서 시작해 얼굴 위로 내려온다. 배를 칠 때마다 휘청인다.
+      const swing = squish.current.pressDepth * 0.5 + Math.sin(now / 900) * 0.06;
+      drawTrunk(ctx, bx, headY + headR * 0.04, headR, swing);
 
       // 눈. 칠 때마다 질끈 감는다.
       const lid = blink.current;
@@ -314,31 +314,31 @@ export function TummyScreen() {
 /**
  * 코. 굵기가 변해야 코처럼 보여서, 선을 긋지 않고
  * 곡선을 따라 양옆으로 벌린 다각형을 채운다.
- * 배 위를 가로지르면 목도리처럼 보이므로 옆으로 비켜 내려뜨린다.
+ *
+ * 길이는 얼굴 크기를 기준으로 잡는다. 몸통까지 늘어뜨리면 코가 아니라
+ * 밧줄처럼 보인다. 끝만 살짝 말아 올린다.
  */
 function drawTrunk(
   ctx: CanvasRenderingContext2D,
   x: number,
   y: number,
   headR: number,
-  bellyR: number,
   swing: number,
 ) {
-  // 세 점짜리 곡선은 밋밋하다. 네 점을 써야 끝이 살짝 말린다.
   const p0 = { x, y };
-  const p1 = { x: x + headR * (0.25 + swing), y: y + headR * 1.4 };
-  const p2 = { x: x + bellyR * (1.05 + swing * 1.2), y: y + bellyR * 0.55 };
-  const p3 = { x: x + bellyR * (1.12 + swing * 1.6), y: y + bellyR * 1.62 };
+  const p1 = { x: x + headR * (0.04 + swing * 0.3), y: y + headR * 0.66 };
+  const p2 = { x: x + headR * (0.26 + swing * 0.9), y: y + headR * 1.2 };
+  const p3 = { x: x + headR * (0.66 + swing * 1.4), y: y + headR * 1.26 };
 
   const spine: { x: number; y: number; w: number }[] = [];
-  const STEPS = 26;
+  const STEPS = 24;
   for (let i = 0; i <= STEPS; i += 1) {
     const t = i / STEPS;
     const u = 1 - t;
     spine.push({
       x: u ** 3 * p0.x + 3 * u * u * t * p1.x + 3 * u * t * t * p2.x + t ** 3 * p3.x,
       y: u ** 3 * p0.y + 3 * u * u * t * p1.y + 3 * u * t * t * p2.y + t ** 3 * p3.y,
-      w: headR * (0.36 - 0.27 * t ** 0.75),
+      w: headR * (0.3 - 0.21 * t ** 0.8),
     });
   }
 
@@ -365,20 +365,16 @@ function drawTrunk(
   ctx.closePath();
   ctx.fillStyle = TRUNK;
   ctx.fill();
-  // 배와 색이 가까워서 테두리가 없으면 어디서 끊기는지 안 보인다
-  ctx.strokeStyle = "rgba(78, 66, 88, 0.22)";
-  ctx.lineWidth = Math.max(1, headR * 0.035);
-  ctx.stroke();
 
   // 코 주름. 촘촘하면 목도리처럼 보인다.
-  ctx.strokeStyle = "rgba(90, 78, 100, 0.18)";
-  ctx.lineWidth = Math.max(1, headR * 0.03);
-  for (let i = 7; i < spine.length - 4; i += 5) {
+  ctx.strokeStyle = "rgba(90, 78, 100, 0.16)";
+  ctx.lineWidth = Math.max(1, headR * 0.028);
+  for (let i = 6; i < spine.length - 4; i += 4) {
     const a = side(i, 1);
     const b = side(i, -1);
     ctx.beginPath();
-    ctx.moveTo(a.x + (b.x - a.x) * 0.12, a.y + (b.y - a.y) * 0.12);
-    ctx.lineTo(a.x + (b.x - a.x) * 0.88, a.y + (b.y - a.y) * 0.88);
+    ctx.moveTo(a.x + (b.x - a.x) * 0.15, a.y + (b.y - a.y) * 0.15);
+    ctx.lineTo(a.x + (b.x - a.x) * 0.85, a.y + (b.y - a.y) * 0.85);
     ctx.stroke();
   }
 }
