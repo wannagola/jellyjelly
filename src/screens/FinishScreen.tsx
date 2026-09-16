@@ -9,6 +9,7 @@ import { useGoBack } from "../lib/goBack";
 import { db, finishEntry } from "../data/db";
 import { JELLY_COLORS } from "../lib/jelly";
 import { useCurrentMonth } from "../lib/useCurrentMonth";
+import { isFull } from "../lib/storage";
 
 /** 다 먹고 나서. 20초 안에 끝나야 다음에도 쓴다. */
 export function FinishScreen() {
@@ -41,6 +42,7 @@ export function FinishScreen() {
   const [busy, setBusy] = useState(false);
   const [photo, setPhoto] = useState<Blob | undefined>();
   const [photoError, setPhotoError] = useState<string>();
+  const [saveError, setSaveError] = useState<string>();
   const photoUrl = usePhotoUrl(photo);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -70,6 +72,7 @@ export function FinishScreen() {
   async function save() {
     if (!id || !jelly) return;
     setBusy(true);
+    setSaveError(undefined);
     try {
       await finishEntry(id, {
         rating: rating || undefined,
@@ -82,6 +85,14 @@ export function FinishScreen() {
         replace: true,
         state: { drop: true, toast: `${jelly.name} 병에 담았어요` },
       });
+    } catch (err) {
+      // 여기서 조용히 넘어가면 담긴 줄 알고 나간다. 안 담겼다고 말해줘야 한다.
+      console.error("기록 저장 실패", err);
+      setSaveError(
+        isFull(err)
+          ? "폰 저장 공간이 꽉 찼어요. 사진을 빼고 담거나, 설정에서 백업을 받고 정리해 주세요."
+          : "담지 못했어요. 잠시 뒤 다시 눌러 주세요.",
+      );
     } finally {
       setBusy(false);
     }
@@ -190,9 +201,15 @@ export function FinishScreen() {
             >
               병에 담기 🫙
             </button>
-            <p className="mt-2 text-center text-tiny text-ink-faint">
-              {photo ? "사진은 이 기록에 남아요" : "별점과 한 줄은 안 써도 담겨요"}
-            </p>
+            {saveError ? (
+              <p className="mt-2.5 rounded-xl bg-accent-bg px-3.5 py-2.5 text-center text-sm leading-relaxed font-medium text-accent">
+                {saveError}
+              </p>
+            ) : (
+              <p className="mt-2 text-center text-tiny text-ink-faint">
+                {photo ? "사진은 이 기록에 남아요" : "별점과 한 줄은 안 써도 담겨요"}
+              </p>
+            )}
           </>
         ) : null}
       </main>

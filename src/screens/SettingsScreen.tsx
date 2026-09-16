@@ -9,6 +9,7 @@ import { syncEnabled } from "../lib/supabase";
 import { setMuted, setNickname, setTheme, setTiltOn, useSettings } from "../lib/settings";
 import { tiltMayWork, tiltNeedsPermission, useTilt } from "../lib/tilt";
 import { useIsStandalone } from "../lib/standalone";
+import { readableSize, useStorage } from "../lib/storage";
 import { THEMES, applyTheme } from "../lib/theme";
 import { playShake } from "../lib/sound";
 import { buildBackup, downloadBackup, restoreBackup, wipeEverything } from "../lib/backup";
@@ -23,6 +24,7 @@ export function SettingsScreen() {
 
   const settings = useSettings();
   const standalone = useIsStandalone();
+  const storage = useStorage();
 
   const tiltOn = settings?.tilt ?? true;
   const { live: tiltLive, enable: askTilt } = useTilt(tiltOn);
@@ -230,6 +232,17 @@ export function SettingsScreen() {
             기록과 사진이 폰 안에만 있어요. 서버로 나가지 않는 대신,
             <b className="font-medium text-ink"> 사본도 여기 하나뿐</b>입니다.
           </p>
+          {/* 사진이 쌓이는 앱인데 남은 공간을 볼 데가 없으면,
+              꽉 찬 걸 저장이 실패하고 나서야 알게 된다. */}
+          {storage ? (
+            <p className="mt-2.5 text-xs leading-relaxed text-ink-soft">
+              지금 <b className="font-medium text-ink">{readableSize(storage.used)}</b> 쓰고 있어요
+              {storage.quota > 0
+                ? ` · 이 폰에서 쓸 수 있는 양은 ${readableSize(storage.quota)}`
+                : ""}
+              {storage.persisted ? "" : " · 한동안 안 열면 지워질 수 있어요"}
+            </p>
+          ) : null}
           <p className="mt-2.5 text-tiny text-ink-faint tabular-nums">
             젤리 {stats?.jellies ?? 0}종 · 기록 {stats?.entries ?? 0}건
             {stats?.lastBackup

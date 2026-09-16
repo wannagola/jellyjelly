@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router";
 import App from "./App";
 import { syncSeed } from "./data/db";
 import { watchInstallPrompt } from "./lib/install";
+import { askPersist } from "./lib/storage";
 import { watchForUpdates } from "./lib/updates";
 import "./styles/app.css";
 
@@ -15,6 +16,9 @@ watchInstallPrompt();
 
 // 새로 배포한 게 폰에 보이려면 앱을 두 번 열어야 했다. 알아서 갈아끼운다.
 watchForUpdates();
+
+// 서버가 없으니 이 데이터가 이 세상의 사본 전부다. 지워도 되는 것으로 분류되지 않게 한다.
+void askPersist();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
