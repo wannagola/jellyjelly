@@ -22,6 +22,14 @@ export const MOVE_NAME: Record<Move, string> = {
   flipV: "위아래 뒤집기",
 };
 
+/** 고른 것을 줄줄이 적을 때 쓰는 짧은 이름 */
+export const MOVE_SHORT: Record<Move, string> = {
+  left: "45° 왼쪽",
+  right: "45° 오른쪽",
+  flipH: "좌우반전",
+  flipV: "상하반전",
+};
+
 export interface Pose {
   /** 45도 단위 회전 (0~7) */
   turn: number;

@@ -9,6 +9,7 @@ import {
   type Pose,
   type Puzzle,
   MOVE_NAME,
+  MOVE_SHORT,
   START,
   applyAll,
   makePuzzle,
@@ -139,11 +140,9 @@ export function FoldScreen() {
       });
       return;
     }
-    // 틀려도 판은 그대로 둔다. 다시 해보라고.
-    window.setTimeout(() => {
-      setMoves([]);
-      setMark(undefined);
-    }, 1500);
+    // 같은 문제를 다시 주면 아까 눌러본 것에 하나씩 더해 보며 맞추게 된다.
+    // 머릿속에서 굴려보는 게임이니 한 문제에 한 번뿐이어야 한다.
+    window.setTimeout(() => ask(solved), 2200);
   }
 
   if (rulesSeen === false) {
@@ -154,15 +153,16 @@ export function FoldScreen() {
           <div className="w-full max-w-[340px] rounded-3xl bg-surface p-6">
             <h2 className="mb-4 text-center font-display text-xl">가장 적은 횟수로</h2>
             <p className="text-sm leading-relaxed text-ink-soft">
-              왼쪽 젤리를 오른쪽 젤리 모양으로 만드세요. 아래 버튼을 눌러 돌리거나 뒤집으면
-              가운데 젤리가 따라 움직여요.
+              왼쪽 젤리를 오른쪽 젤리 모양으로 만드세요. 아래 버튼을 눌러 돌리거나 뒤집을
+              순서를 짜고, 다 짰으면 제출합니다.
             </p>
             <p className="mt-3 rounded-2xl bg-accent-bg px-4 py-3 text-sm leading-relaxed text-accent">
-              <b className="font-medium">모양만 맞으면 안 돼요.</b> 정해진 최소 횟수로 맞춰야
-              정답입니다. 몇 번이면 되는지는 미리 알려드려요.
+              <b className="font-medium">돌아가는 모습은 안 보여줘요.</b> 머릿속으로 굴려 봐야
+              합니다. 고른 순서는 화면에 쌓이니 외울 필요는 없어요.
             </p>
             <p className="mt-3 text-xs leading-relaxed text-ink-faint">
-              판이 올라가면 쓸 수 있는 버튼이 줄어듭니다. 도구가 적을수록 더 돌려 봐야 해요.
+              모양만 맞으면 안 되고 정해진 최소 횟수여야 정답입니다. 몇 번이면 되는지는 미리
+              알려드려요. 판이 올라가면 쓸 수 있는 버튼이 줄어듭니다.
             </p>
             <button
               type="button"
@@ -208,10 +208,44 @@ export function FoldScreen() {
               <b className="font-medium tabular-nums">{moves.length}번</b>
             </p>
 
-            {/* 내가 만든 모양. 가운데에 크게 둬야 두 견본과 견줘볼 수 있다. */}
-            <div className="mt-2 w-[42vw] max-w-[150px] rounded-3xl bg-accent-bg p-3">
-              <Bitten pose={now} tone={mark?.ok ? "#7CC36A" : "#8E5BC9"} />
+            {/*
+              돌아가는 모양은 안 보여준다. 보여주면 머릿속에서 굴려볼 이유가 없어져서,
+              버튼을 아무렇게나 눌러보다 맞으면 제출하는 게임이 된다.
+              대신 고른 것을 순서대로 쌓아 보여준다 - 뭘 했는지는 기억할 필요가 없어야 한다.
+            */}
+            <div className="mt-3 flex min-h-[3.4rem] w-full flex-wrap items-center justify-center gap-1.5 rounded-2xl bg-accent-bg px-3 py-2.5">
+              {moves.length === 0 ? (
+                <span className="text-xs text-ink-faint">아래에서 골라 보세요</span>
+              ) : (
+                moves.map((move, i) => (
+                  <span
+                    key={`${move}-${i}`}
+                    className="rounded-full bg-surface px-2.5 py-1 text-xs font-medium text-ink-soft"
+                  >
+                    <b className="mr-1 font-medium text-accent tabular-nums">{i + 1}</b>
+                    {MOVE_SHORT[move]}
+                  </span>
+                ))
+              )}
             </div>
+
+            {/* 제출하고 나서야 어떻게 됐는지 보여준다. 이건 배우라고 주는 것이다. */}
+            {mark ? (
+              <div className="mt-3 flex items-end gap-3">
+                <div className="flex flex-col items-center gap-1">
+                  <span className="text-tiny text-ink-faint">이렇게 됐어요</span>
+                  <div className="w-[26vw] max-w-[96px] rounded-2xl bg-surface p-2">
+                    <Bitten pose={now} tone={mark.ok ? "#7CC36A" : "#EF5D7A"} />
+                  </div>
+                </div>
+                <div className="flex flex-col items-center gap-1">
+                  <span className="text-tiny text-ink-faint">변경 후</span>
+                  <div className="w-[26vw] max-w-[96px] rounded-2xl bg-surface p-2">
+                    <Bitten pose={puzzle.target} tone="#C9BCD4" />
+                  </div>
+                </div>
+              </div>
+            ) : null}
 
             <div className="mt-4 grid w-full grid-cols-2 gap-2">
               {puzzle.gens.map((move) => (
@@ -252,7 +286,7 @@ export function FoldScreen() {
                 mark ? (mark.ok ? "font-medium text-accent" : "text-ink-soft") : "text-ink-faint"
               }`}
             >
-              {mark ? mark.why : "누른 대로 가운데 젤리가 움직여요"}
+              {mark ? mark.why : "머릿속으로 굴려 보고 제출하세요"}
             </p>
           </div>
         ) : (
