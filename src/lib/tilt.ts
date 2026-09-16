@@ -33,14 +33,20 @@ export function tiltSupported(): boolean {
 }
 
 /**
- * 물어보면 켜질 수 있는 기기인가.
+ * 기울여서 뭔가 될 법한 기기인가.
  *
- * 데스크톱 크롬도 requestPermission 을 갖고 있어서 그것만 보면 노트북에도
- * 버튼이 뜬다. 손가락이 닿는 기기인지까지 같이 본다.
+ * requestPermission 이 있는지로 가르면 안 된다. 아이폰 설정에서 동작 접근을
+ * 꺼두면 그 함수 자체가 사라져서, 정작 켜야 할 사람에게 아무것도 안 보인다.
+ * 손가락이 닿는 기기면 일단 보여주고, 안 되는 이유는 눌러본 뒤에 말해준다.
  */
-export function tiltCanAsk(): boolean {
+export function tiltMayWork(): boolean {
   if (typeof navigator === "undefined") return false;
-  return typeof ctor()?.requestPermission === "function" && navigator.maxTouchPoints > 0;
+  return tiltSupported() && navigator.maxTouchPoints > 0;
+}
+
+/** 아이폰처럼 허락을 받아야 하는 기기인가 */
+export function tiltNeedsPermission(): boolean {
+  return typeof ctor()?.requestPermission === "function";
 }
 
 /**
@@ -50,7 +56,11 @@ export function tiltCanAsk(): boolean {
  * 젤리가 부들부들 떤다. 그래서 값은 ref 에 받아 부드럽게 깎고, 눈에 보일 만큼
  * 바뀌었을 때만 화면에 알린다.
  */
-export function useTilt(): { tilt: number; live: boolean; enable: () => Promise<boolean> } {
+export function useTilt(enabled = true): {
+  tilt: number;
+  live: boolean;
+  enable: () => Promise<boolean>;
+} {
   const [tilt, setTilt] = useState(0);
   /** 쓸 만한 값이 한 번이라도 들어왔나 */
   const [live, setLive] = useState(false);
@@ -66,7 +76,7 @@ export function useTilt(): { tilt: number; live: boolean; enable: () => Promise<
      effect 안의 setState 를 막는 규칙은 이 경우를 위한 게 아니다. */
   /* oxlint-disable react/set-state-in-effect */
   useEffect(() => {
-    if (!tiltSupported()) return;
+    if (!enabled || !tiltSupported()) return;
     const handler = (e: DeviceOrientationEvent) => {
       const gamma = e.gamma;
       // 허락 전에는 이벤트가 오더라도 값이 비어 있다
@@ -77,10 +87,10 @@ export function useTilt(): { tilt: number; live: boolean; enable: () => Promise<
     };
     window.addEventListener("deviceorientation", handler);
     return () => window.removeEventListener("deviceorientation", handler);
-  }, [rearm]);
+  }, [rearm, enabled]);
 
   useEffect(() => {
-    if (!live) return;
+    if (!live || !enabled) return;
     let raf = 0;
     const step = () => {
       smooth.current += (raw.current - smooth.current) * 0.19;
@@ -90,13 +100,14 @@ export function useTilt(): { tilt: number; live: boolean; enable: () => Promise<
     };
     raf = requestAnimationFrame(step);
     return () => cancelAnimationFrame(raf);
-  }, [live, tilt]);
+  }, [live, tilt, enabled]);
   /* oxlint-enable react/set-state-in-effect */
 
   /** 아이폰에 물어본다. 사용자가 뭔가를 누른 직후에만 통한다. */
   const enable = useCallback(async () => {
     const Ctor = ctor();
-    if (typeof Ctor?.requestPermission !== "function") return false;
+    // 물어볼 필요가 없는 기기는 이미 듣고 있다
+    if (typeof Ctor?.requestPermission !== "function") return tiltSupported();
     try {
       // 누른 그 순간에 바로 불러야 한다. 여기서 한 번이라도 기다리면 거절된다.
       const answer = await Ctor.requestPermission();
@@ -108,5 +119,5 @@ export function useTilt(): { tilt: number; live: boolean; enable: () => Promise<
     }
   }, []);
 
-  return { tilt, live, enable };
+  return { tilt: enabled ? tilt : 0, live: enabled && live, enable };
 }

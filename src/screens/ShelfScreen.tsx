@@ -9,7 +9,7 @@ import { Toast } from "../components/Toast";
 import { db } from "../data/db";
 import type { Jelly } from "../data/types";
 import { JAR_CAPACITY, buildPile, jellyRatioFor } from "../lib/pile";
-import { tiltCanAsk, useTilt } from "../lib/tilt";
+import { tiltMayWork, useTilt } from "../lib/tilt";
 import { useSettings } from "../lib/settings";
 import { playDrop, playShake } from "../lib/sound";
 import { monthKeyOf, monthRange, parseMonthKey, seedFromKey, shiftMonth } from "../lib/month";
@@ -82,7 +82,7 @@ export function ShelfScreen() {
   // 병에서 고른 젤리 한 알
   const [picked, setPicked] = useState<string>();
 
-  const { tilt, live: tilting, enable: enableTilt } = useTilt();
+  const { tilt, live: tilting, enable: enableTilt } = useTilt(settings?.tilt ?? true);
   /**
    * 기울이기가 안 될 때 왜 안 되는지.
    *
@@ -166,7 +166,7 @@ export function ShelfScreen() {
             얹어뒀더니 젤리가 커진 뒤로는 눌러도 젤리가 먼저 받아서 물음이
             아예 안 떴다. 눈에 보이는 버튼으로 따로 뺀다.
           */}
-          {isThisMonth && count > 1 && !tilting && tiltCanAsk() ? (
+          {isThisMonth && count > 0 && !tilting && (settings?.tilt ?? true) && tiltMayWork() ? (
             <button
               type="button"
               onClick={async () => {

@@ -6,7 +6,8 @@ import { AppBar } from "../components/AppBar";
 import { InstallGuide } from "../components/InstallGuide";
 import { db, syncSeed } from "../data/db";
 import { syncEnabled } from "../lib/supabase";
-import { setMuted, setNickname, setTheme, useSettings } from "../lib/settings";
+import { setMuted, setNickname, setTheme, setTiltOn, useSettings } from "../lib/settings";
+import { tiltMayWork, tiltNeedsPermission, useTilt } from "../lib/tilt";
 import { useIsStandalone } from "../lib/standalone";
 import { THEMES, applyTheme } from "../lib/theme";
 import { playShake } from "../lib/sound";
@@ -22,6 +23,11 @@ export function SettingsScreen() {
 
   const settings = useSettings();
   const standalone = useIsStandalone();
+
+  const tiltOn = settings?.tilt ?? true;
+  const { live: tiltLive, enable: askTilt } = useTilt(tiltOn);
+  /** 켜봤는데 안 되는 이유. 조용히 실패하면 손을 못 댄다. */
+  const [tiltWhy, setTiltWhy] = useState<"denied" | "silent">();
 
   const stats = useLiveQuery(async () => {
     const [jellies, entries] = await Promise.all([db.jellies.count(), db.entries.count()]);
@@ -160,6 +166,62 @@ export function SettingsScreen() {
             />
           </span>
         </button>
+
+        {tiltMayWork() ? (
+          <>
+            <h2 className="mt-6 mb-2 px-1 text-xs tracking-wide text-ink-soft">기울이기</h2>
+            <button
+              type="button"
+              onClick={async () => {
+                const next = !tiltOn;
+                setTiltWhy(undefined);
+                await setTiltOn(next);
+                if (!next) return;
+                // 허락은 누른 바로 이 순간에만 물을 수 있다. 여기가 그 자리다.
+                const ok = await askTilt();
+                if (!ok) {
+                  setTiltWhy("denied");
+                  return;
+                }
+                // 허락은 떨어졌는데 값이 안 들어오는 경우가 있다
+                window.setTimeout(() => setTiltWhy((w) => w ?? "silent"), 1600);
+              }}
+              aria-pressed={tiltOn}
+              className="flex w-full items-center gap-3 rounded-2xl bg-surface p-4 text-left transition active:scale-[.99]"
+            >
+              <span className="min-w-0 flex-1">
+                <span className="block text-base font-medium">기울이면 젤리가 쏠려요</span>
+                <span className="mt-0.5 block text-xs leading-snug text-ink-soft">
+                  보관함에서 폰을 좌우로 기울이면 젤리가 그쪽 벽으로 쏟아져요
+                </span>
+              </span>
+              <span
+                className={`relative h-6 w-11 flex-none rounded-full transition ${
+                  tiltOn ? "bg-accent" : "bg-line"
+                }`}
+              >
+                <span
+                  className={`absolute top-0.5 size-5 rounded-full bg-white shadow-sm transition-all ${
+                    tiltOn ? "left-[1.375rem]" : "left-0.5"
+                  }`}
+                />
+              </span>
+            </button>
+            {tiltOn ? (
+              <p className="mt-2 px-1 text-tiny leading-relaxed text-ink-faint">
+                {tiltLive
+                  ? "지금 기울기를 읽고 있어요. 보관함에서 기울여 보세요."
+                  : tiltWhy === "denied"
+                    ? "허락을 못 받았어요. 아이폰 설정 → 앱 → Safari → 동작 및 방향 접근을 켠 다음, 이 스위치를 껐다 켜보세요."
+                    : tiltWhy === "silent"
+                      ? "허락은 됐는데 기울기 값이 안 들어와요. 아이폰 설정 → 앱 → Safari → 동작 및 방향 접근을 확인해 주세요."
+                      : tiltNeedsPermission()
+                        ? "스위치를 껐다 켜면 아이폰이 동작 접근을 물어봐요. 허용을 눌러 주세요."
+                        : "아직 기울기 값이 안 들어와요. 아이폰이면 설정 → 앱 → Safari → 동작 및 방향 접근을 켜고 앱을 다시 열어 보세요."}
+              </p>
+            ) : null}
+          </>
+        ) : null}
 
         <h2 className="mt-6 mb-2 px-1 text-xs tracking-wide text-ink-soft">저장</h2>
         <section className="rounded-2xl bg-surface p-4">
