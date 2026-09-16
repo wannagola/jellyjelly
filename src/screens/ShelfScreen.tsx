@@ -9,7 +9,7 @@ import { Toast } from "../components/Toast";
 import { db } from "../data/db";
 import type { Jelly } from "../data/types";
 import { JAR_CAPACITY, buildPile, jellyRatioFor } from "../lib/pile";
-import { useTilt } from "../lib/tilt";
+import { tiltCanAsk, useTilt } from "../lib/tilt";
 import { useSettings } from "../lib/settings";
 import { playDrop, playShake } from "../lib/sound";
 import { monthKeyOf, monthRange, parseMonthKey, seedFromKey, shiftMonth } from "../lib/month";
@@ -83,13 +83,12 @@ export function ShelfScreen() {
   const [picked, setPicked] = useState<string>();
 
   const { tilt, live: tilting, enable: enableTilt } = useTilt();
+  const [tiltDenied, setTiltDenied] = useState(false);
 
   function shake() {
     setShakes((n) => n + 1);
     navigator.vibrate?.(12); // 안드로이드만. iOS 는 이 API 자체가 없어서 조용히 넘어간다
     if (!settings?.muted) playShake(count);
-    // 기울기를 물어볼 수 있는 건 누른 바로 이 순간뿐이다. 병을 만지는 김에 같이 묻는다.
-    if (!tilting) void enableTilt();
   }
 
   const count = doneJellies.length;
@@ -153,8 +152,31 @@ export function ShelfScreen() {
                 ? "아래 ＋ 로 젤리를 담아보세요"
                 : tilting
                   ? "병을 톡 치면 섞이고, 폰을 기울이면 쏠려요"
-                  : "병을 톡 치면 젤리가 섞여요 · 한 번 치면 기울이기도 켜져요"}
+                  : "병을 톡 치면 젤리가 섞여요"}
           </p>
+
+          {/*
+            기울이기 허락은 사용자가 누른 그 순간에만 물을 수 있다. 병 흔들기에
+            얹어뒀더니 젤리가 커진 뒤로는 눌러도 젤리가 먼저 받아서 물음이
+            아예 안 떴다. 눈에 보이는 버튼으로 따로 뺀다.
+          */}
+          {isThisMonth && count > 1 && !tilting && tiltCanAsk() ? (
+            <button
+              type="button"
+              onClick={async () => {
+                const ok = await enableTilt();
+                setTiltDenied(!ok);
+              }}
+              className="mt-2.5 rounded-full bg-accent-bg px-3.5 py-1.5 text-xs font-medium text-accent transition active:scale-95"
+            >
+              폰 기울이면 쏠리게 하기
+            </button>
+          ) : null}
+          {tiltDenied ? (
+            <p className="mt-2 max-w-[28ch] text-center text-tiny leading-relaxed text-ink-faint">
+              허락이 꺼져 있어요. 설정 → Safari → 동작 및 방향 접근을 켜고 다시 열어보세요.
+            </p>
+          ) : null}
         </section>
 
         {data && data.eating.length > 0 ? (

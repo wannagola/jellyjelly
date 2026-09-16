@@ -33,6 +33,17 @@ export function tiltSupported(): boolean {
 }
 
 /**
+ * 물어보면 켜질 수 있는 기기인가.
+ *
+ * 데스크톱 크롬도 requestPermission 을 갖고 있어서 그것만 보면 노트북에도
+ * 버튼이 뜬다. 손가락이 닿는 기기인지까지 같이 본다.
+ */
+export function tiltCanAsk(): boolean {
+  if (typeof navigator === "undefined") return false;
+  return typeof ctor()?.requestPermission === "function" && navigator.maxTouchPoints > 0;
+}
+
+/**
  * -1(왼쪽) ~ 1(오른쪽). 값이 안 들어오는 기기에서는 내내 0 이다.
  *
  * 기울기는 초당 예순 번씩 들어온다. 그대로 화면에 꽂으면 손 떨림까지 그려져서
@@ -45,6 +56,11 @@ export function useTilt(): { tilt: number; live: boolean; enable: () => Promise<
   const [live, setLive] = useState(false);
   const raw = useRef(0);
   const smooth = useRef(0);
+  /**
+   * 허락을 받고 나면 듣기를 새로 건다.
+   * 허락 전에 걸어둔 귀에는 값이 안 들어오는 기기가 있다.
+   */
+  const [rearm, setRearm] = useState(0);
 
   /* 센서는 바깥 세상이고 여기가 그걸 리액트로 옮기는 자리다.
      effect 안의 setState 를 막는 규칙은 이 경우를 위한 게 아니다. */
@@ -61,7 +77,7 @@ export function useTilt(): { tilt: number; live: boolean; enable: () => Promise<
     };
     window.addEventListener("deviceorientation", handler);
     return () => window.removeEventListener("deviceorientation", handler);
-  }, []);
+  }, [rearm]);
 
   useEffect(() => {
     if (!live) return;
@@ -82,7 +98,11 @@ export function useTilt(): { tilt: number; live: boolean; enable: () => Promise<
     const Ctor = ctor();
     if (typeof Ctor?.requestPermission !== "function") return false;
     try {
-      return (await Ctor.requestPermission()) === "granted";
+      // 누른 그 순간에 바로 불러야 한다. 여기서 한 번이라도 기다리면 거절된다.
+      const answer = await Ctor.requestPermission();
+      if (answer !== "granted") return false;
+      setRearm((n) => n + 1);
+      return true;
     } catch {
       return false;
     }
