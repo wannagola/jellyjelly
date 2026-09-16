@@ -3,12 +3,14 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { Heart } from "../components/Heart";
 import { JellyFace } from "../components/JellyFace";
+import { useGoBack } from "../lib/goBack";
 import { db, startEating } from "../data/db";
 import { searchJellies } from "../lib/search";
 
 /** 기록하기 — 찾아서 한 번 탭하면 끝. 없으면 바로 만들 수 있어야 한다. */
 export function RecordScreen() {
   const navigate = useNavigate();
+  const goBack = useGoBack("/");
   const [query, setQuery] = useState("");
 
   const jellies = useLiveQuery(() => db.jellies.orderBy("name").toArray(), []);
@@ -37,7 +39,7 @@ export function RecordScreen() {
     <>
       <header className="flex flex-none items-center justify-between gap-2 px-5 pt-3 pb-2.5">
         <h1 className="font-display text-[22px]">뭐 먹었어요?</h1>
-        <button type="button" onClick={() => navigate(-1)} className="text-[13px] text-ink-soft">
+        <button type="button" onClick={goBack} className="text-[13px] text-ink-soft">
           닫기
         </button>
       </header>

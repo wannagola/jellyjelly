@@ -1,6 +1,7 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { useRef, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router";
+import { useGoBack } from "../lib/goBack";
 import { Jelly as JellyIcon } from "../components/Jelly";
 import { JellyFace } from "../components/JellyFace";
 import { addJelly, db, startEating, updateJelly } from "../data/db";
@@ -45,6 +46,8 @@ type Draft = {
  */
 function JellyForm({ mode, initial }: { mode: "create" | "edit"; initial: Draft | Jelly }) {
   const navigate = useNavigate();
+  // 고치기에서 돌아갈 곳은 그 젤리 상세다. 히스토리가 없을 때만 쓰인다.
+  const goBack = useGoBack(mode === "edit" && initial.id ? `/jelly/${initial.id}` : "/");
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [name, setName] = useState(initial.name);
@@ -87,7 +90,7 @@ function JellyForm({ mode, initial }: { mode: "create" | "edit"; initial: Draft 
       };
       if (mode === "edit" && id) {
         await updateJelly(id, fields);
-        navigate(-1);
+        goBack();
         return;
       }
       const jellyId = await addJelly(fields);
@@ -101,7 +104,7 @@ function JellyForm({ mode, initial }: { mode: "create" | "edit"; initial: Draft 
   return (
     <>
       <header className="flex flex-none items-center justify-between gap-2 px-5 pt-3 pb-2.5">
-        <button type="button" onClick={() => navigate(-1)} className="text-[13px] text-ink-soft">
+        <button type="button" onClick={goBack} className="text-[13px] text-ink-soft">
           ‹ 뒤로
         </button>
         <h1 className="font-display text-[17px]">

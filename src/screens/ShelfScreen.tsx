@@ -13,7 +13,9 @@ import { monthRange, parseMonthKey, seedFromKey, shiftMonth } from "../lib/month
 /** 보관함 — 앱의 얼굴. 다 먹은 젤리가 그 달의 병에 쌓인다. */
 export function ShelfScreen() {
   const [params] = useSearchParams();
-  // 선반에서 병을 고르면 그 달로 열린다
+  // 선반에서 병을 고르면 그 달로 열린다.
+  // 홈 화면에 띄우면 브라우저 뒤로가기가 없으니, 돌아갈 길을 직접 내줘야 한다.
+  const openedFromShelf = Boolean(parseMonthKey(params.get("month") ?? ""));
   const [cursor, setCursor] = useState(() => parseMonthKey(params.get("month") ?? "") ?? new Date());
   const month = useMemo(() => monthRange(cursor), [cursor]);
   const location = useLocation() as { state?: { toast?: string; drop?: boolean } };
@@ -68,29 +70,26 @@ export function ShelfScreen() {
 
   return (
     <>
-      <AppBar
-        title="젤리젤리"
-        side={
-          <span className="flex items-center gap-3">
-            {count > 0 ? <span className="tabular-nums">{`${kinds}종 · ${count}개`}</span> : null}
-            <Link to="/settings" aria-label="설정" className="text-ink-faint">
-              <svg
-                viewBox="0 0 24 24"
-                className="size-[19px]"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-              >
-                <circle cx="12" cy="12" r="3.2" />
-                <path
-                  d="M12 2.6v2.6M12 18.8v2.6M21.4 12h-2.6M5.2 12H2.6M18.6 5.4l-1.9 1.9M7.3 16.7l-1.9 1.9M18.6 18.6l-1.9-1.9M7.3 7.3 5.4 5.4"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </Link>
-          </span>
-        }
-      />
+      {openedFromShelf ? (
+        <header className="flex flex-none items-center justify-between gap-2 px-5 pt-3 pb-2.5">
+          <Link to="/jars" className="text-[13px] text-ink-soft">
+            ‹ 선반
+          </Link>
+          {/* 달 이름은 병 아래에 앞뒤 화살표와 함께 나오니 여기선 두 번 적지 않는다 */}
+          <h1 className="font-display text-[17px]">보관함</h1>
+          <SettingsLink />
+        </header>
+      ) : (
+        <AppBar
+          title="젤리젤리"
+          side={
+            <span className="flex items-center gap-3">
+              {count > 0 ? <span className="tabular-nums">{`${kinds}종 · ${count}개`}</span> : null}
+              <SettingsLink />
+            </span>
+          }
+        />
+      )}
 
       <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-8">
         <section className="flex flex-col items-center pt-2">
@@ -182,5 +181,25 @@ export function ShelfScreen() {
 
       <Toast message={location.state?.toast} />
     </>
+  );
+}
+
+function SettingsLink() {
+  return (
+    <Link to="/settings" aria-label="설정" className="text-ink-faint">
+      <svg
+        viewBox="0 0 24 24"
+        className="size-[19px]"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      >
+        <circle cx="12" cy="12" r="3.2" />
+        <path
+          d="M12 2.6v2.6M12 18.8v2.6M21.4 12h-2.6M5.2 12H2.6M18.6 5.4l-1.9 1.9M7.3 16.7l-1.9 1.9M18.6 18.6l-1.9-1.9M7.3 7.3 5.4 5.4"
+          strokeLinecap="round"
+        />
+      </svg>
+    </Link>
   );
 }

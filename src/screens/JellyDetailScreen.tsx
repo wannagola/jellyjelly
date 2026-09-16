@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from "react-router";
 import { Heart } from "../components/Heart";
 import { JellyFace } from "../components/JellyFace";
 import { Stars } from "../components/Stars";
+import { useGoBack } from "../lib/goBack";
 import { db, toggleFavorite } from "../data/db";
 import type { Entry } from "../data/types";
 import { COLOR_NAMES, JELLY_COLORS, SHAPE_NAMES } from "../lib/jelly";
@@ -12,6 +13,7 @@ import { COLOR_NAMES, JELLY_COLORS, SHAPE_NAMES } from "../lib/jelly";
 export function JellyDetailScreen() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const goBack = useGoBack("/dex");
 
   const data = useLiveQuery(async () => {
     if (!id) return undefined;
@@ -43,7 +45,7 @@ export function JellyDetailScreen() {
   return (
     <>
       <header className="flex flex-none items-center justify-between gap-2 px-5 pt-3 pb-1">
-        <button type="button" onClick={() => navigate(-1)} className="text-[13px] text-ink-soft">
+        <button type="button" onClick={goBack} className="text-[13px] text-ink-soft">
           ‹ 뒤로
         </button>
         {jelly ? (

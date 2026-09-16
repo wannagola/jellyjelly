@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router";
 import { JellyFace } from "../components/JellyFace";
 import { Stars } from "../components/Stars";
 import { TextureSlider } from "../components/TextureSlider";
+import { useGoBack } from "../lib/goBack";
 import { db, finishEntry } from "../data/db";
 import { JELLY_COLORS } from "../lib/jelly";
 
@@ -11,6 +12,7 @@ import { JELLY_COLORS } from "../lib/jelly";
 export function FinishScreen() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const goBack = useGoBack("/");
 
   const data = useLiveQuery(async () => {
     if (!id) return undefined;
@@ -67,7 +69,7 @@ export function FinishScreen() {
   return (
     <>
       <header className="flex flex-none items-center justify-between gap-2 px-5 pt-3 pb-1">
-        <button type="button" onClick={() => navigate(-1)} className="text-[13px] text-ink-soft">
+        <button type="button" onClick={goBack} className="text-[13px] text-ink-soft">
           나중에
         </button>
         <h1 className="font-display text-[17px]">다 먹었어요</h1>
