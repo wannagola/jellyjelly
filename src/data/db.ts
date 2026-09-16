@@ -20,17 +20,49 @@ class JellyDB extends Dexie {
 
 export const db = new JellyDB();
 
-/** 첫 실행에만 도감 씨앗을 깐다. 두 번째부터는 아무것도 하지 않는다. */
-export async function seedOnce(): Promise<void> {
-  const done = await db.meta.get("seeded");
-  if (done) return;
+/** 씨앗 목록이 바뀔 때마다 올린다 */
+const SEED_VERSION = 2;
+
+/**
+ * 브랜드가 이름 앞에 붙어 있든 말든 같은 젤리로 본다.
+ * ("하리보"/"하리보 골드베렌" 과 "하리보"/"골드베렌" 은 같은 것)
+ */
+function identity(brand: string | undefined, name: string): string {
+  const b = (brand ?? "").replace(/\s+/g, "");
+  let n = name.replace(/\s+/g, "");
+  if (b && n.startsWith(b)) n = n.slice(b.length);
+  return `${b}|${n}`;
+}
+
+/**
+ * 도감 씨앗을 채운다. 첫 실행이든 앱 업데이트든 **빠진 것만** 넣는다.
+ * 이미 있는 젤리는 건드리지 않는다 - 모양이나 사진을 고쳐뒀다면 그게 이긴다.
+ * 지운 젤리도 다시 살리지 않는다.
+ */
+export async function syncSeed(): Promise<void> {
+  const stored = (await db.meta.get("seedVersion"))?.value;
+  if (stored === SEED_VERSION) return;
+
+  const existing = await db.jellies.toArray();
+  const known = new Set<string>();
+  for (const jelly of existing) {
+    if (jelly.seedKey) known.add(jelly.seedKey);
+    known.add(identity(jelly.brand, jelly.name));
+  }
+
+  const missing = SEED_JELLIES.filter(
+    (s) => !known.has(s.seedKey) && !known.has(identity(s.brand, s.name)),
+  );
 
   const now = Date.now();
   await db.transaction("rw", db.jellies, db.meta, async () => {
-    await db.jellies.bulkAdd(
-      SEED_JELLIES.map((j) => ({ ...j, id: newId(), createdAt: now, updatedAt: now })),
-    );
-    await db.meta.put({ key: "seeded", value: now });
+    if (missing.length > 0) {
+      await db.jellies.bulkAdd(
+        missing.map((j) => ({ ...j, id: newId(), createdAt: now, updatedAt: now })),
+      );
+    }
+    await db.meta.put({ key: "seedVersion", value: SEED_VERSION });
+    await db.meta.delete("seeded"); // v1이 쓰던 플래그
   });
 }
 

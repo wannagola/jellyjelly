@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { JellyFace } from "../components/JellyFace";
 import { db, startEating } from "../data/db";
-import { matchesQuery } from "../lib/search";
+import { searchJellies } from "../lib/search";
 
 /** 기록하기 — 찾아서 한 번 탭하면 끝. 없으면 바로 만들 수 있어야 한다. */
 export function RecordScreen() {
@@ -20,10 +20,7 @@ export function RecordScreen() {
     return map;
   }, []);
 
-  const results = useMemo(
-    () => (jellies ?? []).filter((j) => matchesQuery(query, j.name, j.brand)),
-    [jellies, query],
-  );
+  const results = useMemo(() => searchJellies(jellies ?? [], query), [jellies, query]);
 
   async function pick(jellyId: string, name: string) {
     await startEating(jellyId);

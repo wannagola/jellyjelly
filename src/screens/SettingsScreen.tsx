@@ -2,7 +2,7 @@ import { format } from "date-fns";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useRef, useState } from "react";
 import { AppBar } from "../components/AppBar";
-import { db, seedOnce } from "../data/db";
+import { db, syncSeed } from "../data/db";
 import { buildBackup, downloadBackup, restoreBackup, wipeEverything } from "../lib/backup";
 
 /** 설정 — 여기서 가장 중요한 건 백업이다. 서버가 없으면 사본이 하나뿐이다. */
@@ -59,7 +59,7 @@ export function SettingsScreen() {
     setBusy("wipe");
     try {
       await wipeEverything();
-      await seedOnce();
+      await syncSeed();
       setConfirmWipe(false);
       setNote("모두 지웠어요");
     } finally {

@@ -23,6 +23,8 @@ export interface Jelly {
   photo?: Blob;
   kcal?: number;
   note?: string;
+  /** 앱이 깔아준 젤리라는 표시. 직접 만든 젤리에는 없다. */
+  seedKey?: string;
   createdAt: number;
   updatedAt: number;
 }

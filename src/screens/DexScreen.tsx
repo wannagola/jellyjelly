@@ -5,7 +5,7 @@ import { Link } from "react-router";
 import { AppBar } from "../components/AppBar";
 import { JellyFace } from "../components/JellyFace";
 import { db } from "../data/db";
-import { matchesQuery } from "../lib/search";
+import { searchJellies } from "../lib/search";
 
 type Tab = "mine" | "all";
 
@@ -34,9 +34,10 @@ export function DexScreen() {
 
   const shown = useMemo(() => {
     if (!data) return [];
-    return data.jellies
-      .filter((j) => (tab === "mine" ? (data.counts.get(j.id) ?? 0) > 0 : true))
-      .filter((j) => matchesQuery(query, j.name, j.brand));
+    const pool = data.jellies.filter((j) =>
+      tab === "mine" ? (data.counts.get(j.id) ?? 0) > 0 : true,
+    );
+    return searchJellies(pool, query);
   }, [data, tab, query]);
 
   const collected = data ? [...data.counts.keys()].length : 0;
