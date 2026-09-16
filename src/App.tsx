@@ -3,6 +3,7 @@ import { Route, Routes, useLocation } from "react-router";
 import { TabBar } from "./components/TabBar";
 import { CalendarScreen } from "./screens/CalendarScreen";
 import { DexScreen } from "./screens/DexScreen";
+import { DrawScreen } from "./screens/DrawScreen";
 import { FinishScreen } from "./screens/FinishScreen";
 import { JarShelfScreen } from "./screens/JarShelfScreen";
 import { JellyDetailScreen } from "./screens/JellyDetailScreen";
@@ -16,7 +17,7 @@ import { useSettings } from "./lib/settings";
 import { applyTheme } from "./lib/theme";
 
 /** 탭바를 숨기는 화면들 — 하나의 일을 끝내고 돌아가는 곳이라 */
-const FULLSCREEN = [/^\/record/, /^\/finish\//, /^\/jelly\/[^/]+\/edit/];
+const FULLSCREEN = [/^\/record/, /^\/finish\//, /^\/jelly\/[^/]+\/edit/, /^\/draw/];
 
 export default function App() {
   const { pathname } = useLocation();
@@ -46,6 +47,7 @@ export default function App() {
         <Route path="/calendar" element={<CalendarScreen />} />
         <Route path="/dex" element={<DexScreen />} />
         <Route path="/recommend" element={<RecommendScreen />} />
+        <Route path="/draw" element={<DrawScreen />} />
         <Route path="/settings" element={<SettingsScreen />} />
       </Routes>
       {bare ? null : <TabBar />}

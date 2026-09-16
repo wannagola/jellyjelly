@@ -333,3 +333,133 @@
   border: 2.5px solid var(--tint);
   box-shadow: 0 1px 3px rgba(59, 36, 48, 0.25);
 }
+
+/* ===== 젤리 뽑기 기계 =====
+   병과 같은 방식으로, 치수를 전부 cqw(기계 너비의 1%)로 잡는다. */
+.gacha {
+  position: relative;
+  container-type: inline-size;
+  aspect-ratio: 200 / 265;
+}
+
+/* 유리 돔 */
+.gacha-dome {
+  position: absolute;
+  top: 0;
+  left: 10%;
+  width: 80%;
+  height: 80cqw;
+  border-radius: 50%;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 32% 26%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0) 38%),
+    linear-gradient(
+      140deg,
+      rgba(255, 255, 255, 0.55) 0%,
+      rgba(214, 234, 241, 0.32) 45%,
+      rgba(176, 201, 212, 0.55) 100%
+    );
+  box-shadow:
+    inset 0 2cqw 5cqw rgba(255, 255, 255, 0.8),
+    inset 0 -4cqw 8cqw rgba(138, 170, 184, 0.45);
+}
+.gacha-dome::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1.2cqw rgba(255, 255, 255, 0.5);
+}
+
+/* 몸통 */
+.gacha-body {
+  position: absolute;
+  top: 62cqw;
+  left: 4%;
+  right: 4%;
+  height: 70cqw;
+  border-radius: 7cqw 7cqw 5cqw 5cqw;
+  background: linear-gradient(180deg, var(--lid-mid) 0%, var(--lid-bottom) 55%, var(--accent) 100%);
+  box-shadow: 0 3cqw 8cqw -4cqw rgba(59, 36, 48, 0.45);
+}
+/* 돔이 얹히는 목 */
+.gacha-collar {
+  position: absolute;
+  top: 58cqw;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 72%;
+  height: 8cqw;
+  border-radius: 3cqw;
+  background: linear-gradient(180deg, var(--lid-top), var(--lid-mid));
+  box-shadow: inset 0 -1cqw 2cqw rgba(0, 0, 0, 0.12);
+}
+
+/* 레버 */
+.gacha-knob {
+  position: absolute;
+  top: 74cqw;
+  left: 50%;
+  margin-left: -9cqw;
+  width: 18cqw;
+  height: 18cqw;
+  border-radius: 50%;
+  background: radial-gradient(circle at 36% 32%, #fff, var(--line) 70%);
+  box-shadow: 0 1.5cqw 3cqw rgba(59, 36, 48, 0.28);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+/* 손잡이의 십자 막대 */
+.gacha-knob i {
+  position: absolute;
+  display: block;
+  width: 11cqw;
+  height: 2.6cqw;
+  border-radius: 1.5cqw;
+  background: var(--accent);
+}
+.gacha-knob i:last-child {
+  transform: rotate(90deg);
+}
+
+/* 투출구 */
+.gacha-slot {
+  position: absolute;
+  top: 98cqw;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 46%;
+  height: 24cqw;
+  border-radius: 3cqw;
+  background: linear-gradient(180deg, rgba(40, 22, 32, 0.82), rgba(40, 22, 32, 0.6));
+  box-shadow: inset 0 2cqw 4cqw rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+/* 투출구 덮개 */
+.gacha-flap {
+  position: absolute;
+  top: 96cqw;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 48%;
+  height: 4cqw;
+  border-radius: 2cqw;
+  background: var(--lid-top);
+  z-index: 2;
+}
+
+.gacha-foot {
+  position: absolute;
+  left: 50%;
+  bottom: -2cqw;
+  transform: translateX(-50%);
+  width: 86%;
+  height: 7cqw;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(108, 86, 100, 0.26),
+    rgba(108, 86, 100, 0) 72%
+  );
+}

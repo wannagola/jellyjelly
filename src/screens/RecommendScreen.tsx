@@ -48,6 +48,20 @@ export function RecommendScreen() {
       <AppBar title="뭐 먹을까" />
 
       <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-8">
+        <Link
+          to="/draw"
+          className="mb-4 flex items-center gap-3 rounded-2xl bg-accent-bg px-4 py-3.5 transition active:scale-[.99]"
+        >
+          <span className="text-2xl leading-none">🎰</span>
+          <span className="min-w-0 flex-1">
+            <span className="block font-display text-lg text-accent">그냥 뽑아줘요</span>
+            <span className="block text-xs text-ink-soft">
+              고르기 귀찮을 땐 레버 한 번이면 돼요
+            </span>
+          </span>
+          <span className="text-lg text-accent">›</span>
+        </Link>
+
         {view ? (
           warmedUp ? (
             <>
