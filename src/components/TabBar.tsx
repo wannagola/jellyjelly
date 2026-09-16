@@ -1,4 +1,5 @@
-import { NavLink, useLocation, useNavigate } from "react-router";
+import { NavLink, useLocation, useNavigate, useSearchParams } from "react-router";
+import { monthKeyOf } from "../lib/month";
 
 const s = { fill: "none", stroke: "currentColor", strokeWidth: 1.8 } as const;
 
@@ -40,8 +41,15 @@ const TABS = [
 
 export function TabBar() {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const [params] = useSearchParams();
   // 선반은 보관함에서 펼쳐 보는 화면이라 탭도 보관함에 머문다
-  const onShelf = useLocation().pathname.startsWith("/jars");
+  const onShelf = pathname.startsWith("/jars");
+
+  // 지난 달 병을 보는 중이면 기록을 잠근다. 지금 기록하면 오늘 날짜로 담겨서
+  // 보고 있는 병이 아니라 이번 달 병에 들어간다. 눌러놓고 어디 갔나 찾게 된다.
+  const viewingPast =
+    pathname === "/" && Boolean(params.get("month")) && params.get("month") !== monthKeyOf(Date.now());
 
   return (
     <nav className="relative flex-none border-t border-line bg-surface safe-b">
@@ -66,8 +74,13 @@ export function TabBar() {
       <button
         type="button"
         onClick={() => navigate("/record")}
-        aria-label="젤리 기록하기"
-        className="absolute left-1/2 -top-6 grid size-14 -translate-x-1/2 place-items-center rounded-full border-4 border-bg bg-accent text-white shadow-[0_6px_16px_rgba(224,86,140,.45)] active:scale-95 transition-transform"
+        disabled={viewingPast}
+        aria-label={viewingPast ? "기록하기 (이번 달에서만 가능해요)" : "젤리 기록하기"}
+        className={`absolute left-1/2 -top-6 grid size-14 -translate-x-1/2 place-items-center rounded-full border-4 border-bg text-white transition-transform ${
+          viewingPast
+            ? "bg-ink-faint shadow-none"
+            : "bg-accent shadow-[0_6px_16px_rgba(224,86,140,.45)] active:scale-95"
+        }`}
       >
         <svg viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round">
           <path d="M12 5.6v12.8M5.6 12h12.8" />

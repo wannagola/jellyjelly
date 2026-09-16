@@ -8,16 +8,29 @@ import { Toast } from "../components/Toast";
 import { db } from "../data/db";
 import type { Jelly } from "../data/types";
 import { JAR_CAPACITY, buildPile } from "../lib/pile";
-import { monthRange, parseMonthKey, seedFromKey, shiftMonth } from "../lib/month";
+import { monthKeyOf, monthRange, parseMonthKey, seedFromKey, shiftMonth } from "../lib/month";
 
 /** 보관함 — 앱의 얼굴. 다 먹은 젤리가 그 달의 병에 쌓인다. */
 export function ShelfScreen() {
-  const [params] = useSearchParams();
-  // 선반에서 병을 고르면 그 달로 열린다.
-  // 홈 화면에 띄우면 브라우저 뒤로가기가 없으니, 돌아갈 길을 직접 내줘야 한다.
-  const openedFromShelf = Boolean(parseMonthKey(params.get("month") ?? ""));
-  const [cursor, setCursor] = useState(() => parseMonthKey(params.get("month") ?? "") ?? new Date());
+  // 어느 달을 보고 있는지는 주소에 둔다. 새로고침해도 유지되고,
+  // 탭바가 이걸 읽어서 지난 달에서는 기록 버튼을 잠근다.
+  const [params, setParams] = useSearchParams();
+  const monthParam = params.get("month");
+  const cursor = useMemo(() => parseMonthKey(monthParam ?? "") ?? new Date(), [monthParam]);
   const month = useMemo(() => monthRange(cursor), [cursor]);
+  const isThisMonth = month.key === monthKeyOf(Date.now());
+  // 기본 화면이 아니면 돌아갈 길을 내준다.
+  // 홈 화면에 띄운 앱에는 브라우저 뒤로가기가 없다.
+  const showBack = Boolean(monthParam);
+
+  function goMonth(delta: number) {
+    const next = monthKeyOf(shiftMonth(cursor, delta).getTime());
+    setParams(
+      next === monthKeyOf(Date.now()) ? {} : { month: next },
+      { replace: true },
+    );
+    setShakes(0);
+  }
   const location = useLocation() as { state?: { toast?: string; drop?: boolean } };
   // 방금 담은 젤리만 떨어지는 연출을 받는다. 마운트 때 한 번만 잡아둔다.
   const [playDrop] = useState(() => Boolean(location.state?.drop));
@@ -70,7 +83,7 @@ export function ShelfScreen() {
 
   return (
     <>
-      {openedFromShelf ? (
+      {showBack ? (
         <header className="flex flex-none items-center justify-between gap-2 px-5 pt-3 pb-2.5">
           <Link to="/jars" className="text-[13px] text-ink-soft">
             ‹ 선반
@@ -104,7 +117,7 @@ export function ShelfScreen() {
             <button
               type="button"
               aria-label="이전 달"
-              onClick={() => setCursor((d) => shiftMonth(d, -1))}
+              onClick={() => goMonth(-1)}
               className="grid size-8 place-items-center rounded-full text-ink-faint active:bg-line"
             >
               ‹
@@ -117,11 +130,13 @@ export function ShelfScreen() {
               {month.label}
               <span className="ml-1 text-[11px] text-ink-faint">▾</span>
             </Link>
+            {/* 아직 오지 않은 달에는 먹은 젤리가 있을 수 없다 */}
             <button
               type="button"
               aria-label="다음 달"
-              onClick={() => setCursor((d) => shiftMonth(d, 1))}
-              className="grid size-8 place-items-center rounded-full text-ink-faint active:bg-line"
+              onClick={() => goMonth(1)}
+              disabled={isThisMonth}
+              className="grid size-8 place-items-center rounded-full text-ink-faint active:bg-line disabled:opacity-25 disabled:active:bg-transparent"
             >
               ›
             </button>
@@ -135,7 +150,11 @@ export function ShelfScreen() {
                 : `${count}개 담겼어요`}
           </p>
           <p className="mt-1 text-[10px] text-ink-faint">
-            {count > 1 ? "병을 톡 치면 젤리가 섞여요 · 달 이름을 누르면 선반" : "달 이름을 누르면 선반이 열려요"}
+            {!isThisMonth
+              ? "지난 병이에요 · 기록은 이번 달에만 담을 수 있어요"
+              : count > 1
+                ? "병을 톡 치면 젤리가 섞여요 · 달 이름을 누르면 선반"
+                : "달 이름을 누르면 선반이 열려요"}
           </p>
         </section>
 
@@ -170,7 +189,7 @@ export function ShelfScreen() {
           </section>
         ) : null}
 
-        {count === 0 && (!data || data.eating.length === 0) ? (
+        {isThisMonth && count === 0 && (!data || data.eating.length === 0) ? (
           <p className="mt-8 text-center text-[13px] leading-relaxed text-ink-soft">
             아래 <span className="font-medium text-accent">＋</span> 를 눌러
             <br />
