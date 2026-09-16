@@ -89,19 +89,23 @@ export function peeled(chips: Chip[], grid = 26): number {
 export { makeRandom };
 
 export interface Squish {
-  /** 누르는 방향(라디안)과 깊이(0~1) */
+  /** 누르는 방향과 깊이. 손을 떼면 되튀느라 잠깐 음수가 된다. */
   pressAngle: number;
   pressDepth: number;
-  /** 끌어당기는 방향과 세기(0~1) */
+  pressVel: number;
+  /** 끌어당기는 방향과 세기 */
   stretchAngle: number;
   stretch: number;
+  stretchVel: number;
 }
 
 export const restingSquish = (): Squish => ({
   pressAngle: 0,
   pressDepth: 0,
+  pressVel: 0,
   stretchAngle: 0,
   stretch: 0,
+  stretchVel: 0,
 });
 
 /** -π..π 로 접은 각도 차 */
@@ -112,27 +116,63 @@ function angleGap(a: number, b: number): number {
   return d;
 }
 
+/** 손가락이 닿는 자리의 폭 */
+const DENT_WIDTH = 0.58;
+
 /**
- * 어느 각도에서 공 표면이 얼마나 멀리 있는지.
+ * 어느 각도에서 표면이 얼마나 멀리 있는지.
  *
- * 누른 자리는 쑥 들어가고, 들어간 만큼 다른 데가 부푼다.
- * 그 부푸는 몫이 없으면 그냥 이가 빠진 원이라 말랑해 보이지 않는다.
+ * 누른 자리만 파면 이가 빠진 원처럼 보인다. 실제로 말랑한 걸 누르면
+ * 눌린 자리 바로 옆이 도톰하게 부푼다. 밀려난 살이 갈 데가 거기밖에 없기 때문이다.
+ * 가운데가 양수고 둘레가 음수인 모자 모양 함수를 쓰면 그게 한 번에 나온다.
  */
 export function blobRadius(theta: number, s: Squish): number {
-  const near = angleGap(theta, s.pressAngle);
-  const dent = s.pressDepth * 0.55 * Math.exp(-(near * near) / (2 * 0.5 * 0.5));
-  const bulge = s.pressDepth * 0.2 * (1 - Math.exp(-(near * near) / (2 * 1.1 * 1.1)));
+  const u = angleGap(theta, s.pressAngle) / DENT_WIDTH;
+  const hat = (1 - u * u) * Math.exp(-(u * u) / 2);
+  const dent = s.pressDepth * 0.56 * hat;
 
   // 끄는 쪽으로만 뾰족하게 딸려 나온다.
   // 코사인으로 퍼뜨리면 반쪽이 통째로 밀려서 뭉툭하게 잘린 것처럼 보인다.
   const away = angleGap(theta, s.stretchAngle);
   const stretch = s.stretch * 0.72 * Math.exp(-(away * away) / (2 * 0.6 * 0.6));
 
-  return Math.max(0.25, 1 - dent + bulge + stretch);
+  return Math.max(0.22, 1 - dent + stretch);
 }
 
-/** 손을 떼면 제자리로 돌아온다 */
+/**
+ * 손을 떼면 제자리로. 그냥 사그라들게 하면 공기가 빠지는 것 같다.
+ * 용수철로 되돌리면 한 번 지나쳤다가 돌아와서 탱글하게 보인다.
+ */
+const STIFFNESS = 210;
+const DAMPING = 2 * 0.52 * Math.sqrt(STIFFNESS);
+
 export function relax(s: Squish, dt: number): Squish {
-  const k = Math.exp(-dt * 7);
-  return { ...s, pressDepth: s.pressDepth * k, stretch: s.stretch * k };
+  const step = (x: number, v: number) => {
+    const next = v + (-STIFFNESS * x - DAMPING * v) * dt;
+    return { x: x + next * dt, v: next };
+  };
+  const press = step(s.pressDepth, s.pressVel);
+  const pull = step(s.stretch, s.stretchVel);
+  return {
+    ...s,
+    pressDepth: press.x,
+    pressVel: press.v,
+    stretch: pull.x,
+    stretchVel: pull.v,
+  };
+}
+
+/** 손가락이 닿아 있는 동안은 용수철을 끄고 값을 바로 밀어 넣는다 */
+export function hold(
+  s: Squish,
+  next: { pressAngle: number; pressDepth: number; stretchAngle?: number; stretch?: number },
+): Squish {
+  return {
+    pressAngle: next.pressAngle,
+    pressDepth: next.pressDepth,
+    pressVel: 0,
+    stretchAngle: next.stretchAngle ?? s.stretchAngle,
+    stretch: next.stretch ?? s.stretch,
+    stretchVel: 0,
+  };
 }
