@@ -252,6 +252,20 @@ export function JarShelfScreen() {
           </Link>
 
           <Link
+            to="/spin"
+            className="flex items-center gap-3 rounded-2xl bg-surface px-4 py-3.5 transition active:scale-[.99]"
+          >
+            <span className="text-2xl leading-none">🔄</span>
+            <span className="min-w-0 flex-1">
+              <span className="block font-display text-base">도형 회전하기</span>
+              <span className="block text-xs text-ink-soft">
+                돌린 것만 정답, 뒤집은 건 오답이에요
+              </span>
+            </span>
+            <span className="text-lg text-ink-faint">›</span>
+          </Link>
+
+          <Link
             to="/waxball"
             className="flex items-center gap-3 rounded-2xl bg-surface px-4 py-3.5 transition active:scale-[.99]"
           >

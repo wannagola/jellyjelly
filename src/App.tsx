@@ -16,6 +16,7 @@ import { RecommendScreen } from "./screens/RecommendScreen";
 import { RecordScreen } from "./screens/RecordScreen";
 import { SettingsScreen } from "./screens/SettingsScreen";
 import { ShelfScreen } from "./screens/ShelfScreen";
+import { SpinScreen } from "./screens/SpinScreen";
 import { SPLASH_MS, SplashScreen } from "./screens/SplashScreen";
 import { TummyScreen } from "./screens/TummyScreen";
 import { WaxBallScreen } from "./screens/WaxBallScreen";
@@ -36,6 +37,7 @@ const FULLSCREEN = [
   /^\/order/,
   /^\/count/,
   /^\/path/,
+  /^\/spin/,
 ];
 
 export default function App() {
@@ -92,6 +94,7 @@ export default function App() {
         <Route path="/order" element={<OrderScreen />} />
         <Route path="/count" element={<CountScreen />} />
         <Route path="/path" element={<PathScreen />} />
+        <Route path="/spin" element={<SpinScreen />} />
         <Route path="/settings" element={<SettingsScreen />} />
       </Routes>
       {bare ? null : <TabBar />}
