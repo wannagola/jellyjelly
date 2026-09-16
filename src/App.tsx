@@ -12,13 +12,14 @@ import { RecommendScreen } from "./screens/RecommendScreen";
 import { RecordScreen } from "./screens/RecordScreen";
 import { SettingsScreen } from "./screens/SettingsScreen";
 import { ShelfScreen } from "./screens/ShelfScreen";
+import { WaxBallScreen } from "./screens/WaxBallScreen";
 import { WelcomeScreen } from "./screens/WelcomeScreen";
 import { useSettings } from "./lib/settings";
 import { applyTheme } from "./lib/theme";
 import { useAutoSync } from "./lib/useAutoSync";
 
 /** 탭바를 숨기는 화면들 — 하나의 일을 끝내고 돌아가는 곳이라 */
-const FULLSCREEN = [/^\/record/, /^\/finish\//, /^\/jelly\/[^/]+\/edit/, /^\/draw/];
+const FULLSCREEN = [/^\/record/, /^\/finish\//, /^\/jelly\/[^/]+\/edit/, /^\/draw/, /^\/waxball/];
 
 export default function App() {
   const { pathname } = useLocation();
@@ -50,6 +51,7 @@ export default function App() {
         <Route path="/dex" element={<DexScreen />} />
         <Route path="/recommend" element={<RecommendScreen />} />
         <Route path="/draw" element={<DrawScreen />} />
+        <Route path="/waxball" element={<WaxBallScreen />} />
         <Route path="/settings" element={<SettingsScreen />} />
       </Routes>
       {bare ? null : <TabBar />}
