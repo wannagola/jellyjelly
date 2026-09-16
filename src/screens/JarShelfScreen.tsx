@@ -238,6 +238,20 @@ export function JarShelfScreen() {
           </Link>
 
           <Link
+            to="/path"
+            className="flex items-center gap-3 rounded-2xl bg-surface px-4 py-3.5 transition active:scale-[.99]"
+          >
+            <span className="text-2xl leading-none">🧩</span>
+            <span className="min-w-0 flex-1">
+              <span className="block font-display text-base">길 만들기</span>
+              <span className="block text-xs text-ink-soft">
+                같은 젤리끼리 잇되 길이 겹치면 안 돼요
+              </span>
+            </span>
+            <span className="text-lg text-ink-faint">›</span>
+          </Link>
+
+          <Link
             to="/waxball"
             className="flex items-center gap-3 rounded-2xl bg-surface px-4 py-3.5 transition active:scale-[.99]"
           >

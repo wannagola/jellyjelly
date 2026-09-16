@@ -11,6 +11,7 @@ import { JarShelfScreen } from "./screens/JarShelfScreen";
 import { JellyDetailScreen } from "./screens/JellyDetailScreen";
 import { JellyFormScreen } from "./screens/JellyFormScreen";
 import { OrderScreen } from "./screens/OrderScreen";
+import { PathScreen } from "./screens/PathScreen";
 import { RecommendScreen } from "./screens/RecommendScreen";
 import { RecordScreen } from "./screens/RecordScreen";
 import { SettingsScreen } from "./screens/SettingsScreen";
@@ -34,6 +35,7 @@ const FULLSCREEN = [
   /^\/acorn/,
   /^\/order/,
   /^\/count/,
+  /^\/path/,
 ];
 
 export default function App() {
@@ -89,6 +91,7 @@ export default function App() {
         <Route path="/acorn" element={<AcornScreen />} />
         <Route path="/order" element={<OrderScreen />} />
         <Route path="/count" element={<CountScreen />} />
+        <Route path="/path" element={<PathScreen />} />
         <Route path="/settings" element={<SettingsScreen />} />
       </Routes>
       {bare ? null : <TabBar />}
