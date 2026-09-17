@@ -66,5 +66,13 @@ export interface Tombstone {
   id: string;
   kind: "jelly" | "entry";
   deletedAt: number;
+  /**
+   * 지운 게 도감 젤리였다면 그게 무엇이었는지 (씨앗 키와 브랜드+이름).
+   *
+   * 묘비는 줄 id 로만 남았는데 그 id 는 기기마다 새로 뽑은 난수라, 씨앗 목록을
+   * 다시 깔 때 "이건 지웠던 젤리다"를 알아볼 수가 없었다. 지운 젤리가 업데이트
+   * 한 번에 통째로 되살아났다.
+   */
+  mark?: string[];
   dirty?: 0 | 1;
 }

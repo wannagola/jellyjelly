@@ -29,7 +29,7 @@ class JellyDB extends Dexie {
 export const db = new JellyDB();
 
 /** 씨앗 목록이 바뀔 때마다 올린다 */
-const SEED_VERSION = 2;
+const SEED_VERSION = 3;
 
 /**
  * 브랜드가 이름 앞에 붙어 있든 말든 같은 젤리로 본다.
@@ -58,7 +58,10 @@ export async function syncSeed(): Promise<void> {
     known.add(identity(jelly.brand, jelly.name));
   }
   // 손수 지운 젤리는 업데이트해도 되살리지 않는다
-  for (const grave of buried) known.add(grave.id);
+  for (const grave of buried) {
+    known.add(grave.id);
+    if (grave.mark) for (const mark of grave.mark) known.add(mark);
+  }
 
   const missing = SEED_JELLIES.filter(
     (s) => !known.has(s.seedKey) && !known.has(identity(s.brand, s.name)),
@@ -166,15 +169,24 @@ export async function deleteEntry(id: string): Promise<void> {
 
 /** 젤리 지우기. 그 젤리의 기록도 같이 묻는다. */
 export async function deleteJelly(id: string): Promise<void> {
+  const jelly = await db.jellies.get(id);
   const entries = await db.entries.where("jellyId").equals(id).toArray();
   for (const entry of entries) await deleteEntry(entry.id);
-  await bury("jelly", id, () => db.jellies.delete(id));
+  // 무엇을 지웠는지 묘비에 적어 둔다. 줄 id 만으로는 씨앗을 다시 깔 때 못 알아본다.
+  const mark = jelly ? [identity(jelly.brand, jelly.name)] : undefined;
+  if (jelly?.seedKey) mark?.push(jelly.seedKey);
+  await bury("jelly", id, () => db.jellies.delete(id), mark);
 }
 
-async function bury(kind: Tombstone["kind"], id: string, remove: () => Promise<unknown>) {
+async function bury(
+  kind: Tombstone["kind"],
+  id: string,
+  remove: () => Promise<unknown>,
+  mark?: string[],
+) {
   const deletedAt = Date.now();
   await db.transaction("rw", db.jellies, db.entries, db.graveyard, async () => {
     await remove();
-    await db.graveyard.put({ id, kind, deletedAt, dirty: 1 });
+    await db.graveyard.put({ id, kind, deletedAt, mark, dirty: 1 });
   });
 }

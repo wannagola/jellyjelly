@@ -26,6 +26,12 @@ export const SEED_JELLIES: SeedJelly[] = [
   { seedKey: "하리보-스타믹스", name: "스타믹스", brand: "하리보", shape: "ring", color: "peach" },
   { seedKey: "하리보-푸르티부시", name: "푸르티부시", brand: "하리보", shape: "bear", color: "berry" },
   { seedKey: "하리보-계란프라이", name: "계란프라이", brand: "하리보", shape: "ring", color: "lemon" },
+  // 알름두들러는 오스트리아 허브 레모네이드다. 봉지 안은 빨강·초록 커플 모양과
+  // 금빛 병 모양인데, 병이 제일 많고 제품 얼굴이라 병으로 뒀다.
+  { seedKey: "하리보-알름두들러", name: "알름두들러", brand: "하리보", shape: "bottle", color: "lemon" },
+  { seedKey: "하리보-요거티스", name: "요거티스", brand: "하리보", shape: "ring", color: "soda" },
+  // 2026년 1월 국내 출시. 웃는 얼굴이 새겨진 파스텔 큐브, 여섯 맛이 한 봉지에 든다
+  { seedKey: "하리보-스퀴시", name: "스퀴시", brand: "하리보", shape: "cube", color: "berry" },
   { seedKey: "오리온-마이구미-포도", name: "마이구미 포도", brand: "오리온", shape: "cube", color: "grape" },
   { seedKey: "오리온-마이구미-딸기", name: "마이구미 딸기", brand: "오리온", shape: "heart", color: "berry" },
   { seedKey: "오리온-마이구미-청포도", name: "마이구미 청포도", brand: "오리온", shape: "cube", color: "green" },
@@ -40,8 +46,12 @@ export const SEED_JELLIES: SeedJelly[] = [
   { seedKey: "트롤리-게코젤리", name: "게코젤리", brand: "트롤리", shape: "worm", color: "green" },
   { seedKey: "트롤리-사우어-게코젤리", name: "사우어 게코젤리", brand: "트롤리", shape: "worm", color: "green" },
   { seedKey: "트롤리-상어젤리", name: "상어젤리", brand: "트롤리", shape: "worm", color: "soda" },
+  // 겉에 설탕을 묻힌 연두·분홍 알맹이. 봉지에는 「애플향 팝스」로 적혀 있다
+  { seedKey: "트롤리-애플팝스", name: "애플팝스", brand: "트롤리", shape: "ring", color: "green" },
   { seedKey: "uha-코로로-포도", name: "코로로 포도", brand: "UHA", shape: "cube", color: "grape" },
   { seedKey: "uha-코로로-청포도", name: "코로로 청포도", brand: "UHA", shape: "cube", color: "green" },
+  // 파스타 페투치네를 닮은 납작한 띠. 신맛 가루가 묻어 있다
+  { seedKey: "부르봉-페투치네구미-포도", name: "페투치네구미 포도", brand: "부르봉", shape: "worm", color: "grape" },
   { seedKey: "스키틀즈-젤리-후르츠믹스", name: "젤리 후르츠믹스", brand: "스키틀즈", shape: "ring", color: "berry" },
   { seedKey: "스키틀즈-젤리-후르츠요거트", name: "젤리 후르츠요거트", brand: "스키틀즈", shape: "ring", color: "soda" },
   { seedKey: "네슬레-프루팁스-미니", name: "프루팁스 미니", brand: "네슬레", shape: "ring", color: "berry" },
