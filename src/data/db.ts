@@ -28,8 +28,14 @@ class JellyDB extends Dexie {
 
 export const db = new JellyDB();
 
-/** 씨앗 목록이 바뀔 때마다 올린다 */
-const SEED_VERSION = 3;
+/**
+ * 씨앗 목록이 바뀔 때마다 올린다.
+ *
+ * 4 는 목록이 바뀌어서가 아니라 고치려고 올렸다. 3 을 받은 사람 중에 젤리가
+ * 겹쳐 깔린 사람이 있는데, 이 숫자가 그대로면 syncSeed 가 맨 윗줄에서 돌아가
+ * 치우는 데까지 오지를 못한다.
+ */
+const SEED_VERSION = 4;
 
 /**
  * 브랜드가 이름 앞에 붙어 있든 말든 같은 젤리로 본다.
