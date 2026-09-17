@@ -4,6 +4,7 @@ import { Link } from "react-router";
 import { db, writeSetting } from "../data/db";
 import {
   type Falling,
+  basketMouth,
   drawFalling,
   drawSquirrel,
   playCatch,
@@ -23,6 +24,8 @@ interface Item {
   /** 화면 높이를 1 로 둔 자리 */
   y: number;
   vy: number;
+  /** 지난 프레임의 y. 바구니 아가리를 지나쳤는지 이걸로 본다. */
+  wasY: number;
   rot: number;
   vr: number;
   /** 은행잎만 좌우로 팔랑인다 */
@@ -34,8 +37,6 @@ interface Item {
 const LIVES = 5;
 /** 다람쥐가 서 있는 높이 (화면 높이를 1 로 둔 자리) */
 const GROUND = 0.84;
-/** 이 폭 안에 들어오면 받은 것으로 친다 (화면 폭 대비) */
-const CATCH = 0.14;
 
 let seq = 0;
 
@@ -91,6 +92,7 @@ export function AcornScreen() {
     };
     fit();
     const onResize = () => fit();
+    const squirrelR = () => Math.min(w * 0.15, h * 0.1);
     window.addEventListener("resize", onResize);
 
     /* ---------- 손가락 ---------- */
@@ -99,7 +101,10 @@ export function AcornScreen() {
     // 그래서 화면 아무 데나 짚어도 그 가로 자리로 달려가게 한다.
     const aimAt = (e: PointerEvent) => {
       const box = canvas.getBoundingClientRect();
-      squirrel.current.aim = Math.min(0.92, Math.max(0.08, (e.clientX - box.left) / box.width));
+      // 바구니째로 화면 안에 있어야 한다. 반쯤 잘려 나가면 받는 자리가 안 보인다.
+      const edge = basketMouth(0, 0, squirrelR()).half / w + 0.02;
+      const at = (e.clientX - box.left) / box.width;
+      squirrel.current.aim = Math.min(1 - edge, Math.max(edge, at));
     };
     const onDown = (e: PointerEvent) => {
       try {
@@ -132,6 +137,7 @@ export function AcornScreen() {
         kind,
         x: 0.1 + Math.random() * 0.8,
         y: -0.08,
+        wasY: -0.08,
         vy: speed * (0.85 + Math.random() * 0.3),
         // 도토리는 꼭지가 위로 선 채 갸우뚱거려야 도토리로 읽힌다.
         // 마구 돌리면 깍정이가 밑으로 가서 무슨 팽이처럼 보인다.
@@ -177,16 +183,22 @@ export function AcornScreen() {
       s.joy = Math.max(0, s.joy - dt * 2.6);
 
       for (const it of items.current) {
+        it.wasY = it.y;
         it.y += it.vy * dt;
         it.rot += it.vr * dt;
         it.swayAt += dt * 2.6;
       }
 
+      // 받았는지는 바구니 아가리로만 따진다. 그림과 같은 숫자를 본다.
+      const mouth = basketMouth(s.x * w, h * GROUND, squirrelR());
+
       const kept: Item[] = [];
       for (const it of items.current) {
         const x = it.x + Math.sin(it.swayAt) * it.swayBy;
-        if (it.y >= GROUND - 0.03 && it.y <= GROUND + 0.06) {
-          if (Math.abs(x - s.x) < CATCH) {
+        // 아가리 높이를 이번 프레임에 지나쳤나. 구간으로 보면 빨라졌을 때
+        // 한 프레임에 건너뛰어서 그냥 통과해 버린다.
+        if (it.wasY * h <= mouth.y && it.y * h > mouth.y) {
+          if (Math.abs(x * w - mouth.x) <= mouth.half) {
             if (it.kind === "burr") {
               if (!muted.current) playOuch();
               navigator.vibrate?.([18, 40, 18]);
@@ -244,7 +256,7 @@ export function AcornScreen() {
       }
 
       const s = squirrel.current;
-      drawSquirrel(ctx, s.x * w, h * GROUND, Math.min(w * 0.15, h * 0.1), s.lean, s.joy);
+      drawSquirrel(ctx, s.x * w, h * GROUND, squirrelR(), s.lean, s.joy);
 
       raf = requestAnimationFrame(draw);
     };

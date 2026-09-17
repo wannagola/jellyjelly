@@ -21,6 +21,10 @@ const FUR = "#C1793F";
 const FUR_DARK = "#9C5B28";
 const BELLY = "#EBD2B4";
 
+const CANE = "#D9A860";
+const CANE_DARK = "#A9742F";
+const CANE_DEEP = "#6E4517";
+
 /* ---------- 그림 ---------- */
 
 /** 도토리 한 알. 깍정이가 있어야 도토리로 읽힌다. */
@@ -125,10 +129,33 @@ export function drawFalling(
 }
 
 /**
+ * 바구니 치수. 다람쥐 기준점(발밑)에서 r 배수로 잰다.
+ *
+ * 그리는 쪽과 받았는지 따지는 쪽이 이 숫자 하나를 같이 본다. 따로 적어두면
+ * 언젠가 한쪽만 고쳐서, 바구니 밖에 떨어졌는데 받아지거나 그 반대가 된다.
+ */
+const BASKET = {
+  /** 아가리가 발밑에서 얼마나 위인가. 귀가 가리지 않을 만큼은 들어야 한다. */
+  lift: 2.4,
+  /** 아가리 반폭 */
+  half: 0.95,
+  /** 아가리 타원의 세로 반지름 - 원근을 주는 만큼 */
+  rim: 0.26,
+  /** 아가리에서 바닥까지 */
+  deep: 0.6,
+};
+
+/** 바구니 아가리가 화면 어디에 있나. 받았는지는 이걸로만 따진다. */
+export function basketMouth(x: number, groundY: number, r: number) {
+  return { x, y: groundY - r * BASKET.lift, half: r * BASKET.half };
+}
+
+/**
  * 다람쥐.
  *
- * 팔을 위로 벌려 그릇을 만든다. 그 사이가 받는 자리라서, 어디로 받는지
- * 설명하지 않아도 보인다. 꼬리는 몸보다 커야 다람쥐로 읽힌다.
+ * 바구니를 머리 위로 들고 받는다. 받는 자리가 그림으로 딱 정해져 있어서,
+ * 어디로 받는지 설명할 필요가 없고 빗맞았을 때도 왜 못 받았는지가 보인다.
+ * 꼬리는 몸보다 커야 다람쥐로 읽힌다.
  */
 export function drawSquirrel(
   ctx: CanvasRenderingContext2D,
@@ -163,15 +190,15 @@ export function drawSquirrel(
   ctx.ellipse(0, r * 0.42, r * 0.4, r * 0.5, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // 팔 - 받으려고 위로 벌린다. 받은 직후엔 더 번쩍 든다.
-  const raise = 0.9 + joy * 0.45;
+  // 팔 - 바구니 양옆을 붙잡고 머리 위로 들어 올린다
+  const grip = -r * (BASKET.lift - BASKET.deep * 0.45);
   ctx.strokeStyle = FUR;
-  ctx.lineWidth = r * 0.26;
+  ctx.lineWidth = r * 0.24;
   ctx.lineCap = "round";
   for (const side of [-1, 1]) {
     ctx.beginPath();
-    ctx.moveTo(side * r * 0.4, r * 0.15);
-    ctx.quadraticCurveTo(side * r * 0.95, -r * 0.2 * raise, side * r * 0.78, -r * 0.78 * raise);
+    ctx.moveTo(side * r * 0.42, r * 0.18);
+    ctx.quadraticCurveTo(side * r * 1.02, -r * 0.55, side * r * BASKET.half * 0.88, grip);
     ctx.stroke();
   }
 
@@ -223,7 +250,78 @@ export function drawSquirrel(
     ctx.fill();
   }
 
+  drawBasket(ctx, r, joy);
+  // 붙잡은 앞발은 바구니 위에 얹혀야 든 것으로 보인다
+  ctx.fillStyle = FUR;
+  for (const side of [-1, 1]) {
+    ctx.beginPath();
+    ctx.ellipse(side * r * BASKET.half * 0.9, grip, r * 0.16, r * 0.13, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
   ctx.restore();
+}
+
+/** 들고 있는 바구니. 아가리가 곧 받는 자리라서 테두리를 또렷하게 둔다. */
+function drawBasket(ctx: CanvasRenderingContext2D, r: number, joy: number) {
+  const cy = -r * BASKET.lift;
+  const half = r * BASKET.half;
+  const rim = r * BASKET.rim;
+  const deep = r * BASKET.deep;
+  const foot = half * 0.72;
+
+  // 아가리 안쪽. 구멍이 보여야 들어가는 자리로 읽힌다.
+  ctx.fillStyle = CANE_DEEP;
+  ctx.beginPath();
+  ctx.ellipse(0, cy, half, rim, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 몸통 - 아래로 좁아지다 바닥에서 둥글게 닫힌다
+  ctx.fillStyle = CANE;
+  ctx.beginPath();
+  ctx.moveTo(-half, cy);
+  ctx.lineTo(-foot, cy + deep);
+  ctx.quadraticCurveTo(0, cy + deep + rim * 1.4, foot, cy + deep);
+  ctx.lineTo(half, cy);
+  ctx.closePath();
+  ctx.fill();
+
+  // 엮은 결. 가로 띠와 세로 살이 있어야 바구니지 그냥 통이 아니다.
+  ctx.save();
+  ctx.clip();
+  ctx.strokeStyle = CANE_DARK;
+  ctx.lineWidth = r * 0.055;
+  for (const t of [0.3, 0.62, 0.92]) {
+    const y = cy + deep * t;
+    const wide = half + (foot - half) * t;
+    ctx.beginPath();
+    ctx.ellipse(0, y, wide, rim * 0.72, 0, 0, Math.PI);
+    ctx.stroke();
+  }
+  ctx.lineWidth = r * 0.042;
+  for (const u of [-0.72, -0.26, 0.26, 0.72]) {
+    ctx.beginPath();
+    ctx.moveTo(half * u, cy);
+    ctx.lineTo(foot * u, cy + deep + rim);
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  // 테두리 - 앞쪽만 굵게 둘러 아가리를 또렷하게
+  ctx.strokeStyle = CANE_DARK;
+  ctx.lineWidth = r * 0.12;
+  ctx.beginPath();
+  ctx.ellipse(0, cy, half, rim, 0, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // 받은 직후엔 아가리가 한 번 환해진다. 방금 여기로 들어갔다는 표시다.
+  if (joy > 0.05) {
+    ctx.strokeStyle = `rgba(255, 236, 178, ${joy * 0.9})`;
+    ctx.lineWidth = r * 0.1;
+    ctx.beginPath();
+    ctx.ellipse(0, cy, half * (1 + (1 - joy) * 0.16), rim * (1 + (1 - joy) * 0.16), 0, 0, Math.PI * 2);
+    ctx.stroke();
+  }
 }
 
 /* ---------- 소리 ---------- */
