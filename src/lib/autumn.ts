@@ -190,15 +190,22 @@ export function drawSquirrel(
   ctx.ellipse(0, r * 0.42, r * 0.4, r * 0.5, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // 팔 - 바구니 양옆을 붙잡고 머리 위로 들어 올린다
+  // 팔 - 바구니 양옆을 붙잡고 머리 위로 들어 올린다.
+  // 손끝은 수평을 지키는 바구니를 따라가야 손과 테두리가 안 어긋난다.
   const grip = -r * (BASKET.lift - BASKET.deep * 0.45);
+  const tilt = -lean * 0.16;
+  const hand = (side: number) => ({
+    x: Math.cos(tilt) * side * r * BASKET.half * 0.88 - Math.sin(tilt) * grip,
+    y: Math.sin(tilt) * side * r * BASKET.half * 0.88 + Math.cos(tilt) * grip,
+  });
   ctx.strokeStyle = FUR;
   ctx.lineWidth = r * 0.24;
   ctx.lineCap = "round";
   for (const side of [-1, 1]) {
+    const h = hand(side);
     ctx.beginPath();
     ctx.moveTo(side * r * 0.42, r * 0.18);
-    ctx.quadraticCurveTo(side * r * 1.02, -r * 0.55, side * r * BASKET.half * 0.88, grip);
+    ctx.quadraticCurveTo(side * r * 1.02, -r * 0.55, h.x, h.y);
     ctx.stroke();
   }
 
@@ -250,6 +257,11 @@ export function drawSquirrel(
     ctx.fill();
   }
 
+  // 바구니는 몸이 기울어도 같이 안 기운다. 들고 뛰면 수평을 잡는 게 자연스럽기도
+  // 하고, 무엇보다 받는 자리가 흔들리면 안 된다. 몸을 따라 기울였더니 힘껏
+  // 달릴 때 그려진 아가리가 규칙이 보는 자리에서 21px 까지 밀렸다 - 반폭이
+  // 50px 인데 그 정도면 바구니에 든 게 안 받아진다.
+  ctx.rotate(-lean * 0.16);
   drawBasket(ctx, r, joy);
   // 붙잡은 앞발은 바구니 위에 얹혀야 든 것으로 보인다
   ctx.fillStyle = FUR;
