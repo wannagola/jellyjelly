@@ -48,27 +48,34 @@ function identity(brand: string | undefined, name: string): string {
  * 지운 젤리도 다시 살리지 않는다.
  */
 export async function syncSeed(): Promise<void> {
-  const stored = (await db.meta.get("seedVersion"))?.value;
-  if (stored === SEED_VERSION) return;
+  // 대개는 여기서 끝난다. 최신이면 트랜잭션을 열 이유가 없다.
+  if ((await db.meta.get("seedVersion"))?.value === SEED_VERSION) return;
 
-  const [existing, buried] = await Promise.all([db.jellies.toArray(), db.graveyard.toArray()]);
-  const known = new Set<string>();
-  for (const jelly of existing) {
-    if (jelly.seedKey) known.add(jelly.seedKey);
-    known.add(identity(jelly.brand, jelly.name));
-  }
-  // 손수 지운 젤리는 업데이트해도 되살리지 않는다
-  for (const grave of buried) {
-    known.add(grave.id);
-    if (grave.mark) for (const mark of grave.mark) known.add(mark);
-  }
+  await db.transaction("rw", db.jellies, db.entries, db.meta, db.graveyard, async () => {
+    // 읽기와 쓰기를 한 트랜잭션에 묶는다. 밖에서 읽고 안에서 쓰면, 탭 두 개가
+    // 동시에 열렸을 때 둘 다 "아직 없네"를 보고 각자 넣는다. 실제로 씨앗 버전을
+    // 올린 날 새 젤리 다섯 종이 네 벌씩 깔렸다.
+    if ((await db.meta.get("seedVersion"))?.value === SEED_VERSION) return;
 
-  const missing = SEED_JELLIES.filter(
-    (s) => !known.has(s.seedKey) && !known.has(identity(s.brand, s.name)),
-  );
+    const [existing, buried] = await Promise.all([db.jellies.toArray(), db.graveyard.toArray()]);
+    await dropSeedDupes(existing);
 
-  const now = Date.now();
-  await db.transaction("rw", db.jellies, db.meta, async () => {
+    const known = new Set<string>();
+    for (const jelly of existing) {
+      if (jelly.seedKey) known.add(jelly.seedKey);
+      known.add(identity(jelly.brand, jelly.name));
+    }
+    // 손수 지운 젤리는 업데이트해도 되살리지 않는다
+    for (const grave of buried) {
+      known.add(grave.id);
+      if (grave.mark) for (const mark of grave.mark) known.add(mark);
+    }
+
+    const missing = SEED_JELLIES.filter(
+      (s) => !known.has(s.seedKey) && !known.has(identity(s.brand, s.name)),
+    );
+
+    const now = Date.now();
     if (missing.length > 0) {
       await db.jellies.bulkAdd(
         missing.map((j) => ({ ...j, id: newId(), createdAt: now, updatedAt: now, dirty: 1 as const })),
@@ -77,6 +84,44 @@ export async function syncSeed(): Promise<void> {
     await db.meta.put({ key: "seedVersion", value: SEED_VERSION });
     await db.meta.delete("seeded"); // v1이 쓰던 플래그
   });
+}
+
+/**
+ * 같은 씨앗 젤리가 여러 벌 깔린 것을 치운다.
+ *
+ * 위의 경쟁 상태로 이미 겹쳐 받은 사람이 있어서, 고친 판이 처음 열릴 때 한 번
+ * 쓸어낸다. 손댄 흔적이 조금이라도 있는 벌은 남긴다 - 사진이나 최애 표시를
+ * 붙여뒀을 수 있고, 겹친 것을 치우다 남의 기록을 지우면 고친 것보다 나쁘다.
+ * 그래서 기록이 하나도 안 달렸고 앱이 깔아준 값 그대로인 것만 지운다.
+ */
+async function dropSeedDupes(existing: Jelly[]): Promise<void> {
+  const bySeed = new Map<string, Jelly[]>();
+  for (const jelly of existing) {
+    if (!jelly.seedKey) continue;
+    const list = bySeed.get(jelly.seedKey);
+    if (list) list.push(jelly);
+    else bySeed.set(jelly.seedKey, [jelly]);
+  }
+
+  const untouched = (j: Jelly) =>
+    !j.photo && !j.favorite && !j.wish && !j.note && j.kcal === undefined;
+
+  const drop: string[] = [];
+  for (const list of bySeed.values()) {
+    if (list.length < 2) continue;
+    const sorted = [...list].sort((a, b) => a.createdAt - b.createdAt);
+    for (const jelly of sorted.slice(1)) {
+      if (!untouched(jelly)) continue;
+      if ((await db.entries.where("jellyId").equals(jelly.id).count()) > 0) continue;
+      drop.push(jelly.id);
+    }
+  }
+  if (drop.length > 0) {
+    await db.jellies.bulkDelete(drop);
+    // 겹쳐 받은 건 지운 게 아니라 없던 일로 친다. 묘비를 세우면 다음 업데이트에
+    // 그 젤리가 아예 안 깔린다.
+    for (const id of drop) existing.splice(existing.findIndex((j) => j.id === id), 1);
+  }
 }
 
 /** 설정값 한 칸. 없으면 undefined. */
