@@ -147,7 +147,8 @@ export function PotionScreen() {
               재료 여섯 개의 색은 안 알려줍니다. 둘을 골라 섞으면 <b className="font-medium text-ink">섞인 색</b>이
               나오는데, 그걸 보고 재료의 색을 거꾸로 알아내는 거예요.
             </p>
-            <div className="mt-3 flex justify-center gap-2 rounded-2xl bg-accent-bg px-3 py-3 text-xs">
+            {/* 세 규칙 사이를 짝 안의 간격보다 넓게 둬야 한 줄로 안 읽힌다 */}
+            <div className="mt-3 flex justify-center gap-4 rounded-2xl bg-accent-bg px-3 py-3 text-xs">
               {(
                 [
                   ["red", "blue", "purple"],
