@@ -3,6 +3,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { useMemo, useState } from "react";
 import { Link } from "react-router";
 import { AppBar } from "../components/AppBar";
+import { Bookmark } from "../components/Bookmark";
 import { Heart } from "../components/Heart";
 import { type BrandStat, BrandProgress } from "../components/BrandProgress";
 import { JellyFace } from "../components/JellyFace";
@@ -189,6 +190,11 @@ export function DexScreen() {
                         {jelly.favorite ? (
                           <span className="absolute top-1.5 right-1.5">
                             <Heart on size={12} />
+                          </span>
+                        ) : null}
+                        {jelly.wish ? (
+                          <span className="absolute top-1.5 left-1.5">
+                            <Bookmark on size={12} />
                           </span>
                         ) : null}
                         <JellyFace jelly={jelly} size={44} radius={14} />

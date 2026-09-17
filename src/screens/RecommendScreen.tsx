@@ -32,8 +32,15 @@ export function RecommendScreen() {
     const close = closeToTaste(raw.jellies, raw.entries, taste);
     // 위 칸에 이미 뜬 젤리는 아래에서 빼준다
     const shown = new Set([...again, ...close].map((s) => s.jelly.id));
+    // 찜은 내가 직접 고른 것이라 추천보다 위다. 계산으로 고른 것들이
+    // 내가 점찍어 둔 것을 밀어내면 안 된다.
+    const wished = raw.jellies
+      .filter((j) => j.wish)
+      .map((jelly) => ({ jelly, reason: jelly.brand ?? "" }));
+
     return {
       taste,
+      wished,
       again,
       close,
       newLand: unexplored(raw.jellies, raw.entries, shown),
@@ -65,6 +72,7 @@ export function RecommendScreen() {
         {view ? (
           warmedUp ? (
             <>
+              <Section title="찜해둔 것" hint="먹어보려고 점찍어 둔 젤리" items={view.wished} />
               <TasteCard taste={view.taste} />
               <Section title="다시 만날 때" hint="좋아했는데 요즘 안 먹은 것" items={view.again} />
               <Section title="취향에 가까운" hint="아직 안 먹어본 젤리 중에서" items={view.close} />
@@ -78,6 +86,7 @@ export function RecommendScreen() {
             </>
           ) : (
             <>
+              <Section title="찜해둔 것" hint="먹어보려고 점찍어 둔 젤리" items={view.wished} />
               <section className="rounded-2xl bg-surface p-4">
                 <p className="text-base font-medium">아직 추천할 만큼은 아니에요</p>
                 <p className="mt-1 text-xs leading-relaxed text-ink-soft">

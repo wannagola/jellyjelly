@@ -25,6 +25,8 @@ export interface Jelly {
   note?: string;
   /** 최애 표시 */
   favorite?: boolean;
+  /** 아직 안 먹어봤는데 먹어보고 싶은 것. 편의점에서 뭘 살지 고를 때 본다. */
+  wish?: boolean;
   /** 앱이 깔아준 젤리라는 표시. 직접 만든 젤리에는 없다. */
   seedKey?: string;
   createdAt: number;

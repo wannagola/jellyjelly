@@ -171,128 +171,28 @@ export function JarShelfScreen() {
           </>
         )}
 
-        {/* 여기부터는 기록이 아니라 장난감이다. 선을 그어 갈라놔야 선반을 훑다가 헷갈리지 않는다. */}
-        <div className="mt-7 mb-2.5 flex items-center gap-2.5">
-          <span className="h-px flex-1 bg-line" />
-          <span className="text-micro font-medium tracking-[.2em] text-ink-faint">
-            PLAY GROUND
-          </span>
-          <span className="h-px flex-1 bg-line" />
+        {/*
+          장난감 여덟 줄이 선반 아래 늘어서 있었다. 기록하러 들어온 사람이
+          그걸 다 지나쳐야 했다. 입구만 하나 두고 안에서 갈라 놓는다.
+        */}
+        <div className="mt-7 flex flex-col gap-2">
+          <Link
+            to="/play"
+            className="flex items-center gap-3 rounded-2xl bg-surface px-4 py-3.5 transition active:scale-[.99]"
+          >
+            <span className="text-2xl leading-none">🎮</span>
+            <span className="min-w-0 flex-1">
+              <span className="block font-display text-base">PLAY GROUND</span>
+              <span className="block text-xs text-ink-soft">
+                만지작거리는 것 둘, 머리 쓰는 것 일곱
+              </span>
+            </span>
+            <span className="text-lg text-ink-faint">›</span>
+          </Link>
+
+          <BackupNudge />
         </div>
 
-        <div className="flex flex-col gap-2">
-          <Link
-            to="/tummy"
-            className="flex items-center gap-3 rounded-2xl bg-surface px-4 py-3.5 transition active:scale-[.99]"
-          >
-            <span className="text-2xl leading-none">🐘</span>
-            <span className="min-w-0 flex-1">
-              <span className="block font-display text-base">코끼리 배</span>
-              <span className="block text-xs text-ink-soft">
-                두드리고, 코 당기고, 쓰다듬어요
-              </span>
-            </span>
-            <span className="text-lg text-ink-faint">›</span>
-          </Link>
-
-          <Link
-            to="/acorn"
-            className="flex items-center gap-3 rounded-2xl bg-surface px-4 py-3.5 transition active:scale-[.99]"
-          >
-            <span className="text-2xl leading-none">🐿️</span>
-            <span className="min-w-0 flex-1">
-              <span className="block font-display text-base">도토리 받기</span>
-              <span className="block text-xs text-ink-soft">
-                가을이니까. 밤송이는 피하세요
-              </span>
-            </span>
-            <span className="text-lg text-ink-faint">›</span>
-          </Link>
-
-          <Link
-            to="/order"
-            className="flex items-center gap-3 rounded-2xl bg-surface px-4 py-3.5 transition active:scale-[.99]"
-          >
-            <span className="text-2xl leading-none">🎵</span>
-            <span className="min-w-0 flex-1">
-              <span className="block font-display text-base">순서 외우기</span>
-              <span className="block text-xs text-ink-soft">
-                반짝인 젤리를 그 순서대로 누르기
-              </span>
-            </span>
-            <span className="text-lg text-ink-faint">›</span>
-          </Link>
-
-          <Link
-            to="/count"
-            className="flex items-center gap-3 rounded-2xl bg-surface px-4 py-3.5 transition active:scale-[.99]"
-          >
-            <span className="text-2xl leading-none">⚖️</span>
-            <span className="min-w-0 flex-1">
-              <span className="block font-display text-base">개수 비교</span>
-              <span className="block text-xs text-ink-soft">
-                젤리가 더 많은 쪽을 빠르게 고르기
-              </span>
-            </span>
-            <span className="text-lg text-ink-faint">›</span>
-          </Link>
-
-          <Link
-            to="/path"
-            className="flex items-center gap-3 rounded-2xl bg-surface px-4 py-3.5 transition active:scale-[.99]"
-          >
-            <span className="text-2xl leading-none">🧩</span>
-            <span className="min-w-0 flex-1">
-              <span className="block font-display text-base">길 만들기</span>
-              <span className="block text-xs text-ink-soft">
-                같은 젤리끼리 잇되 길이 겹치면 안 돼요
-              </span>
-            </span>
-            <span className="text-lg text-ink-faint">›</span>
-          </Link>
-
-          <Link
-            to="/spin"
-            className="flex items-center gap-3 rounded-2xl bg-surface px-4 py-3.5 transition active:scale-[.99]"
-          >
-            <span className="text-2xl leading-none">🔄</span>
-            <span className="min-w-0 flex-1">
-              <span className="block font-display text-base">도형 회전하기</span>
-              <span className="block text-xs text-ink-soft">
-                돌린 것만 정답, 뒤집은 건 오답이에요
-              </span>
-            </span>
-            <span className="text-lg text-ink-faint">›</span>
-          </Link>
-
-          <Link
-            to="/fold"
-            className="flex items-center gap-3 rounded-2xl bg-surface px-4 py-3.5 transition active:scale-[.99]"
-          >
-            <span className="text-2xl leading-none">🎚️</span>
-            <span className="min-w-0 flex-1">
-              <span className="block font-display text-base">돌려 맞추기</span>
-              <span className="block text-xs text-ink-soft">
-                돌리고 뒤집어서, 가장 적은 횟수로
-              </span>
-            </span>
-            <span className="text-lg text-ink-faint">›</span>
-          </Link>
-
-          <Link
-            to="/waxball"
-            className="flex items-center gap-3 rounded-2xl bg-surface px-4 py-3.5 transition active:scale-[.99]"
-          >
-            <span className="text-2xl leading-none">🥚</span>
-            <span className="min-w-0 flex-1">
-              <span className="block font-display text-base">젤리 왁뿌볼</span>
-              <span className="block text-xs text-ink-soft">
-                왁스를 다 부수면 말랑이가 나와요
-              </span>
-            </span>
-            <span className="text-lg text-ink-faint">›</span>
-          </Link>
-        </div>
       </main>
     </>
   );
@@ -314,6 +214,48 @@ function SettingsLink() {
           strokeLinecap="round"
         />
       </svg>
+    </Link>
+  );
+}
+
+/**
+ * 백업한 지 오래됐다고 알려주는 줄.
+ *
+ * 서버가 없어서 이 세상에 기록은 폰 안의 사본 하나뿐인데, 지금까지는 사용자가
+ * 알아서 챙겨야 했다. 담은 게 있는데 한 달 넘게 안 챙겼으면 여기서 말해준다.
+ * 아직 하나도 안 담은 사람에게는 잃을 게 없으니 띄우지 않는다.
+ */
+function BackupNudge() {
+  // 렌더 중에 Date.now() 를 부르면 값이 언제 바뀔지 알 수 없다. 오늘 날짜를
+  // 따로 받아 쓴다 - 며칠씩 열어둔 앱에서도 자정이 지나면 하루가 올라간다.
+  const today = useToday();
+  const state = useLiveQuery(async () => {
+    const entries = await db.entries.count();
+    const last = (await db.meta.get("lastBackupAt"))?.value as number | undefined;
+    return { entries, last };
+  }, []);
+
+  if (!state || state.entries === 0) return null;
+  const days = state.last
+    ? differenceInCalendarDays(parseISO(today), startOfDay(state.last))
+    : undefined;
+  if (days !== undefined && days < 30) return null;
+
+  return (
+    <Link
+      to="/settings"
+      className="flex items-center gap-3 rounded-2xl bg-accent-bg px-4 py-3 transition active:scale-[.99]"
+    >
+      <span className="text-xl leading-none">🫙</span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-medium text-accent">
+          {days === undefined ? "아직 백업한 적이 없어요" : `백업한 지 ${days}일 됐어요`}
+        </span>
+        <span className="block text-xs leading-snug text-ink-soft">
+          기록은 이 폰에만 있어요. 설정에서 파일 하나로 받아두세요.
+        </span>
+      </span>
+      <span className="text-lg text-ink-faint">›</span>
     </Link>
   );
 }

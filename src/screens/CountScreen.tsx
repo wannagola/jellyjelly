@@ -226,8 +226,8 @@ export function CountScreen() {
   return (
     <>
       <header className="grid flex-none grid-cols-[1fr_auto_1fr] items-center gap-2 px-5 pt-3 pb-2.5">
-        <Link to="/" className="justify-self-start text-base text-ink-soft">
-          ‹ 선반
+        <Link to="/play" className="justify-self-start text-base text-ink-soft">
+          ‹ 놀이터
         </Link>
         <h1 className="font-display text-lg">개수 비교</h1>
         <span className="justify-self-end text-xs text-ink-faint tabular-nums">

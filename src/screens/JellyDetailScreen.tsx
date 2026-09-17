@@ -1,12 +1,13 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { format } from "date-fns";
 import { Link, useNavigate, useParams } from "react-router";
+import { Bookmark } from "../components/Bookmark";
 import { Heart } from "../components/Heart";
 import { JellyFace } from "../components/JellyFace";
 import { Stars } from "../components/Stars";
 import { usePhotoUrl } from "../lib/photo";
 import { useGoBack } from "../lib/goBack";
-import { db, toggleFavorite } from "../data/db";
+import { db, toggleFavorite, toggleWish } from "../data/db";
 import type { Entry } from "../data/types";
 import { COLOR_NAMES, JELLY_COLORS, SHAPE_NAMES } from "../lib/jelly";
 
@@ -51,6 +52,15 @@ export function JellyDetailScreen() {
         </button>
         {jelly ? (
           <span className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={() => toggleWish(jelly.id)}
+              aria-pressed={Boolean(jelly.wish)}
+              aria-label={jelly.wish ? "찜 풀기" : "먹어보고 싶어요"}
+              className="text-ink-faint transition active:scale-90"
+            >
+              <Bookmark on={Boolean(jelly.wish)} size={20} />
+            </button>
             <button
               type="button"
               onClick={() => toggleFavorite(jelly.id)}

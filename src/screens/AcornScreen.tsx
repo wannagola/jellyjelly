@@ -268,8 +268,8 @@ export function AcornScreen() {
   return (
     <>
       <header className="grid flex-none grid-cols-[1fr_auto_1fr] items-center gap-2 px-5 pt-3 pb-2.5">
-        <Link to="/" className="justify-self-start text-base text-ink-soft">
-          ‹ 선반
+        <Link to="/play" className="justify-self-start text-base text-ink-soft">
+          ‹ 놀이터
         </Link>
         <h1 className="font-display text-lg">도토리 받기</h1>
         <span className="justify-self-end text-xs text-ink-faint tabular-nums">
@@ -309,7 +309,7 @@ export function AcornScreen() {
             </p>
             <div className="mt-1 flex gap-2">
               <Link
-                to="/"
+                to="/play"
                 className="rounded-2xl bg-surface px-5 py-2.5 text-sm font-medium text-ink-soft transition active:scale-95"
               >
                 그만할래요

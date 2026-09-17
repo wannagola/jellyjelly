@@ -13,6 +13,8 @@ import { JellyDetailScreen } from "./screens/JellyDetailScreen";
 import { JellyFormScreen } from "./screens/JellyFormScreen";
 import { OrderScreen } from "./screens/OrderScreen";
 import { PathScreen } from "./screens/PathScreen";
+import { PlayScreen } from "./screens/PlayScreen";
+import { PotionScreen } from "./screens/PotionScreen";
 import { RecommendScreen } from "./screens/RecommendScreen";
 import { RecordScreen } from "./screens/RecordScreen";
 import { SettingsScreen } from "./screens/SettingsScreen";
@@ -40,6 +42,7 @@ const FULLSCREEN = [
   /^\/path/,
   /^\/spin/,
   /^\/fold/,
+  /^\/potion/,
 ];
 
 export default function App() {
@@ -98,6 +101,8 @@ export default function App() {
         <Route path="/path" element={<PathScreen />} />
         <Route path="/spin" element={<SpinScreen />} />
         <Route path="/fold" element={<FoldScreen />} />
+        <Route path="/play" element={<PlayScreen />} />
+        <Route path="/potion" element={<PotionScreen />} />
         <Route path="/settings" element={<SettingsScreen />} />
       </Routes>
       {bare ? null : <TabBar />}

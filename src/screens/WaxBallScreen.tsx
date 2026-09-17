@@ -402,8 +402,8 @@ export function WaxBallScreen() {
   return (
     <>
       <header className="grid flex-none grid-cols-[1fr_auto_1fr] items-center gap-2 px-5 pt-3 pb-2.5">
-        <Link to="/" className="justify-self-start text-base text-ink-soft">
-          ‹ 선반
+        <Link to="/play" className="justify-self-start text-base text-ink-soft">
+          ‹ 놀이터
         </Link>
         <h1 className="font-display text-lg">젤리 왁뿌볼</h1>
         <button

@@ -105,6 +105,13 @@ export async function toggleFavorite(id: string): Promise<void> {
   await db.jellies.update(id, { favorite: !jelly.favorite, updatedAt: Date.now(), dirty: 1 });
 }
 
+/** 찜하기. 사 먹고 나면 알아서 풀린다 - finishEntry 가 지운다. */
+export async function toggleWish(id: string): Promise<void> {
+  const jelly = await db.jellies.get(id);
+  if (!jelly) return;
+  await updateJelly(id, { wish: !jelly.wish });
+}
+
 /** 먹기 시작. 같은 젤리를 또 먹어도 기록은 새로 하나 생긴다. */
 export async function startEating(jellyId: string): Promise<string> {
   const now = Date.now();
@@ -132,6 +139,15 @@ export async function finishEntry(id: string, review?: Partial<Entry>): Promise<
       updatedAt: now,
       dirty: 1,
     });
+
+    // 찜해둔 걸 먹었으면 찜은 저절로 풀린다. 다 먹고도 목록에 남아 있으면
+    // 지우는 게 일이 되고, 안 지우면 목록이 못 믿을 것이 된다.
+    if (entry) {
+      const wished = await db.jellies.get(entry.jellyId);
+      if (wished?.wish) {
+        await db.jellies.update(wished.id, { wish: false, updatedAt: now, dirty: 1 });
+      }
+    }
 
     // 그날 찍은 사진이 있는데 젤리엔 아직 대표 사진이 없으면 그걸 얼굴로 쓴다.
     // 따로 물어볼 만한 일이 아니다. 이미 있으면 건드리지 않는다.
